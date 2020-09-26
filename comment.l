@@ -1,9 +1,5 @@
 %{
 #include <stdio.h>
-
-int var = 1;//verifica se está na declaração das variáveis
-char* id_atual;/*guarda o id que será modificado a seguir*/
-
 %}
 
 /*max um 0*/
