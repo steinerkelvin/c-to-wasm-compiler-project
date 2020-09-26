@@ -1,5 +1,6 @@
 %{
 #include <stdio.h>
+
 %}
 
 /*max um 0*/
