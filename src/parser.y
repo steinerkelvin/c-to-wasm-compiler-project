@@ -20,23 +20,31 @@ void yyerror(char const *s);
 //FALTA FAZER AS PRECEDÊNCIAS E ASSOCIATIVIDADE
 
 %%
-funcdec: funcdec func | %empty;
-func: typespec ID LPAR arglist RPAR SEMI;
+program: header funcsect;//estrutura do programa; PRECISA ANALISAR: include, define, ifndef, end, etc.
+
+header: header vardecllist | header funcdec | %empty;//pode declarar variáveis e funções a qualquer momento, alternadamente ou em conjunto;
+//==================================IMPORTANTE: PRECISA FAZER A REGRA DO STRUCT================================
+funcdec: funcdec func | %empty;//declaração de funções
+func: typespec ID LPAR arglist RPAR SEMI;//declaração de uma função
 typespec: VOID | DOUBLE | INT | CHAR | FLOAT | ID; //CONST, SHORT, LONG, STATIC, UNSIGNED, *POINTER*, ENUM, EXTERN, SIGNED(?), VOLATILE(?)
-arglist: arglist COMMA arglist | arg;
-arg: typespec ID;//VER CASO DO VOID SEM ID
-funccall: funccall ID LPAR paramlist RPAR SEMI | %empty;
-paramlist: paramlist COMMA paramlist | ID;
-funcdef: funcdef typespec ID LPAR arglist RPAR LCB stmtlist RCB; 
-//======= ATÉ AQUI (APARENTEMENTE) ESTÁ OK. REVISEM! DAQUI PARA BAIXO EU ALTEREI ALGUMAS COISAS, PRA PRECISA FAZER UM PENTE FINO APURADO ======
+arglist: arglist COMMA arglist | arg;//lista de argumentos de uma declaração de função
+arg: typespec ID | %empty;//argumento para qualquer função (declaração ou definição); VER CASO DO VOID SEM ID (PODE TER MAIS DE UM VOID?)
+
+funcsect: funcsect funcdef | funcsect vardecllist | %empty;//pode declarar variáveis e definir funções a qualquer momento, alternadamente ou em conjunto
+funcdef: funcdef typespec ID LPAR arglist RPAR LCB stmtlist RCB; //definição de função
+
 //program: PROGRAM ID SEMI varssect stmtsect;
 //varssect: VAR optvardecl;
 //optvardecl: %empty | vardecllist;
-vardecllist: vardecllist vardecl | vardecl | %empty;
-vardecl: typespec ID SEMI;
+vardecllist: vardecllist vardecl | vardecl | %empty;//declaração de uma ou mais variáveis
+vardecl: typespec ID SEMI | typespec assignstmt;//declaração ou definição
+
+//================================= REVISEI ATÉ AQUI E PARECE OK (-Allan) =======================================
 //stmtsect: BEGIN_ stmtlist END;
-stmtlist: stmtlist stmt | stmt;
+stmtlist: stmtlist stmt | stmt | %empty;
 stmt: ifstmt | assignstmt | vardecllist | funccall | return;//while, switch, do-while, for
+funccall: funccall ID LPAR paramlist RPAR SEMI | %empty;//chamada de função;
+paramlist: paramlist COMMA paramlist | expr | funccall | %empty;//lista de parâmetros ou apenas um parâmetro ou nenhum; pode ser nova chamada de função; PRECISA REVER ISSO AQUI
 return: RETURN ret SEMI;
 ret: ID | expr | %empty;
 ifstmt: IF expr stmtlist | IF expr stmtlist ELSE stmtlist;//precisa fazer, bem como o while, switch, do-while, for
