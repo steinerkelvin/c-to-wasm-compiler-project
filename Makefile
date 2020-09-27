@@ -1,15 +1,23 @@
 
-all: bison flex gcc
+exe="./exe"
+
+all: exe
 	@echo "Done."
 
-bison: parser.y
-	bison parser.y
+bison: src/parser.c src/parser.h
 
-flex: scanner.l
-	flex scanner.l
+flex: src/scanner.c
 
-gcc: scanner.c parser.c
-	gcc -Wall scanner.c parser.c
+
+src/parser.c src/parser.h: src/parser.y
+	(cd src/; bison parser.y)
+
+src/scanner.c: src/scanner.l src/parser.h
+	(cd src/; flex scanner.l)
+
+exe: src/scanner.c src/parser.c
+	gcc -Wall -o ${exe} src/*.c
+
 
 clean:
-	@rm -f *.o *.output scanner.c parser.h parser.c a.out
+	(cd src/; rm -f *.o *.output scanner.c parser.h parser.c ./exe)
