@@ -7,6 +7,7 @@
 %{
 
 #include <stdio.h>
+#include "parser.h"
 
 void yyerror (char const* s) {
 	printf("SYNTAX ERROR (%d): %s\n", yylineno, s);
@@ -58,17 +59,21 @@ unsigned					{return UNSIGNED;}
 void						{return VOID;}
 volatile					{return VOLATILE;}
 while						{return WHILE;}
+,							{return COMMA;}
 "="     	     			{return ASSIGN;}  
 "=="    	       			{return EQ;} 
-"<"     	      			{return LT;}  
+"<"     	      			{return LT;} 
+">"							{return BT;} 
 "<="						{return LET;}
 ">="						{return BET;}
 "+"     	      			{return PLUS;}  
 "-"     	      			{return MINUS;} 
 "*"     	      			{return TIMES;} 
 "/"    		      			{return OVER;}    
-"("     	      			{return LPAR;}   
+"("     	      			{return LPAR;} 
 ")"     	      			{return RPAR;} 
+"{"  						{return LCB;}
+"}"							{return RCB;}
 ";"     	      			{return SEMI;} 
 {digit} 	      			{return INT_VAL;} 
 {alpha} 	      			{return ID;} 
