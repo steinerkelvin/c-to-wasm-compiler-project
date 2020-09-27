@@ -1,4 +1,5 @@
 
+flags=
 exe="./exe"
 
 all: exe
@@ -10,13 +11,13 @@ flex: src/scanner.c
 
 
 src/parser.c src/parser.h: src/parser.y
-	(cd src/; bison parser.y)
+	(cd src/; bison -v parser.y)
 
 src/scanner.c: src/scanner.l src/parser.h
 	(cd src/; flex scanner.l)
 
 exe: src/scanner.c src/parser.c
-	gcc -Wall -o ${exe} src/*.c
+	gcc -Wall -o ${exe} src/*.c ${flags}
 
 
 clean:

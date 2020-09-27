@@ -9,64 +9,86 @@ int yylex(void);
 void yyerror(char const *s);
 %}
 
-%token AUTO BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE ENUM EXTERN FLOAT FOR GOTO IF INT LONG REGISTER RETURN SHORT SIGNED SIZEOF STATIC STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID VOLATILE WHILE COMMA ASSIGN EQ LT BT LET BET PLUS MINUS TIMES OVER LPAR RPAR SEMI INT_VAL REAL_VAL ID STR_VAL LCB RCB
-%left EQ LT
-%left PLUS MINUS// Ops associativos a esquerda.
-%left TIMES OVER// Mais para baixo, maior precedencia.
-%precedence UMINUS// Menos unario mais precedencia que binario.
+%token AUTO CONST VOLATILE STATIC EXTERN
+%token LONG REGISTER SIGNED UNSIGNED
+%token VOID CHAR SHORT INT FLOAT DOUBLE
+%token TYPEDEF SIZEOF
+%token ENUM STRUCT UNION
+%token BREAK CASE CONTINUE DEFAULT DO ELSE FOR GOTO IF RETURN SWITCH WHILE
+%token ASSIGN EQ LT BT LET BET PLUS MINUS TIMES OVER LPAR RPAR SEMI LCB RCB
+%token INT_VAL REAL_VAL ID STR_VAL
+
+%left COMMA
+%left EQ LT BT LET BET
+%left PLUS MINUS
+%left TIMES OVER
+%precedence UMINUS
 %precedence RPAR
 %precedence ELSE
 
-//FALTA FAZER AS PRECEDÊNCIAS E ASSOCIATIVIDADE
+// TODO FALTA FAZER AS PRECEDÊNCIAS E ASSOCIATIVIDADE
 
 %%
-program: header funcsect;//estrutura do programa; PRECISA ANALISAR: include, define, ifndef, end, etc.
 
-header: %empty | header vardecllist | header funcdec;//pode declarar variáveis e funções a qualquer momento, alternadamente ou em conjunto;
-//==================================IMPORTANTE: PRECISA FAZER A REGRA DO STRUCT================================
-funcdec: %empty | funcdec func;//declaração de funções
-func: typespec ID LPAR arglist RPAR SEMI;//declaração de uma função
-typespec: VOID | DOUBLE | INT | CHAR | FLOAT | ID; //CONST, SHORT, LONG, STATIC, UNSIGNED, *POINTER*, ENUM, EXTERN, SIGNED(?), VOLATILE(?)
-arglist: arglist COMMA arglist | arg;//lista de argumentos de uma declaração de função
-arg: %empty | typespec ID;//argumento para qualquer função (declaração ou definição); VER CASO DO VOID SEM ID (PODE TER MAIS DE UM VOID?)
+program : program program-part | %empty ;
+program-part : function-definition | declaration ;
 
-funcsect: %empty | funcsect funcdef | funcsect vardecllist;//pode declarar variáveis e definir funções a qualquer momento, alternadamente ou em conjunto
-funcdef: typespec ID LPAR arglist RPAR LCB stmtlist RCB; //definição de função
+declaration : function-declaration | var-declaration-stmt ;
 
-//program: PROGRAM ID SEMI varssect stmtsect;
-//varssect: VAR optvardecl;
-//optvardecl: %empty | vardecllist;
-vardecllist: vardecllist vardecl | vardecl | %empty;//declaração de uma ou mais variáveis
-vardecl: typespec ID SEMI | typespec assignstmt;//declaração ou definição
+function-declaration : type-spec ID LPAR param-list RPAR SEMI ;
+function-definition  : type-spec ID LPAR param-list RPAR compound-stmt ;
 
-//================================= REVISEI ATÉ AQUI E PARECE OK (-Allan) =======================================
-//stmtsect: BEGIN_ stmtlist END;
-stmtlist: %empty | stmtlist stmt | stmt;
-stmt: ifstmt | assignstmt | vardecllist | funccall | return;//while, switch, do-while, for
-funccall: funccall ID LPAR paramlist RPAR SEMI | %empty;//chamada de função;
-paramlist: paramlist COMMA paramlist | expr | funccall | %empty;//lista de parâmetros ou apenas um parâmetro ou nenhum; pode ser nova chamada de função; PRECISA REVER ISSO AQUI
-return: RETURN ret SEMI;
-ret: ID | expr | %empty;
-ifstmt: IF LPAR expr RPAR stmtlist | IF LPAR expr RPAR stmtlist ELSE stmtlist;//precisa fazer, bem como o while, switch, do-while, for
-//repeatstmt: REPEAT stmtlist UNTIL expr;
-assignstmt: ID ASSIGN expr SEMI;
-//readstmt: READ ID SEMI;
-//writestmt: WRITE expr SEMI;
-expr: expr LT expr//falta o pow e provavelmente outras coisas
-| expr BT expr
-| expr LET expr
-| expr BET expr
-| expr EQ expr
-| expr PLUS expr
-| expr MINUS expr
-| expr TIMES expr
-| expr OVER expr
-| MINUS expr %prec UMINUS
-| LPAR expr RPAR
-| INT_VAL
-| REAL_VAL
-| STR_VAL
-| ID;
+param-list : param-list COMMA param-spec | param-spec | %empty ;
+param-spec : type-spec | type-spec ID ;
+
+type-spec : VOID | CHAR | SHORT | INT | FLOAT | DOUBLE | ID ;
+
+compound-stmt : LCB stmt-list RCB ;
+
+stmt-list : stmt-list stmt | %empty ;
+
+empty-stmt : SEMI ;
+
+var-declaration-stmt : type-spec var-list SEMI ;
+
+var-list : var-list COMMA var-part | var-part ;
+var-part : ID | ID ASSIGN expr ;
+
+assign-stmt : expr ASSIGN expr SEMI ;
+
+if-stmt : IF LPAR expr RPAR stmt | IF LPAR expr RPAR stmt ELSE stmt ;
+
+return-stmt : RETURN return-value SEMI;
+
+return-value : expr | %empty ;
+
+// TODO while, switch, do-while, for
+
+stmt :
+      empty-stmt
+    | compound-stmt
+    | var-declaration-stmt 
+    | assign-stmt
+    | if-stmt
+    | return-stmt 
+    ;
+
+expr: expr LT expr
+    | expr BT expr
+    | expr LET expr
+    | expr BET expr
+    | expr EQ expr
+    | expr PLUS expr
+    | expr MINUS expr
+    | expr TIMES expr
+    | expr OVER expr
+    | MINUS expr %prec UMINUS
+    | LPAR expr RPAR
+    | INT_VAL
+    | REAL_VAL
+    | STR_VAL
+    | ID
+    ;
 
 %%
 
@@ -75,5 +97,3 @@ int main(void) {
     else                printf("PARSE FAILED!\n");
     return 0;
 }
-
-

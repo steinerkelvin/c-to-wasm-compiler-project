@@ -1,0 +1,1358 @@
+Terminals unused in grammar
+
+    AUTO
+    CONST
+    VOLATILE
+    STATIC
+    EXTERN
+    LONG
+    REGISTER
+    SIGNED
+    UNSIGNED
+    TYPEDEF
+    SIZEOF
+    ENUM
+    STRUCT
+    UNION
+    BREAK
+    CASE
+    CONTINUE
+    DEFAULT
+    DO
+    FOR
+    GOTO
+    SWITCH
+    WHILE
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: program program-part
+    2        | %empty
+
+    3 program-part: function-definition
+    4             | declaration
+
+    5 declaration: function-declaration
+    6            | var-declaration-stmt
+
+    7 function-declaration: type-spec ID LPAR param-list RPAR SEMI
+
+    8 function-definition: type-spec ID LPAR param-list RPAR compound-stmt
+
+    9 param-list: param-list COMMA param-spec
+   10           | param-spec
+   11           | %empty
+
+   12 param-spec: type-spec
+   13           | type-spec ID
+
+   14 type-spec: VOID
+   15          | CHAR
+   16          | SHORT
+   17          | INT
+   18          | FLOAT
+   19          | DOUBLE
+   20          | ID
+
+   21 compound-stmt: LCB stmt-list RCB
+
+   22 stmt-list: stmt-list stmt
+   23          | %empty
+
+   24 empty-stmt: SEMI
+
+   25 var-declaration-stmt: type-spec var-list SEMI
+
+   26 var-list: var-list COMMA var-part
+   27         | var-part
+
+   28 var-part: ID
+   29         | ID ASSIGN expr
+
+   30 assign-stmt: expr ASSIGN expr SEMI
+
+   31 if-stmt: IF LPAR expr RPAR stmt
+   32        | IF LPAR expr RPAR stmt ELSE stmt
+
+   33 return-stmt: RETURN return-value SEMI
+
+   34 return-value: expr
+   35             | %empty
+
+   36 stmt: empty-stmt
+   37     | compound-stmt
+   38     | var-declaration-stmt
+   39     | assign-stmt
+   40     | if-stmt
+   41     | return-stmt
+
+   42 expr: expr LT expr
+   43     | expr BT expr
+   44     | expr LET expr
+   45     | expr BET expr
+   46     | expr EQ expr
+   47     | expr PLUS expr
+   48     | expr MINUS expr
+   49     | expr TIMES expr
+   50     | expr OVER expr
+   51     | MINUS expr
+   52     | LPAR expr RPAR
+   53     | INT_VAL
+   54     | REAL_VAL
+   55     | STR_VAL
+   56     | ID
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    AUTO (258)
+    CONST (259)
+    VOLATILE (260)
+    STATIC (261)
+    EXTERN (262)
+    LONG (263)
+    REGISTER (264)
+    SIGNED (265)
+    UNSIGNED (266)
+    VOID (267) 14
+    CHAR (268) 15
+    SHORT (269) 16
+    INT (270) 17
+    FLOAT (271) 18
+    DOUBLE (272) 19
+    TYPEDEF (273)
+    SIZEOF (274)
+    ENUM (275)
+    STRUCT (276)
+    UNION (277)
+    BREAK (278)
+    CASE (279)
+    CONTINUE (280)
+    DEFAULT (281)
+    DO (282)
+    ELSE (283) 32
+    FOR (284)
+    GOTO (285)
+    IF (286) 31 32
+    RETURN (287) 33
+    SWITCH (288)
+    WHILE (289)
+    ASSIGN (290) 29 30
+    EQ (291) 46
+    LT (292) 42
+    BT (293) 43
+    LET (294) 44
+    BET (295) 45
+    PLUS (296) 47
+    MINUS (297) 48 51
+    TIMES (298) 49
+    OVER (299) 50
+    LPAR (300) 7 8 31 32 52
+    RPAR (301) 7 8 31 32 52
+    SEMI (302) 7 24 25 30 33
+    LCB (303) 21
+    RCB (304) 21
+    INT_VAL (305) 53
+    REAL_VAL (306) 54
+    ID (307) 7 8 13 20 28 29 56
+    STR_VAL (308) 55
+    COMMA (309) 9 26
+    UMINUS (310)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (56)
+        on left: 0
+    program (57)
+        on left: 1 2
+        on right: 0 1
+    program-part (58)
+        on left: 3 4
+        on right: 1
+    declaration (59)
+        on left: 5 6
+        on right: 4
+    function-declaration (60)
+        on left: 7
+        on right: 5
+    function-definition (61)
+        on left: 8
+        on right: 3
+    param-list (62)
+        on left: 9 10 11
+        on right: 7 8 9
+    param-spec (63)
+        on left: 12 13
+        on right: 9 10
+    type-spec (64)
+        on left: 14 15 16 17 18 19 20
+        on right: 7 8 12 13 25
+    compound-stmt (65)
+        on left: 21
+        on right: 8 37
+    stmt-list (66)
+        on left: 22 23
+        on right: 21 22
+    empty-stmt (67)
+        on left: 24
+        on right: 36
+    var-declaration-stmt (68)
+        on left: 25
+        on right: 6 38
+    var-list (69)
+        on left: 26 27
+        on right: 25 26
+    var-part (70)
+        on left: 28 29
+        on right: 26 27
+    assign-stmt (71)
+        on left: 30
+        on right: 39
+    if-stmt (72)
+        on left: 31 32
+        on right: 40
+    return-stmt (73)
+        on left: 33
+        on right: 41
+    return-value (74)
+        on left: 34 35
+        on right: 33
+    stmt (75)
+        on left: 36 37 38 39 40 41
+        on right: 22 31 32
+    expr (76)
+        on left: 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56
+        on right: 29 30 31 32 34 42 43 44 45 46 47 48 49 50 51 52
+
+
+State 0
+
+    0 $accept: . program $end
+
+    $default  reduce using rule 2 (program)
+
+    program  go to state 1
+
+
+State 1
+
+    0 $accept: program . $end
+    1 program: program . program-part
+
+    $end    shift, and go to state 2
+    VOID    shift, and go to state 3
+    CHAR    shift, and go to state 4
+    SHORT   shift, and go to state 5
+    INT     shift, and go to state 6
+    FLOAT   shift, and go to state 7
+    DOUBLE  shift, and go to state 8
+    ID      shift, and go to state 9
+
+    program-part          go to state 10
+    declaration           go to state 11
+    function-declaration  go to state 12
+    function-definition   go to state 13
+    type-spec             go to state 14
+    var-declaration-stmt  go to state 15
+
+
+State 2
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+State 3
+
+   14 type-spec: VOID .
+
+    $default  reduce using rule 14 (type-spec)
+
+
+State 4
+
+   15 type-spec: CHAR .
+
+    $default  reduce using rule 15 (type-spec)
+
+
+State 5
+
+   16 type-spec: SHORT .
+
+    $default  reduce using rule 16 (type-spec)
+
+
+State 6
+
+   17 type-spec: INT .
+
+    $default  reduce using rule 17 (type-spec)
+
+
+State 7
+
+   18 type-spec: FLOAT .
+
+    $default  reduce using rule 18 (type-spec)
+
+
+State 8
+
+   19 type-spec: DOUBLE .
+
+    $default  reduce using rule 19 (type-spec)
+
+
+State 9
+
+   20 type-spec: ID .
+
+    $default  reduce using rule 20 (type-spec)
+
+
+State 10
+
+    1 program: program program-part .
+
+    $default  reduce using rule 1 (program)
+
+
+State 11
+
+    4 program-part: declaration .
+
+    $default  reduce using rule 4 (program-part)
+
+
+State 12
+
+    5 declaration: function-declaration .
+
+    $default  reduce using rule 5 (declaration)
+
+
+State 13
+
+    3 program-part: function-definition .
+
+    $default  reduce using rule 3 (program-part)
+
+
+State 14
+
+    7 function-declaration: type-spec . ID LPAR param-list RPAR SEMI
+    8 function-definition: type-spec . ID LPAR param-list RPAR compound-stmt
+   25 var-declaration-stmt: type-spec . var-list SEMI
+
+    ID  shift, and go to state 16
+
+    var-list  go to state 17
+    var-part  go to state 18
+
+
+State 15
+
+    6 declaration: var-declaration-stmt .
+
+    $default  reduce using rule 6 (declaration)
+
+
+State 16
+
+    7 function-declaration: type-spec ID . LPAR param-list RPAR SEMI
+    8 function-definition: type-spec ID . LPAR param-list RPAR compound-stmt
+   28 var-part: ID .
+   29         | ID . ASSIGN expr
+
+    ASSIGN  shift, and go to state 19
+    LPAR    shift, and go to state 20
+
+    $default  reduce using rule 28 (var-part)
+
+
+State 17
+
+   25 var-declaration-stmt: type-spec var-list . SEMI
+   26 var-list: var-list . COMMA var-part
+
+    SEMI   shift, and go to state 21
+    COMMA  shift, and go to state 22
+
+
+State 18
+
+   27 var-list: var-part .
+
+    $default  reduce using rule 27 (var-list)
+
+
+State 19
+
+   29 var-part: ID ASSIGN . expr
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 29
+
+
+State 20
+
+    7 function-declaration: type-spec ID LPAR . param-list RPAR SEMI
+    8 function-definition: type-spec ID LPAR . param-list RPAR compound-stmt
+
+    VOID    shift, and go to state 3
+    CHAR    shift, and go to state 4
+    SHORT   shift, and go to state 5
+    INT     shift, and go to state 6
+    FLOAT   shift, and go to state 7
+    DOUBLE  shift, and go to state 8
+    ID      shift, and go to state 9
+
+    $default  reduce using rule 11 (param-list)
+
+    param-list  go to state 30
+    param-spec  go to state 31
+    type-spec   go to state 32
+
+
+State 21
+
+   25 var-declaration-stmt: type-spec var-list SEMI .
+
+    $default  reduce using rule 25 (var-declaration-stmt)
+
+
+State 22
+
+   26 var-list: var-list COMMA . var-part
+
+    ID  shift, and go to state 33
+
+    var-part  go to state 34
+
+
+State 23
+
+   51 expr: MINUS . expr
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 35
+
+
+State 24
+
+   52 expr: LPAR . expr RPAR
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 36
+
+
+State 25
+
+   53 expr: INT_VAL .
+
+    $default  reduce using rule 53 (expr)
+
+
+State 26
+
+   54 expr: REAL_VAL .
+
+    $default  reduce using rule 54 (expr)
+
+
+State 27
+
+   56 expr: ID .
+
+    $default  reduce using rule 56 (expr)
+
+
+State 28
+
+   55 expr: STR_VAL .
+
+    $default  reduce using rule 55 (expr)
+
+
+State 29
+
+   29 var-part: ID ASSIGN expr .
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    EQ     shift, and go to state 37
+    LT     shift, and go to state 38
+    BT     shift, and go to state 39
+    LET    shift, and go to state 40
+    BET    shift, and go to state 41
+    PLUS   shift, and go to state 42
+    MINUS  shift, and go to state 43
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+
+    $default  reduce using rule 29 (var-part)
+
+
+State 30
+
+    7 function-declaration: type-spec ID LPAR param-list . RPAR SEMI
+    8 function-definition: type-spec ID LPAR param-list . RPAR compound-stmt
+    9 param-list: param-list . COMMA param-spec
+
+    RPAR   shift, and go to state 46
+    COMMA  shift, and go to state 47
+
+
+State 31
+
+   10 param-list: param-spec .
+
+    $default  reduce using rule 10 (param-list)
+
+
+State 32
+
+   12 param-spec: type-spec .
+   13           | type-spec . ID
+
+    ID  shift, and go to state 48
+
+    $default  reduce using rule 12 (param-spec)
+
+
+State 33
+
+   28 var-part: ID .
+   29         | ID . ASSIGN expr
+
+    ASSIGN  shift, and go to state 19
+
+    $default  reduce using rule 28 (var-part)
+
+
+State 34
+
+   26 var-list: var-list COMMA var-part .
+
+    $default  reduce using rule 26 (var-list)
+
+
+State 35
+
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+   51     | MINUS expr .
+
+    $default  reduce using rule 51 (expr)
+
+
+State 36
+
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+   52     | LPAR expr . RPAR
+
+    EQ     shift, and go to state 37
+    LT     shift, and go to state 38
+    BT     shift, and go to state 39
+    LET    shift, and go to state 40
+    BET    shift, and go to state 41
+    PLUS   shift, and go to state 42
+    MINUS  shift, and go to state 43
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+    RPAR   shift, and go to state 49
+
+
+State 37
+
+   46 expr: expr EQ . expr
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 50
+
+
+State 38
+
+   42 expr: expr LT . expr
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 51
+
+
+State 39
+
+   43 expr: expr BT . expr
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 52
+
+
+State 40
+
+   44 expr: expr LET . expr
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 53
+
+
+State 41
+
+   45 expr: expr BET . expr
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 54
+
+
+State 42
+
+   47 expr: expr PLUS . expr
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 55
+
+
+State 43
+
+   48 expr: expr MINUS . expr
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 56
+
+
+State 44
+
+   49 expr: expr TIMES . expr
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 57
+
+
+State 45
+
+   50 expr: expr OVER . expr
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 58
+
+
+State 46
+
+    7 function-declaration: type-spec ID LPAR param-list RPAR . SEMI
+    8 function-definition: type-spec ID LPAR param-list RPAR . compound-stmt
+
+    SEMI  shift, and go to state 59
+    LCB   shift, and go to state 60
+
+    compound-stmt  go to state 61
+
+
+State 47
+
+    9 param-list: param-list COMMA . param-spec
+
+    VOID    shift, and go to state 3
+    CHAR    shift, and go to state 4
+    SHORT   shift, and go to state 5
+    INT     shift, and go to state 6
+    FLOAT   shift, and go to state 7
+    DOUBLE  shift, and go to state 8
+    ID      shift, and go to state 9
+
+    param-spec  go to state 62
+    type-spec   go to state 32
+
+
+State 48
+
+   13 param-spec: type-spec ID .
+
+    $default  reduce using rule 13 (param-spec)
+
+
+State 49
+
+   52 expr: LPAR expr RPAR .
+
+    $default  reduce using rule 52 (expr)
+
+
+State 50
+
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   46     | expr EQ expr .
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    PLUS   shift, and go to state 42
+    MINUS  shift, and go to state 43
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+
+    $default  reduce using rule 46 (expr)
+
+
+State 51
+
+   42 expr: expr . LT expr
+   42     | expr LT expr .
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    PLUS   shift, and go to state 42
+    MINUS  shift, and go to state 43
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+
+    $default  reduce using rule 42 (expr)
+
+
+State 52
+
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   43     | expr BT expr .
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    PLUS   shift, and go to state 42
+    MINUS  shift, and go to state 43
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+
+    $default  reduce using rule 43 (expr)
+
+
+State 53
+
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   44     | expr LET expr .
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    PLUS   shift, and go to state 42
+    MINUS  shift, and go to state 43
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+
+    $default  reduce using rule 44 (expr)
+
+
+State 54
+
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   45     | expr BET expr .
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    PLUS   shift, and go to state 42
+    MINUS  shift, and go to state 43
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+
+    $default  reduce using rule 45 (expr)
+
+
+State 55
+
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   47     | expr PLUS expr .
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+
+    $default  reduce using rule 47 (expr)
+
+
+State 56
+
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   48     | expr MINUS expr .
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+
+    $default  reduce using rule 48 (expr)
+
+
+State 57
+
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   49     | expr TIMES expr .
+   50     | expr . OVER expr
+
+    $default  reduce using rule 49 (expr)
+
+
+State 58
+
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+   50     | expr OVER expr .
+
+    $default  reduce using rule 50 (expr)
+
+
+State 59
+
+    7 function-declaration: type-spec ID LPAR param-list RPAR SEMI .
+
+    $default  reduce using rule 7 (function-declaration)
+
+
+State 60
+
+   21 compound-stmt: LCB . stmt-list RCB
+
+    $default  reduce using rule 23 (stmt-list)
+
+    stmt-list  go to state 63
+
+
+State 61
+
+    8 function-definition: type-spec ID LPAR param-list RPAR compound-stmt .
+
+    $default  reduce using rule 8 (function-definition)
+
+
+State 62
+
+    9 param-list: param-list COMMA param-spec .
+
+    $default  reduce using rule 9 (param-list)
+
+
+State 63
+
+   21 compound-stmt: LCB stmt-list . RCB
+   22 stmt-list: stmt-list . stmt
+
+    VOID      shift, and go to state 3
+    CHAR      shift, and go to state 4
+    SHORT     shift, and go to state 5
+    INT       shift, and go to state 6
+    FLOAT     shift, and go to state 7
+    DOUBLE    shift, and go to state 8
+    IF        shift, and go to state 64
+    RETURN    shift, and go to state 65
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 66
+    LCB       shift, and go to state 60
+    RCB       shift, and go to state 67
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 68
+    STR_VAL   shift, and go to state 28
+
+    type-spec             go to state 69
+    compound-stmt         go to state 70
+    empty-stmt            go to state 71
+    var-declaration-stmt  go to state 72
+    assign-stmt           go to state 73
+    if-stmt               go to state 74
+    return-stmt           go to state 75
+    stmt                  go to state 76
+    expr                  go to state 77
+
+
+State 64
+
+   31 if-stmt: IF . LPAR expr RPAR stmt
+   32        | IF . LPAR expr RPAR stmt ELSE stmt
+
+    LPAR  shift, and go to state 78
+
+
+State 65
+
+   33 return-stmt: RETURN . return-value SEMI
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    $default  reduce using rule 35 (return-value)
+
+    return-value  go to state 79
+    expr          go to state 80
+
+
+State 66
+
+   24 empty-stmt: SEMI .
+
+    $default  reduce using rule 24 (empty-stmt)
+
+
+State 67
+
+   21 compound-stmt: LCB stmt-list RCB .
+
+    $default  reduce using rule 21 (compound-stmt)
+
+
+State 68
+
+   20 type-spec: ID .
+   56 expr: ID .
+
+    ID        reduce using rule 20 (type-spec)
+    $default  reduce using rule 56 (expr)
+
+
+State 69
+
+   25 var-declaration-stmt: type-spec . var-list SEMI
+
+    ID  shift, and go to state 33
+
+    var-list  go to state 17
+    var-part  go to state 18
+
+
+State 70
+
+   37 stmt: compound-stmt .
+
+    $default  reduce using rule 37 (stmt)
+
+
+State 71
+
+   36 stmt: empty-stmt .
+
+    $default  reduce using rule 36 (stmt)
+
+
+State 72
+
+   38 stmt: var-declaration-stmt .
+
+    $default  reduce using rule 38 (stmt)
+
+
+State 73
+
+   39 stmt: assign-stmt .
+
+    $default  reduce using rule 39 (stmt)
+
+
+State 74
+
+   40 stmt: if-stmt .
+
+    $default  reduce using rule 40 (stmt)
+
+
+State 75
+
+   41 stmt: return-stmt .
+
+    $default  reduce using rule 41 (stmt)
+
+
+State 76
+
+   22 stmt-list: stmt-list stmt .
+
+    $default  reduce using rule 22 (stmt-list)
+
+
+State 77
+
+   30 assign-stmt: expr . ASSIGN expr SEMI
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    ASSIGN  shift, and go to state 81
+    EQ      shift, and go to state 37
+    LT      shift, and go to state 38
+    BT      shift, and go to state 39
+    LET     shift, and go to state 40
+    BET     shift, and go to state 41
+    PLUS    shift, and go to state 42
+    MINUS   shift, and go to state 43
+    TIMES   shift, and go to state 44
+    OVER    shift, and go to state 45
+
+
+State 78
+
+   31 if-stmt: IF LPAR . expr RPAR stmt
+   32        | IF LPAR . expr RPAR stmt ELSE stmt
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 82
+
+
+State 79
+
+   33 return-stmt: RETURN return-value . SEMI
+
+    SEMI  shift, and go to state 83
+
+
+State 80
+
+   34 return-value: expr .
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    EQ     shift, and go to state 37
+    LT     shift, and go to state 38
+    BT     shift, and go to state 39
+    LET    shift, and go to state 40
+    BET    shift, and go to state 41
+    PLUS   shift, and go to state 42
+    MINUS  shift, and go to state 43
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+
+    $default  reduce using rule 34 (return-value)
+
+
+State 81
+
+   30 assign-stmt: expr ASSIGN . expr SEMI
+
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 27
+    STR_VAL   shift, and go to state 28
+
+    expr  go to state 84
+
+
+State 82
+
+   31 if-stmt: IF LPAR expr . RPAR stmt
+   32        | IF LPAR expr . RPAR stmt ELSE stmt
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    EQ     shift, and go to state 37
+    LT     shift, and go to state 38
+    BT     shift, and go to state 39
+    LET    shift, and go to state 40
+    BET    shift, and go to state 41
+    PLUS   shift, and go to state 42
+    MINUS  shift, and go to state 43
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+    RPAR   shift, and go to state 85
+
+
+State 83
+
+   33 return-stmt: RETURN return-value SEMI .
+
+    $default  reduce using rule 33 (return-stmt)
+
+
+State 84
+
+   30 assign-stmt: expr ASSIGN expr . SEMI
+   42 expr: expr . LT expr
+   43     | expr . BT expr
+   44     | expr . LET expr
+   45     | expr . BET expr
+   46     | expr . EQ expr
+   47     | expr . PLUS expr
+   48     | expr . MINUS expr
+   49     | expr . TIMES expr
+   50     | expr . OVER expr
+
+    EQ     shift, and go to state 37
+    LT     shift, and go to state 38
+    BT     shift, and go to state 39
+    LET    shift, and go to state 40
+    BET    shift, and go to state 41
+    PLUS   shift, and go to state 42
+    MINUS  shift, and go to state 43
+    TIMES  shift, and go to state 44
+    OVER   shift, and go to state 45
+    SEMI   shift, and go to state 86
+
+
+State 85
+
+   31 if-stmt: IF LPAR expr RPAR . stmt
+   32        | IF LPAR expr RPAR . stmt ELSE stmt
+
+    VOID      shift, and go to state 3
+    CHAR      shift, and go to state 4
+    SHORT     shift, and go to state 5
+    INT       shift, and go to state 6
+    FLOAT     shift, and go to state 7
+    DOUBLE    shift, and go to state 8
+    IF        shift, and go to state 64
+    RETURN    shift, and go to state 65
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 66
+    LCB       shift, and go to state 60
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 68
+    STR_VAL   shift, and go to state 28
+
+    type-spec             go to state 69
+    compound-stmt         go to state 70
+    empty-stmt            go to state 71
+    var-declaration-stmt  go to state 72
+    assign-stmt           go to state 73
+    if-stmt               go to state 74
+    return-stmt           go to state 75
+    stmt                  go to state 87
+    expr                  go to state 77
+
+
+State 86
+
+   30 assign-stmt: expr ASSIGN expr SEMI .
+
+    $default  reduce using rule 30 (assign-stmt)
+
+
+State 87
+
+   31 if-stmt: IF LPAR expr RPAR stmt .
+   32        | IF LPAR expr RPAR stmt . ELSE stmt
+
+    ELSE  shift, and go to state 88
+
+    $default  reduce using rule 31 (if-stmt)
+
+
+State 88
+
+   32 if-stmt: IF LPAR expr RPAR stmt ELSE . stmt
+
+    VOID      shift, and go to state 3
+    CHAR      shift, and go to state 4
+    SHORT     shift, and go to state 5
+    INT       shift, and go to state 6
+    FLOAT     shift, and go to state 7
+    DOUBLE    shift, and go to state 8
+    IF        shift, and go to state 64
+    RETURN    shift, and go to state 65
+    MINUS     shift, and go to state 23
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 66
+    LCB       shift, and go to state 60
+    INT_VAL   shift, and go to state 25
+    REAL_VAL  shift, and go to state 26
+    ID        shift, and go to state 68
+    STR_VAL   shift, and go to state 28
+
+    type-spec             go to state 69
+    compound-stmt         go to state 70
+    empty-stmt            go to state 71
+    var-declaration-stmt  go to state 72
+    assign-stmt           go to state 73
+    if-stmt               go to state 74
+    return-stmt           go to state 75
+    stmt                  go to state 89
+    expr                  go to state 77
+
+
+State 89
+
+   32 if-stmt: IF LPAR expr RPAR stmt ELSE stmt .
+
+    $default  reduce using rule 32 (if-stmt)

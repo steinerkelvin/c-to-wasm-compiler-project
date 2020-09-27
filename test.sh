@@ -1,0 +1,1 @@
+make && < test.c ./exe
