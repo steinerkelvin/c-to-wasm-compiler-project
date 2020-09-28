@@ -1,10 +1,19 @@
-%output "parser.c"          // File name of generated parser.
+%output "parser.cpp"        // File name of generated parser.
 %defines "parser.h"         // Produces a 'parser.h'
 %define parse.error verbose // Give proper messages when a syntax error is found.
 %define parse.lac full      // Enable LAC to improve syntax error handling.
 
+%define api.value.type {std::string}
+
+%code requires {
+#include <string>
+}
+
 %{
 #include <stdio.h>
+#include <string>
+#include <iostream>
+
 int yylex(void);
 void yyerror(char const *s);
 %}
@@ -33,10 +42,21 @@ void yyerror(char const *s);
 
 %%
 
-program : program program-part | %empty ;
-program-part : function-definition | declaration ;
+all : program               { $$ = $1; std::cout << $$ << std::endl; }
 
-declaration : function-declaration | var-declaration-stmt ;
+program :
+    program program-part    { $$ = $1 + $2; }
+    | %empty                { $$ = std::string(""); }
+    ;
+program-part : 
+    function-definition     { $$ = std::string("void func() {\n}\n"); }
+    | declaration           
+    ;
+
+declaration :
+    function-declaration    { $$ = std::string("void func();\n"); }
+    | var-declaration-stmt  { $$ = std::string("int x = 0;\n"); }
+    ;
 
 function-declaration : type-spec ID LPAR param-list RPAR SEMI ;
 function-definition  : type-spec ID LPAR param-list RPAR compound-stmt ;

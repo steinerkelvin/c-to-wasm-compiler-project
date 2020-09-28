@@ -1,4 +1,4 @@
-%option outfile="scanner.c"
+%option outfile="scanner.cpp"
 %option noyywrap
 %option nounput
 %option noinput
