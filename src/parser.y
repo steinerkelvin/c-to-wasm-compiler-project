@@ -23,9 +23,11 @@ void yyerror(char const *s);
 %left EQ LT BT LET BET
 %left PLUS MINUS
 %left STAR OVER
+%precedence PLUSPLUS MINUSMINUS
 %precedence UMINUS
 %precedence RPAR
 %precedence ELSE
+%left LPAR // Associação da chamada de função
 
 // TODO Outras precedências e associatividade
 

@@ -22,6 +22,6 @@ int main() {
         return 1;
     }
     int i = 0;
-    i++;
+    - i++;
     return 0;
 }

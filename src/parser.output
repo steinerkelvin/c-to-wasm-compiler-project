@@ -25,18 +25,6 @@ Terminals unused in grammar
     WHILE
 
 
-State 37 conflicts: 3 shift/reduce
-State 54 conflicts: 3 shift/reduce
-State 55 conflicts: 3 shift/reduce
-State 56 conflicts: 3 shift/reduce
-State 57 conflicts: 3 shift/reduce
-State 58 conflicts: 3 shift/reduce
-State 61 conflicts: 3 shift/reduce
-State 62 conflicts: 3 shift/reduce
-State 63 conflicts: 3 shift/reduce
-State 64 conflicts: 3 shift/reduce
-
-
 Grammar
 
     0 $accept: program $end
@@ -668,14 +656,9 @@ State 37
    55     | expr . MINUSMINUS
    62 function-call: expr . LPAR arg-list RPAR
 
-    LPAR        shift, and go to state 43
-    PLUSPLUS    shift, and go to state 48
-    MINUSMINUS  shift, and go to state 49
+    LPAR  shift, and go to state 43
 
-    LPAR        [reduce using rule 53 (expr)]
-    PLUSPLUS    [reduce using rule 53 (expr)]
-    MINUSMINUS  [reduce using rule 53 (expr)]
-    $default    reduce using rule 53 (expr)
+    $default  reduce using rule 53 (expr)
 
 
 State 38
@@ -910,10 +893,7 @@ State 54
     PLUSPLUS    shift, and go to state 48
     MINUSMINUS  shift, and go to state 49
 
-    LPAR        [reduce using rule 48 (expr)]
-    PLUSPLUS    [reduce using rule 48 (expr)]
-    MINUSMINUS  [reduce using rule 48 (expr)]
-    $default    reduce using rule 48 (expr)
+    $default  reduce using rule 48 (expr)
 
 
 State 55
@@ -940,10 +920,7 @@ State 55
     PLUSPLUS    shift, and go to state 48
     MINUSMINUS  shift, and go to state 49
 
-    LPAR        [reduce using rule 44 (expr)]
-    PLUSPLUS    [reduce using rule 44 (expr)]
-    MINUSMINUS  [reduce using rule 44 (expr)]
-    $default    reduce using rule 44 (expr)
+    $default  reduce using rule 44 (expr)
 
 
 State 56
@@ -970,10 +947,7 @@ State 56
     PLUSPLUS    shift, and go to state 48
     MINUSMINUS  shift, and go to state 49
 
-    LPAR        [reduce using rule 45 (expr)]
-    PLUSPLUS    [reduce using rule 45 (expr)]
-    MINUSMINUS  [reduce using rule 45 (expr)]
-    $default    reduce using rule 45 (expr)
+    $default  reduce using rule 45 (expr)
 
 
 State 57
@@ -1000,10 +974,7 @@ State 57
     PLUSPLUS    shift, and go to state 48
     MINUSMINUS  shift, and go to state 49
 
-    LPAR        [reduce using rule 46 (expr)]
-    PLUSPLUS    [reduce using rule 46 (expr)]
-    MINUSMINUS  [reduce using rule 46 (expr)]
-    $default    reduce using rule 46 (expr)
+    $default  reduce using rule 46 (expr)
 
 
 State 58
@@ -1030,10 +1001,7 @@ State 58
     PLUSPLUS    shift, and go to state 48
     MINUSMINUS  shift, and go to state 49
 
-    LPAR        [reduce using rule 47 (expr)]
-    PLUSPLUS    [reduce using rule 47 (expr)]
-    MINUSMINUS  [reduce using rule 47 (expr)]
-    $default    reduce using rule 47 (expr)
+    $default  reduce using rule 47 (expr)
 
 
 State 59
@@ -1099,10 +1067,7 @@ State 61
     PLUSPLUS    shift, and go to state 48
     MINUSMINUS  shift, and go to state 49
 
-    LPAR        [reduce using rule 49 (expr)]
-    PLUSPLUS    [reduce using rule 49 (expr)]
-    MINUSMINUS  [reduce using rule 49 (expr)]
-    $default    reduce using rule 49 (expr)
+    $default  reduce using rule 49 (expr)
 
 
 State 62
@@ -1127,10 +1092,7 @@ State 62
     PLUSPLUS    shift, and go to state 48
     MINUSMINUS  shift, and go to state 49
 
-    LPAR        [reduce using rule 50 (expr)]
-    PLUSPLUS    [reduce using rule 50 (expr)]
-    MINUSMINUS  [reduce using rule 50 (expr)]
-    $default    reduce using rule 50 (expr)
+    $default  reduce using rule 50 (expr)
 
 
 State 63
@@ -1153,10 +1115,7 @@ State 63
     PLUSPLUS    shift, and go to state 48
     MINUSMINUS  shift, and go to state 49
 
-    LPAR        [reduce using rule 51 (expr)]
-    PLUSPLUS    [reduce using rule 51 (expr)]
-    MINUSMINUS  [reduce using rule 51 (expr)]
-    $default    reduce using rule 51 (expr)
+    $default  reduce using rule 51 (expr)
 
 
 State 64
@@ -1179,10 +1138,7 @@ State 64
     PLUSPLUS    shift, and go to state 48
     MINUSMINUS  shift, and go to state 49
 
-    LPAR        [reduce using rule 52 (expr)]
-    PLUSPLUS    [reduce using rule 52 (expr)]
-    MINUSMINUS  [reduce using rule 52 (expr)]
-    $default    reduce using rule 52 (expr)
+    $default  reduce using rule 52 (expr)
 
 
 State 65
