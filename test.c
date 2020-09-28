@@ -8,16 +8,20 @@ int test3(int a, int b);
 int test4(int a, int);
 
 int test4(int a, int b) {
-    return 0;
+    return a + b;
 }
 
 int main() {
     float a = 2, b;
-    b = 3 + 7.0;
+    a == b;
+    test3(a, b);
+    int c = test4(a, b);
     if (b > 1)
         a = 77;
     else {
         return 1;
     }
+    int i = 0;
+    i++;
     return 0;
 }

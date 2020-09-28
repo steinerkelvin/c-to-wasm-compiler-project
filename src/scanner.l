@@ -65,6 +65,12 @@ void             {return VOID;}
 volatile         {return VOLATILE;}
 while            {return WHILE;}
 
+"+"              {return PLUS;}
+"-"              {return MINUS;}
+"*"              {return STAR;}
+"/"              {return OVER;}
+"++"             {return PLUSPLUS;}
+"--"             {return MINUSMINUS;}
 ,                {return COMMA;}
 "="              {return ASSIGN;}
 "=="             {return EQ;}
@@ -72,10 +78,6 @@ while            {return WHILE;}
 ">"              {return BT;}
 "<="             {return LET;}
 ">="             {return BET;}
-"+"              {return PLUS;}
-"-"              {return MINUS;}
-"*"              {return TIMES;}
-"/"              {return OVER;}
 "("              {return LPAR;}
 ")"              {return RPAR;}
 "{"              {return LCB;}
