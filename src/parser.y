@@ -24,7 +24,7 @@ void yyerror(char const *s);
 %token TYPEDEF SIZEOF
 %token ENUM STRUCT UNION
 %token BREAK CASE CONTINUE DEFAULT DO ELSE FOR GOTO IF RETURN SWITCH WHILE
-%token ASSIGN EQ LT BT LET BET LPAR RPAR SEMI LCB RCB
+%token ASSIGN EQ LT BT LET BET LPAR RPAR SEMI LCB RCB COLON
 %token PLUS MINUS STAR OVER PLUSPLUS MINUSMINUS
 %token INT_VAL REAL_VAL ID STR_VAL
 
@@ -73,6 +73,11 @@ var-part : ID | ID ASSIGN expr ;
 return-stmt : RETURN return-value SEMI;
 return-value : expr | %empty ;
 
+continue-stmt : CONTINUE SEMI ;
+break-stmt : BREAK SEMI ;
+case-stmt : CASE expr COLON stmt ;//problema: só aceita constantes
+default-stmt : DEFAULT COLON stmt ;
+
 stmt :
       empty-stmt
     | compound-stmt
@@ -80,7 +85,15 @@ stmt :
     | assign-stmt
     | if-stmt
     | return-stmt
+	| break-stmt
+	| case-stmt//o case e o default são única e exclusivamente do switch?
+	| default-stmt
+	| continue-stmt
     | expr-stmt
+	| while-stmt
+	| do-while-stmt
+	| for-stmt
+	| switch-stmt
     ;
 
 empty-stmt : SEMI ;
@@ -95,7 +108,15 @@ assign-stmt : expr ASSIGN expr SEMI ;
 
 if-stmt : IF LPAR expr RPAR stmt | IF LPAR expr RPAR stmt ELSE stmt ;
 
-// TODO while, switch, do-while, for
+while-stmt : WHILE LPAR expr RPAR stmt ;
+
+do-while-stmt : DO stmt WHILE LPAR expr RPAR ;
+
+for-stmt: FOR LPAR stmt stmt expr RPAR stmt | FOR LPAR stmt stmt RPAR stmt;
+
+switch-stmt : SWITCH LPAR expr RPAR stmt;//há um sério problema aqui, que é não aceitar condicionais, somente constantes;
+
+// TODO switch. incluir: continue e break nos loops e switch
 
 expr-stmt : expr SEMI ;
 

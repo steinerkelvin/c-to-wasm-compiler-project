@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 int globalzao = 2;
+float b = 1;
 
 int test1();
 int test2(void);
@@ -10,6 +11,11 @@ int test4(int a, int);
 int test4(int a, int b) {
     return a + b;
 }
+
+//testando\
+um \
+comentario		 \
+obscuro
 
 int main() {
     float a = 2, b;
@@ -23,5 +29,26 @@ int main() {
     }
     int i = 0;
     - i++;
+
+	while(i < 5)
+		i++;
+
+	for(;;)
+
+	for(int a=0,b,c;i<7;i++)
+		a++;
+
+	switch(0){
+		case 0: a++; break;
+	} 
+	//i++++;
+
+	do i++;
+	while(i < 10);
     return 0;
 }
+
+/*
+testando um comentário 
+normal
+*/

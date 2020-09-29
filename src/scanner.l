@@ -83,6 +83,7 @@ while            {return WHILE;}
 "{"              {return LCB;}
 "}"              {return RCB;}
 ";"              {return SEMI;}
+":"				 {return COLON;}
 
 {digit}          {return INT_VAL;}
 {real}           {return REAL_VAL;}
