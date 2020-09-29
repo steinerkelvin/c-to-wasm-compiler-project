@@ -24,7 +24,7 @@ void yyerror(char const *s);
 %token TYPEDEF SIZEOF
 %token ENUM STRUCT UNION
 %token BREAK CASE CONTINUE DEFAULT DO ELSE FOR GOTO IF RETURN SWITCH WHILE
-%token ASSIGN EQ LT BT LET BET LPAR RPAR SEMI LCB RCB COLON
+%token ASSIGN EQ LT BT LET BET LPAR RPAR SEMI LCB RCB COLON LB RB
 %token PLUS MINUS STAR OVER PLUSPLUS MINUSMINUS
 %token INT_VAL REAL_VAL ID STR_VAL
 
@@ -128,7 +128,16 @@ var-list :
 var-part :
       ID                            { $$ = std::string("x"); }
     | ID ASSIGN expr                { $$ = std::string("x") + " = " + $3; }
+    | array-stmt ///////////////////////////  ARRAY  //////////////////////////
     ;
+array-stmt: 
+    array 
+    | array ASSIGN LCB arg-list RCB
+    ;
+array: 
+    ID LB expr RB 
+    | ID LB RB 
+    ;    
 
 assign-stmt :
       expr ASSIGN expr SEMI         { $$ = $1 + " = " + $3 + ";\n" ; }

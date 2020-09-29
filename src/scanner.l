@@ -80,6 +80,8 @@ while            {return WHILE;}
 ">="             {return BET;}
 "("              {return LPAR;}
 ")"              {return RPAR;}
+"["              {return LB;}
+"]"              {return RB;}
 "{"              {return LCB;}
 "}"              {return RCB;}
 ";"              {return SEMI;}

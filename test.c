@@ -14,41 +14,52 @@ int test4(int a, int b) {
 
 //testando\
 um \
-comentario         \
+comentario		 \
 obscuro
 
 int main() {
-    float a = 2, b;
+    int a = 2, b;
+    //char d = 'd'; PROBLEMA COM '
+    //const int _01; PROBLEMA COM CONST
     a == b;
-    test4(a, b);
+//    test3(a, b);
     int c = test4(a, b);
-    if (b > 1)
+    if (b > 1){
         a = 77;
-    else {
-        return 1;
-    }
+    }    
+    else 
+   // return 1;
+	a = 100;
+    
+    int e = 1;
+    int j = 2;
+    int v[3] = {e,j,3};
+    
+
     int i = 0;
     - i++;
 
-    while(i < 5)
-        i++;
+	while(i < 5)
+		i++;
 
-    for(;;)
+	//for(;;)
 
-    for(int a=0,b,c;i<7;i++)
-        a++;
+	for(int i=0,b,c;i<7;i++)
+	//teste
+	a++;
 
-    // const int k = 0 + 2;
-    switch(0){
-        case 0: 
-            break;
-        // case k + 1:
-        //     a++; break;
-    } 
-    //i++++;
+	printf("%d\n",a);
 
-    do i++;
-    while(i < 10);
+	switch(a){
+		case (107): {
+				printf("%d\n",a);
+				//case 1: ; break;
+				}
+	} 
+	//i++++;
+
+	do i++;
+	while(i < 10);
     return 0;
 }
 
