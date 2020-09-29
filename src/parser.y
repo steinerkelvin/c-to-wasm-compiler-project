@@ -42,114 +42,181 @@ void yyerror(char const *s);
 
 %%
 
-all : program               { $$ = $1; std::cout << $$ << std::endl; }
+all : program                   { $$ = $1; std::cout << $$ << std::endl; }
 
 program :
-    program program-part    { $$ = $1 + $2; }
-    | %empty                { $$ = std::string(""); }
+      program program-part      { $$ = $1 + $2; }
+    | %empty                    { $$ = std::string(""); }
     ;
-program-part : 
-    function-definition     { $$ = std::string("void func() {\n}\n"); }
-    | declaration           
+program-part :
+      function-definition
+    | declaration
     ;
 
 declaration :
-    function-declaration    { $$ = std::string("void func();\n"); }
-    | var-declaration-stmt  { $$ = std::string("int x = 0;\n"); }
+      function-declaration
+    | var-declaration-stmt
     ;
 
-function-declaration : type-spec ID LPAR param-list RPAR SEMI ;
-function-definition  : type-spec ID LPAR param-list RPAR compound-stmt ;
+function-declaration :
+      type-spec ID LPAR param-list RPAR SEMI            { $$ = $1 + " " + "x" + "(" + $4 + ")" + ";\n"; }
+    ;
+function-definition :
+      type-spec ID LPAR param-list RPAR compound-stmt   { $$ = $1 + " " + "x" + "(" + $4 + ")" + $6; }
+    ;
 
 // ? Há maneira melhor de especificar lista de elementos separados por vírgula?
-param-list : param-list COMMA param-spec | param-spec | %empty ;
-param-spec : type-spec | type-spec ID ;
+param-list :
+      param-list COMMA param-spec   { $$ = $1 + ", " + $3; }
+    | param-spec
+    | %empty
+    ;
+param-spec :
+      type-spec
+    | type-spec ID      { $$ = $1 + " " + "x"; }
+    ;
 
-type-spec : VOID | CHAR | SHORT | INT | FLOAT | DOUBLE | ID ;
+type-spec :
+      VOID              { $$ = std::string("void"); }
+    | CHAR              { $$ = std::string("char"); }
+    | SHORT             { $$ = std::string("short"); }
+    | INT               { $$ = std::string("int"); }
+    | FLOAT             { $$ = std::string("float"); }
+    | DOUBLE            { $$ = std::string("double"); }
+    | ID                { $$ = std::string("x"); }
+    ;
 
-var-list : var-list COMMA var-part | var-part ;
-var-part : ID | ID ASSIGN expr ;
-
-return-stmt : RETURN return-value SEMI;
-return-value : expr | %empty ;
-
-continue-stmt : CONTINUE SEMI ;
-break-stmt : BREAK SEMI ;
-case-stmt : CASE expr COLON stmt ;//problema: só aceita constantes
-default-stmt : DEFAULT COLON stmt ;
 
 stmt :
       empty-stmt
     | compound-stmt
-    | var-declaration-stmt 
+    | var-declaration-stmt
     | assign-stmt
     | if-stmt
     | return-stmt
-	| break-stmt
-	| case-stmt//o case e o default são única e exclusivamente do switch?
-	| default-stmt
-	| continue-stmt
+    | break-stmt
+    | case-stmt
+    | default-stmt
+    | continue-stmt
+    | while-stmt
+    | do-while-stmt
+    | for-stmt
+    | switch-stmt
     | expr-stmt
-	| while-stmt
-	| do-while-stmt
-	| for-stmt
-	| switch-stmt
     ;
 
-empty-stmt : SEMI ;
+empty-stmt :
+      SEMI                          { $$ = std::string(";\n"); }
+    ;
 
-compound-stmt : LCB stmt-list RCB ;
-stmt-list : stmt-list stmt | %empty ;
+compound-stmt :
+      LCB stmt-list RCB             { $$ = std::string("{\n") + $2 + "}\n"; }
+    ;
+stmt-list :
+      stmt-list stmt                { $$ = $1 + $2; }
+    | %empty                        { $$ = std::string(""); }
+    ;
 
 // TODO qualificadores, ponteiros, arrays
-var-declaration-stmt : type-spec var-list SEMI ;
+var-declaration-stmt :
+    type-spec var-list SEMI         { $$ = $1 + " " + $2 + ";\n" ; }
+    ;
+var-list :
+      var-list COMMA var-part       { $$ = $1 + ", " + $3; }
+    | var-part
+    ;
+var-part :
+      ID                            { $$ = std::string("x"); }
+    | ID ASSIGN expr                { $$ = std::string("x") + " = " + $3; }
+    ;
 
-assign-stmt : expr ASSIGN expr SEMI ;
+assign-stmt :
+      expr ASSIGN expr SEMI         { $$ = $1 + " = " + $3 + ";\n" ; }
+    ;
 
-if-stmt : IF LPAR expr RPAR stmt | IF LPAR expr RPAR stmt ELSE stmt ;
+if-stmt :
+      IF LPAR expr RPAR stmt                { std::string("if (") + $3 + ")" + $4; }
+    | IF LPAR expr RPAR stmt ELSE stmt      { std::string("if (") + $3 + ")" + $4 + "else" + $6; }
+    ;
 
-while-stmt : WHILE LPAR expr RPAR stmt ;
+return-stmt :
+    RETURN return-value SEMI        { $$ = std::string("return ") + $2 + ";\n" ;  }
+    ;
+return-value :
+      expr                          { $$ = $1; }
+    | %empty                        { $$ = std::string(""); }
+    ;
 
-do-while-stmt : DO stmt WHILE LPAR expr RPAR ;
+continue-stmt :
+      CONTINUE SEMI                 { $$ = std::string("continue") + ";\n" ; }
+    ;
+break-stmt :
+      BREAK SEMI                    { $$ = std::string("break") + ";\n" ; }
+    ;
+case-stmt :
+      CASE expr COLON stmt          { $$ = std::string("case ") + $2 + ":\n" + $4 ; }
+    ;
+default-stmt :
+      DEFAULT COLON stmt            { $$ = std::string("default ") + ":\n" + $3 ; }
+    ;
 
-for-stmt: FOR LPAR stmt stmt expr RPAR stmt | FOR LPAR stmt stmt RPAR stmt;
+while-stmt :
+      WHILE LPAR expr RPAR stmt     { $$ = std::string("while (") + $3 + ") " + $5; }
+    ;
 
-switch-stmt : SWITCH LPAR expr RPAR stmt;//há um sério problema aqui, que é não aceitar condicionais, somente constantes;
+do-while-stmt :
+    DO stmt WHILE LPAR expr RPAR SEMI   { $$ = std::string("do ") + $2 + "while (" + $5 + ")" + ";\n" ; }
+    ;
 
-// TODO switch. incluir: continue e break nos loops e switch
+// TODO corrigir esses stmt
+for-stmt:
+      FOR LPAR stmt stmt expr RPAR stmt     { $$ = std::string("for (;;) ") + $7; }
+    | FOR LPAR stmt stmt RPAR stmt          { $$ = std::string("for (;;) ") + $6; }
+    ;
 
-expr-stmt : expr SEMI ;
+switch-stmt :
+      SWITCH LPAR expr RPAR stmt            { $$ = std::string("switch (") + $3 + ") " + $5; }
+    ;
+
+expr-stmt :
+      expr SEMI                             { $$ = $1 + ";\n" ; }
+    ;
 
 
-expr: expr LT expr
-    | expr BT expr
-    | expr LET expr
-    | expr BET expr
-    | expr EQ expr
-    | expr PLUS expr
-    | expr MINUS expr
-    | expr STAR expr
-    | expr OVER expr
-    | MINUS expr %prec UMINUS
-    | expr PLUSPLUS
-    | expr MINUSMINUS
-    | LPAR expr RPAR
-    | function-call
-    | INT_VAL
-    | REAL_VAL
-    | STR_VAL
-    | ID
+expr: expr LT expr          { $$ = std::string("(") + $1 + "<" + $3 + ")"; }
+    | expr BT expr          { $$ = std::string("(") + $1 + ">" + $3 + ")"; }
+    | expr LET expr         { $$ = std::string("(") + $1 + "<=" + $3 + ")"; }
+    | expr BET expr         { $$ = std::string("(") + $1 + ">=" + $3 + ")"; }
+    | expr EQ expr          { $$ = std::string("(") + $1 + "==" + $3 + ")"; }
+    | expr PLUS expr        { $$ = std::string("(") + $1 + "+" + $3 + ")"; }
+    | expr MINUS expr       { $$ = std::string("(") + $1 + "-" + $3 + ")"; }
+    | expr STAR expr        { $$ = std::string("(") + $1 + "*" + $3 + ")"; }
+    | expr OVER expr        { $$ = std::string("(") + $1 + "/" + $3 + ")"; }
+    | MINUS expr %prec UMINUS   { $$ = std::string("(-") + $2 + ")"; }
+    | expr PLUSPLUS         { $$ = std::string("(") + $1 + "++" + ")"; }
+    | expr MINUSMINUS       { $$ = std::string("(") + $1 + "--" + ")"; }
+    | LPAR expr RPAR        { $$ = std::string("(") + $2 + ")"; }
+    | function-call         { $$ = std::string("(") + $1 + ")"; }
+    | INT_VAL               { $$ = std::string("0"); }
+    | REAL_VAL              { $$ = std::string("0.0"); }
+    | STR_VAL               { $$ = std::string("\"\""); }
+    | ID                    { $$ = std::string("x"); }
     ;
     // TODO acesso de índice, derreferenciação, acesso de membro (incluindo ->)
     // cast
 
-function-call : expr LPAR arg-list RPAR
-arg-list : arg-list COMMA expr | expr | %empty 
+function-call :
+    expr LPAR arg-list RPAR     { $$ = $1 + "(" + $3 + ")"; }
+    ;
+arg-list :
+      arg-list COMMA expr       { $$ = $1 + ", " + $3; }
+    | expr                      { $$ = $1; }
+    | %empty                    { $$ = std::string(""); }
 
 %%
 
 int main(void) {
-    if (yyparse() == 0) printf("PARSE SUCCESSFUL!\n");
-    else                printf("PARSE FAILED!\n");
+    if (yyparse() == 0) fprintf(stderr, "PARSE SUCCESSFUL!\n");
+    else                fprintf(stderr, "PARSE FAILED!\n");
     return 0;
 }

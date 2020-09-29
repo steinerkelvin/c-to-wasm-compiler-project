@@ -1,23 +1,23 @@
-Terminais sem uso na gramática
+Terminals unused in grammar
 
-   AUTO
-   CONST
-   VOLATILE
-   STATIC
-   EXTERN
-   LONG
-   REGISTER
-   SIGNED
-   UNSIGNED
-   TYPEDEF
-   SIZEOF
-   ENUM
-   STRUCT
-   UNION
-   GOTO
+    AUTO
+    CONST
+    VOLATILE
+    STATIC
+    EXTERN
+    LONG
+    REGISTER
+    SIGNED
+    UNSIGNED
+    TYPEDEF
+    SIZEOF
+    ENUM
+    STRUCT
+    UNION
+    GOTO
 
 
-Gramática
+Grammar
 
     0 $accept: all $end
 
@@ -51,58 +51,58 @@ Gramática
    20          | DOUBLE
    21          | ID
 
-   22 var-list: var-list COMMA var-part
-   23         | var-part
+   22 stmt: empty-stmt
+   23     | compound-stmt
+   24     | var-declaration-stmt
+   25     | assign-stmt
+   26     | if-stmt
+   27     | return-stmt
+   28     | break-stmt
+   29     | case-stmt
+   30     | default-stmt
+   31     | continue-stmt
+   32     | while-stmt
+   33     | do-while-stmt
+   34     | for-stmt
+   35     | switch-stmt
+   36     | expr-stmt
 
-   24 var-part: ID
-   25         | ID ASSIGN expr
+   37 empty-stmt: SEMI
 
-   26 return-stmt: RETURN return-value SEMI
+   38 compound-stmt: LCB stmt-list RCB
 
-   27 return-value: expr
-   28             | %empty
+   39 stmt-list: stmt-list stmt
+   40          | %empty
 
-   29 continue-stmt: CONTINUE SEMI
+   41 var-declaration-stmt: type-spec var-list SEMI
 
-   30 break-stmt: BREAK SEMI
+   42 var-list: var-list COMMA var-part
+   43         | var-part
 
-   31 case-stmt: CASE expr COLON stmt
+   44 var-part: ID
+   45         | ID ASSIGN expr
 
-   32 default-stmt: DEFAULT COLON stmt
+   46 assign-stmt: expr ASSIGN expr SEMI
 
-   33 stmt: empty-stmt
-   34     | compound-stmt
-   35     | var-declaration-stmt
-   36     | assign-stmt
-   37     | if-stmt
-   38     | return-stmt
-   39     | break-stmt
-   40     | case-stmt
-   41     | default-stmt
-   42     | continue-stmt
-   43     | expr-stmt
-   44     | while-stmt
-   45     | do-while-stmt
-   46     | for-stmt
-   47     | switch-stmt
+   47 if-stmt: IF LPAR expr RPAR stmt
+   48        | IF LPAR expr RPAR stmt ELSE stmt
 
-   48 empty-stmt: SEMI
+   49 return-stmt: RETURN return-value SEMI
 
-   49 compound-stmt: LCB stmt-list RCB
+   50 return-value: expr
+   51             | %empty
 
-   50 stmt-list: stmt-list stmt
-   51          | %empty
+   52 continue-stmt: CONTINUE SEMI
 
-   52 var-declaration-stmt: type-spec var-list SEMI
+   53 break-stmt: BREAK SEMI
 
-   53 assign-stmt: expr ASSIGN expr SEMI
+   54 case-stmt: CASE expr COLON stmt
 
-   54 if-stmt: IF LPAR expr RPAR stmt
-   55        | IF LPAR expr RPAR stmt ELSE stmt
+   55 default-stmt: DEFAULT COLON stmt
 
    56 while-stmt: WHILE LPAR expr RPAR stmt
 
-   57 do-while-stmt: DO stmt WHILE LPAR expr RPAR
+   57 do-while-stmt: DO stmt WHILE LPAR expr RPAR SEMI
 
    58 for-stmt: FOR LPAR stmt stmt expr RPAR stmt
    59         | FOR LPAR stmt stmt RPAR stmt
@@ -137,425 +137,454 @@ Gramática
    83         | %empty
 
 
-Terminais, com as regras onde eles aparecem
+Terminals, with rules where they appear
 
-$end (0) 0
-error (256)
-AUTO (258)
-CONST (259)
-VOLATILE (260)
-STATIC (261)
-EXTERN (262)
-LONG (263)
-REGISTER (264)
-SIGNED (265)
-UNSIGNED (266)
-VOID (267) 15
-CHAR (268) 16
-SHORT (269) 17
-INT (270) 18
-FLOAT (271) 19
-DOUBLE (272) 20
-TYPEDEF (273)
-SIZEOF (274)
-ENUM (275)
-STRUCT (276)
-UNION (277)
-BREAK (278) 30
-CASE (279) 31
-CONTINUE (280) 29
-DEFAULT (281) 32
-DO (282) 57
-ELSE (283) 55
-FOR (284) 58 59
-GOTO (285)
-IF (286) 54 55
-RETURN (287) 26
-SWITCH (288) 60
-WHILE (289) 56 57
-ASSIGN (290) 25 53
-EQ (291) 66
-LT (292) 62
-BT (293) 63
-LET (294) 64
-BET (295) 65
-LPAR (296) 8 9 54 55 56 57 58 59 60 74 80
-RPAR (297) 8 9 54 55 56 57 58 59 60 74 80
-SEMI (298) 8 26 29 30 48 52 53 61
-LCB (299) 49
-RCB (300) 49
-COLON (301) 31 32
-PLUS (302) 67
-MINUS (303) 68 71
-STAR (304) 69
-OVER (305) 70
-PLUSPLUS (306) 72
-MINUSMINUS (307) 73
-INT_VAL (308) 76
-REAL_VAL (309) 77
-ID (310) 8 9 14 21 24 25 79
-STR_VAL (311) 78
-COMMA (312) 10 22 81
-UMINUS (313)
-
-
-Não terminais com as regras onde eles aparecem
-
-$accept (59)
-    à esquerda: 0
-all (60)
-    à esquerda: 1, à direita: 0
-program (61)
-    à esquerda: 2 3, à direita: 1 2
-program-part (62)
-    à esquerda: 4 5, à direita: 2
-declaration (63)
-    à esquerda: 6 7, à direita: 5
-function-declaration (64)
-    à esquerda: 8, à direita: 6
-function-definition (65)
-    à esquerda: 9, à direita: 4
-param-list (66)
-    à esquerda: 10 11 12, à direita: 8 9 10
-param-spec (67)
-    à esquerda: 13 14, à direita: 10 11
-type-spec (68)
-    à esquerda: 15 16 17 18 19 20 21, à direita: 8 9 13 14 52
-var-list (69)
-    à esquerda: 22 23, à direita: 22 52
-var-part (70)
-    à esquerda: 24 25, à direita: 22 23
-return-stmt (71)
-    à esquerda: 26, à direita: 38
-return-value (72)
-    à esquerda: 27 28, à direita: 26
-continue-stmt (73)
-    à esquerda: 29, à direita: 42
-break-stmt (74)
-    à esquerda: 30, à direita: 39
-case-stmt (75)
-    à esquerda: 31, à direita: 40
-default-stmt (76)
-    à esquerda: 32, à direita: 41
-stmt (77)
-    à esquerda: 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47, à direita:
-    31 32 50 54 55 56 57 58 59 60
-empty-stmt (78)
-    à esquerda: 48, à direita: 33
-compound-stmt (79)
-    à esquerda: 49, à direita: 9 34
-stmt-list (80)
-    à esquerda: 50 51, à direita: 49 50
-var-declaration-stmt (81)
-    à esquerda: 52, à direita: 7 35
-assign-stmt (82)
-    à esquerda: 53, à direita: 36
-if-stmt (83)
-    à esquerda: 54 55, à direita: 37
-while-stmt (84)
-    à esquerda: 56, à direita: 44
-do-while-stmt (85)
-    à esquerda: 57, à direita: 45
-for-stmt (86)
-    à esquerda: 58 59, à direita: 46
-switch-stmt (87)
-    à esquerda: 60, à direita: 47
-expr-stmt (88)
-    à esquerda: 61, à direita: 43
-expr (89)
-    à esquerda: 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78
-    79, à direita: 25 27 31 53 54 55 56 57 58 60 61 62 63 64 65 66
-    67 68 69 70 71 72 73 74 80 81 82
-function-call (90)
-    à esquerda: 80, à direita: 75
-arg-list (91)
-    à esquerda: 81 82 83, à direita: 80 81
+    $end (0) 0
+    error (256)
+    AUTO (258)
+    CONST (259)
+    VOLATILE (260)
+    STATIC (261)
+    EXTERN (262)
+    LONG (263)
+    REGISTER (264)
+    SIGNED (265)
+    UNSIGNED (266)
+    VOID (267) 15
+    CHAR (268) 16
+    SHORT (269) 17
+    INT (270) 18
+    FLOAT (271) 19
+    DOUBLE (272) 20
+    TYPEDEF (273)
+    SIZEOF (274)
+    ENUM (275)
+    STRUCT (276)
+    UNION (277)
+    BREAK (278) 53
+    CASE (279) 54
+    CONTINUE (280) 52
+    DEFAULT (281) 55
+    DO (282) 57
+    ELSE (283) 48
+    FOR (284) 58 59
+    GOTO (285)
+    IF (286) 47 48
+    RETURN (287) 49
+    SWITCH (288) 60
+    WHILE (289) 56 57
+    ASSIGN (290) 45 46
+    EQ (291) 66
+    LT (292) 62
+    BT (293) 63
+    LET (294) 64
+    BET (295) 65
+    LPAR (296) 8 9 47 48 56 57 58 59 60 74 80
+    RPAR (297) 8 9 47 48 56 57 58 59 60 74 80
+    SEMI (298) 8 37 41 46 49 52 53 57 61
+    LCB (299) 38
+    RCB (300) 38
+    COLON (301) 54 55
+    PLUS (302) 67
+    MINUS (303) 68 71
+    STAR (304) 69
+    OVER (305) 70
+    PLUSPLUS (306) 72
+    MINUSMINUS (307) 73
+    INT_VAL (308) 76
+    REAL_VAL (309) 77
+    ID (310) 8 9 14 21 44 45 79
+    STR_VAL (311) 78
+    COMMA (312) 10 42 81
+    UMINUS (313)
 
 
-Estado 0
+Nonterminals, with rules where they appear
+
+    $accept (59)
+        on left: 0
+    all (60)
+        on left: 1
+        on right: 0
+    program (61)
+        on left: 2 3
+        on right: 1 2
+    program-part (62)
+        on left: 4 5
+        on right: 2
+    declaration (63)
+        on left: 6 7
+        on right: 5
+    function-declaration (64)
+        on left: 8
+        on right: 6
+    function-definition (65)
+        on left: 9
+        on right: 4
+    param-list (66)
+        on left: 10 11 12
+        on right: 8 9 10
+    param-spec (67)
+        on left: 13 14
+        on right: 10 11
+    type-spec (68)
+        on left: 15 16 17 18 19 20 21
+        on right: 8 9 13 14 41
+    stmt (69)
+        on left: 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36
+        on right: 39 47 48 54 55 56 57 58 59 60
+    empty-stmt (70)
+        on left: 37
+        on right: 22
+    compound-stmt (71)
+        on left: 38
+        on right: 9 23
+    stmt-list (72)
+        on left: 39 40
+        on right: 38 39
+    var-declaration-stmt (73)
+        on left: 41
+        on right: 7 24
+    var-list (74)
+        on left: 42 43
+        on right: 41 42
+    var-part (75)
+        on left: 44 45
+        on right: 42 43
+    assign-stmt (76)
+        on left: 46
+        on right: 25
+    if-stmt (77)
+        on left: 47 48
+        on right: 26
+    return-stmt (78)
+        on left: 49
+        on right: 27
+    return-value (79)
+        on left: 50 51
+        on right: 49
+    continue-stmt (80)
+        on left: 52
+        on right: 31
+    break-stmt (81)
+        on left: 53
+        on right: 28
+    case-stmt (82)
+        on left: 54
+        on right: 29
+    default-stmt (83)
+        on left: 55
+        on right: 30
+    while-stmt (84)
+        on left: 56
+        on right: 32
+    do-while-stmt (85)
+        on left: 57
+        on right: 33
+    for-stmt (86)
+        on left: 58 59
+        on right: 34
+    switch-stmt (87)
+        on left: 60
+        on right: 35
+    expr-stmt (88)
+        on left: 61
+        on right: 36
+    expr (89)
+        on left: 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79
+        on right: 45 46 47 48 50 54 56 57 58 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 80 81 82
+    function-call (90)
+        on left: 80
+        on right: 75
+    arg-list (91)
+        on left: 81 82 83
+        on right: 80 81
+
+
+State 0
 
     0 $accept: . all $end
 
-    $padrão  reduzir usando a regra 3 (program)
+    $default  reduce using rule 3 (program)
 
-    all      ir ao estado 1
-    program  ir ao estado 2
+    all      go to state 1
+    program  go to state 2
 
 
-Estado 1
+State 1
 
     0 $accept: all . $end
 
-    $end  deslocar, e ir ao estado 3
+    $end  shift, and go to state 3
 
 
-Estado 2
+State 2
 
     1 all: program .
     2 program: program . program-part
 
-    VOID    deslocar, e ir ao estado 4
-    CHAR    deslocar, e ir ao estado 5
-    SHORT   deslocar, e ir ao estado 6
-    INT     deslocar, e ir ao estado 7
-    FLOAT   deslocar, e ir ao estado 8
-    DOUBLE  deslocar, e ir ao estado 9
-    ID      deslocar, e ir ao estado 10
+    VOID    shift, and go to state 4
+    CHAR    shift, and go to state 5
+    SHORT   shift, and go to state 6
+    INT     shift, and go to state 7
+    FLOAT   shift, and go to state 8
+    DOUBLE  shift, and go to state 9
+    ID      shift, and go to state 10
 
-    $padrão  reduzir usando a regra 1 (all)
+    $default  reduce using rule 1 (all)
 
-    program-part          ir ao estado 11
-    declaration           ir ao estado 12
-    function-declaration  ir ao estado 13
-    function-definition   ir ao estado 14
-    type-spec             ir ao estado 15
-    var-declaration-stmt  ir ao estado 16
+    program-part          go to state 11
+    declaration           go to state 12
+    function-declaration  go to state 13
+    function-definition   go to state 14
+    type-spec             go to state 15
+    var-declaration-stmt  go to state 16
 
 
-Estado 3
+State 3
 
     0 $accept: all $end .
 
-    $padrão  aceitar
+    $default  accept
 
 
-Estado 4
+State 4
 
    15 type-spec: VOID .
 
-    $padrão  reduzir usando a regra 15 (type-spec)
+    $default  reduce using rule 15 (type-spec)
 
 
-Estado 5
+State 5
 
    16 type-spec: CHAR .
 
-    $padrão  reduzir usando a regra 16 (type-spec)
+    $default  reduce using rule 16 (type-spec)
 
 
-Estado 6
+State 6
 
    17 type-spec: SHORT .
 
-    $padrão  reduzir usando a regra 17 (type-spec)
+    $default  reduce using rule 17 (type-spec)
 
 
-Estado 7
+State 7
 
    18 type-spec: INT .
 
-    $padrão  reduzir usando a regra 18 (type-spec)
+    $default  reduce using rule 18 (type-spec)
 
 
-Estado 8
+State 8
 
    19 type-spec: FLOAT .
 
-    $padrão  reduzir usando a regra 19 (type-spec)
+    $default  reduce using rule 19 (type-spec)
 
 
-Estado 9
+State 9
 
    20 type-spec: DOUBLE .
 
-    $padrão  reduzir usando a regra 20 (type-spec)
+    $default  reduce using rule 20 (type-spec)
 
 
-Estado 10
+State 10
 
    21 type-spec: ID .
 
-    $padrão  reduzir usando a regra 21 (type-spec)
+    $default  reduce using rule 21 (type-spec)
 
 
-Estado 11
+State 11
 
     2 program: program program-part .
 
-    $padrão  reduzir usando a regra 2 (program)
+    $default  reduce using rule 2 (program)
 
 
-Estado 12
+State 12
 
     5 program-part: declaration .
 
-    $padrão  reduzir usando a regra 5 (program-part)
+    $default  reduce using rule 5 (program-part)
 
 
-Estado 13
+State 13
 
     6 declaration: function-declaration .
 
-    $padrão  reduzir usando a regra 6 (declaration)
+    $default  reduce using rule 6 (declaration)
 
 
-Estado 14
+State 14
 
     4 program-part: function-definition .
 
-    $padrão  reduzir usando a regra 4 (program-part)
+    $default  reduce using rule 4 (program-part)
 
 
-Estado 15
+State 15
 
     8 function-declaration: type-spec . ID LPAR param-list RPAR SEMI
     9 function-definition: type-spec . ID LPAR param-list RPAR compound-stmt
-   52 var-declaration-stmt: type-spec . var-list SEMI
+   41 var-declaration-stmt: type-spec . var-list SEMI
 
-    ID  deslocar, e ir ao estado 17
+    ID  shift, and go to state 17
 
-    var-list  ir ao estado 18
-    var-part  ir ao estado 19
+    var-list  go to state 18
+    var-part  go to state 19
 
 
-Estado 16
+State 16
 
     7 declaration: var-declaration-stmt .
 
-    $padrão  reduzir usando a regra 7 (declaration)
+    $default  reduce using rule 7 (declaration)
 
 
-Estado 17
+State 17
 
     8 function-declaration: type-spec ID . LPAR param-list RPAR SEMI
     9 function-definition: type-spec ID . LPAR param-list RPAR compound-stmt
-   24 var-part: ID .
-   25         | ID . ASSIGN expr
+   44 var-part: ID .
+   45         | ID . ASSIGN expr
 
-    ASSIGN  deslocar, e ir ao estado 20
-    LPAR    deslocar, e ir ao estado 21
+    ASSIGN  shift, and go to state 20
+    LPAR    shift, and go to state 21
 
-    $padrão  reduzir usando a regra 24 (var-part)
-
-
-Estado 18
-
-   22 var-list: var-list . COMMA var-part
-   52 var-declaration-stmt: type-spec var-list . SEMI
-
-    SEMI   deslocar, e ir ao estado 22
-    COMMA  deslocar, e ir ao estado 23
+    $default  reduce using rule 44 (var-part)
 
 
-Estado 19
+State 18
 
-   23 var-list: var-part .
+   41 var-declaration-stmt: type-spec var-list . SEMI
+   42 var-list: var-list . COMMA var-part
 
-    $padrão  reduzir usando a regra 23 (var-list)
-
-
-Estado 20
-
-   25 var-part: ID ASSIGN . expr
-
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
-
-    expr           ir ao estado 30
-    function-call  ir ao estado 31
+    SEMI   shift, and go to state 22
+    COMMA  shift, and go to state 23
 
 
-Estado 21
+State 19
+
+   43 var-list: var-part .
+
+    $default  reduce using rule 43 (var-list)
+
+
+State 20
+
+   45 var-part: ID ASSIGN . expr
+
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
+
+    expr           go to state 30
+    function-call  go to state 31
+
+
+State 21
 
     8 function-declaration: type-spec ID LPAR . param-list RPAR SEMI
     9 function-definition: type-spec ID LPAR . param-list RPAR compound-stmt
 
-    VOID    deslocar, e ir ao estado 4
-    CHAR    deslocar, e ir ao estado 5
-    SHORT   deslocar, e ir ao estado 6
-    INT     deslocar, e ir ao estado 7
-    FLOAT   deslocar, e ir ao estado 8
-    DOUBLE  deslocar, e ir ao estado 9
-    ID      deslocar, e ir ao estado 10
+    VOID    shift, and go to state 4
+    CHAR    shift, and go to state 5
+    SHORT   shift, and go to state 6
+    INT     shift, and go to state 7
+    FLOAT   shift, and go to state 8
+    DOUBLE  shift, and go to state 9
+    ID      shift, and go to state 10
 
-    $padrão  reduzir usando a regra 12 (param-list)
+    $default  reduce using rule 12 (param-list)
 
-    param-list  ir ao estado 32
-    param-spec  ir ao estado 33
-    type-spec   ir ao estado 34
-
-
-Estado 22
-
-   52 var-declaration-stmt: type-spec var-list SEMI .
-
-    $padrão  reduzir usando a regra 52 (var-declaration-stmt)
+    param-list  go to state 32
+    param-spec  go to state 33
+    type-spec   go to state 34
 
 
-Estado 23
+State 22
 
-   22 var-list: var-list COMMA . var-part
+   41 var-declaration-stmt: type-spec var-list SEMI .
 
-    ID  deslocar, e ir ao estado 35
-
-    var-part  ir ao estado 36
+    $default  reduce using rule 41 (var-declaration-stmt)
 
 
-Estado 24
+State 23
+
+   42 var-list: var-list COMMA . var-part
+
+    ID  shift, and go to state 35
+
+    var-part  go to state 36
+
+
+State 24
 
    74 expr: LPAR . expr RPAR
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 37
-    function-call  ir ao estado 31
+    expr           go to state 37
+    function-call  go to state 31
 
 
-Estado 25
+State 25
 
    71 expr: MINUS . expr
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 38
-    function-call  ir ao estado 31
+    expr           go to state 38
+    function-call  go to state 31
 
 
-Estado 26
+State 26
 
    76 expr: INT_VAL .
 
-    $padrão  reduzir usando a regra 76 (expr)
+    $default  reduce using rule 76 (expr)
 
 
-Estado 27
+State 27
 
    77 expr: REAL_VAL .
 
-    $padrão  reduzir usando a regra 77 (expr)
+    $default  reduce using rule 77 (expr)
 
 
-Estado 28
+State 28
 
    79 expr: ID .
 
-    $padrão  reduzir usando a regra 79 (expr)
+    $default  reduce using rule 79 (expr)
 
 
-Estado 29
+State 29
 
    78 expr: STR_VAL .
 
-    $padrão  reduzir usando a regra 78 (expr)
+    $default  reduce using rule 78 (expr)
 
 
-Estado 30
+State 30
 
-   25 var-part: ID ASSIGN expr .
+   45 var-part: ID ASSIGN expr .
    62 expr: expr . LT expr
    63     | expr . BT expr
    64     | expr . LET expr
@@ -569,74 +598,74 @@ Estado 30
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 25 (var-part)
+    $default  reduce using rule 45 (var-part)
 
 
-Estado 31
+State 31
 
    75 expr: function-call .
 
-    $padrão  reduzir usando a regra 75 (expr)
+    $default  reduce using rule 75 (expr)
 
 
-Estado 32
+State 32
 
     8 function-declaration: type-spec ID LPAR param-list . RPAR SEMI
     9 function-definition: type-spec ID LPAR param-list . RPAR compound-stmt
    10 param-list: param-list . COMMA param-spec
 
-    RPAR   deslocar, e ir ao estado 51
-    COMMA  deslocar, e ir ao estado 52
+    RPAR   shift, and go to state 51
+    COMMA  shift, and go to state 52
 
 
-Estado 33
+State 33
 
    11 param-list: param-spec .
 
-    $padrão  reduzir usando a regra 11 (param-list)
+    $default  reduce using rule 11 (param-list)
 
 
-Estado 34
+State 34
 
    13 param-spec: type-spec .
    14           | type-spec . ID
 
-    ID  deslocar, e ir ao estado 53
+    ID  shift, and go to state 53
 
-    $padrão  reduzir usando a regra 13 (param-spec)
-
-
-Estado 35
-
-   24 var-part: ID .
-   25         | ID . ASSIGN expr
-
-    ASSIGN  deslocar, e ir ao estado 20
-
-    $padrão  reduzir usando a regra 24 (var-part)
+    $default  reduce using rule 13 (param-spec)
 
 
-Estado 36
+State 35
 
-   22 var-list: var-list COMMA var-part .
+   44 var-part: ID .
+   45         | ID . ASSIGN expr
 
-    $padrão  reduzir usando a regra 22 (var-list)
+    ASSIGN  shift, and go to state 20
+
+    $default  reduce using rule 44 (var-part)
 
 
-Estado 37
+State 36
+
+   42 var-list: var-list COMMA var-part .
+
+    $default  reduce using rule 42 (var-list)
+
+
+State 37
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -652,22 +681,22 @@ Estado 37
    74     | LPAR expr . RPAR
    80 function-call: expr . LPAR arg-list RPAR
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    RPAR        deslocar, e ir ao estado 54
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    RPAR        shift, and go to state 54
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
 
-Estado 38
+State 38
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -683,220 +712,220 @@ Estado 38
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    LPAR  deslocar, e ir ao estado 44
+    LPAR  shift, and go to state 44
 
-    $padrão  reduzir usando a regra 71 (expr)
+    $default  reduce using rule 71 (expr)
 
 
-Estado 39
+State 39
 
    66 expr: expr EQ . expr
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 55
-    function-call  ir ao estado 31
+    expr           go to state 55
+    function-call  go to state 31
 
 
-Estado 40
+State 40
 
    62 expr: expr LT . expr
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 56
-    function-call  ir ao estado 31
+    expr           go to state 56
+    function-call  go to state 31
 
 
-Estado 41
+State 41
 
    63 expr: expr BT . expr
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 57
-    function-call  ir ao estado 31
+    expr           go to state 57
+    function-call  go to state 31
 
 
-Estado 42
+State 42
 
    64 expr: expr LET . expr
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 58
-    function-call  ir ao estado 31
+    expr           go to state 58
+    function-call  go to state 31
 
 
-Estado 43
+State 43
 
    65 expr: expr BET . expr
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 59
-    function-call  ir ao estado 31
+    expr           go to state 59
+    function-call  go to state 31
 
 
-Estado 44
+State 44
 
    80 function-call: expr LPAR . arg-list RPAR
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    $padrão  reduzir usando a regra 83 (arg-list)
+    $default  reduce using rule 83 (arg-list)
 
-    expr           ir ao estado 60
-    function-call  ir ao estado 31
-    arg-list       ir ao estado 61
+    expr           go to state 60
+    function-call  go to state 31
+    arg-list       go to state 61
 
 
-Estado 45
+State 45
 
    67 expr: expr PLUS . expr
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 62
-    function-call  ir ao estado 31
+    expr           go to state 62
+    function-call  go to state 31
 
 
-Estado 46
+State 46
 
    68 expr: expr MINUS . expr
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 63
-    function-call  ir ao estado 31
+    expr           go to state 63
+    function-call  go to state 31
 
 
-Estado 47
+State 47
 
    69 expr: expr STAR . expr
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 64
-    function-call  ir ao estado 31
+    expr           go to state 64
+    function-call  go to state 31
 
 
-Estado 48
+State 48
 
    70 expr: expr OVER . expr
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 65
-    function-call  ir ao estado 31
+    expr           go to state 65
+    function-call  go to state 31
 
 
-Estado 49
+State 49
 
    72 expr: expr PLUSPLUS .
 
-    $padrão  reduzir usando a regra 72 (expr)
+    $default  reduce using rule 72 (expr)
 
 
-Estado 50
+State 50
 
    73 expr: expr MINUSMINUS .
 
-    $padrão  reduzir usando a regra 73 (expr)
+    $default  reduce using rule 73 (expr)
 
 
-Estado 51
+State 51
 
     8 function-declaration: type-spec ID LPAR param-list RPAR . SEMI
     9 function-definition: type-spec ID LPAR param-list RPAR . compound-stmt
 
-    SEMI  deslocar, e ir ao estado 66
-    LCB   deslocar, e ir ao estado 67
+    SEMI  shift, and go to state 66
+    LCB   shift, and go to state 67
 
-    compound-stmt  ir ao estado 68
+    compound-stmt  go to state 68
 
 
-Estado 52
+State 52
 
    10 param-list: param-list COMMA . param-spec
 
-    VOID    deslocar, e ir ao estado 4
-    CHAR    deslocar, e ir ao estado 5
-    SHORT   deslocar, e ir ao estado 6
-    INT     deslocar, e ir ao estado 7
-    FLOAT   deslocar, e ir ao estado 8
-    DOUBLE  deslocar, e ir ao estado 9
-    ID      deslocar, e ir ao estado 10
+    VOID    shift, and go to state 4
+    CHAR    shift, and go to state 5
+    SHORT   shift, and go to state 6
+    INT     shift, and go to state 7
+    FLOAT   shift, and go to state 8
+    DOUBLE  shift, and go to state 9
+    ID      shift, and go to state 10
 
-    param-spec  ir ao estado 69
-    type-spec   ir ao estado 34
+    param-spec  go to state 69
+    type-spec   go to state 34
 
 
-Estado 53
+State 53
 
    14 param-spec: type-spec ID .
 
-    $padrão  reduzir usando a regra 14 (param-spec)
+    $default  reduce using rule 14 (param-spec)
 
 
-Estado 54
+State 54
 
    74 expr: LPAR expr RPAR .
 
-    $padrão  reduzir usando a regra 74 (expr)
+    $default  reduce using rule 74 (expr)
 
 
-Estado 55
+State 55
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -912,18 +941,18 @@ Estado 55
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    LPAR        deslocar, e ir ao estado 44
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    LPAR        shift, and go to state 44
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 66 (expr)
+    $default  reduce using rule 66 (expr)
 
 
-Estado 56
+State 56
 
    62 expr: expr . LT expr
    62     | expr LT expr .
@@ -939,18 +968,18 @@ Estado 56
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    LPAR        deslocar, e ir ao estado 44
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    LPAR        shift, and go to state 44
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 62 (expr)
+    $default  reduce using rule 62 (expr)
 
 
-Estado 57
+State 57
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -966,18 +995,18 @@ Estado 57
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    LPAR        deslocar, e ir ao estado 44
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    LPAR        shift, and go to state 44
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 63 (expr)
+    $default  reduce using rule 63 (expr)
 
 
-Estado 58
+State 58
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -993,18 +1022,18 @@ Estado 58
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    LPAR        deslocar, e ir ao estado 44
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    LPAR        shift, and go to state 44
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 64 (expr)
+    $default  reduce using rule 64 (expr)
 
 
-Estado 59
+State 59
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -1020,18 +1049,18 @@ Estado 59
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    LPAR        deslocar, e ir ao estado 44
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    LPAR        shift, and go to state 44
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 65 (expr)
+    $default  reduce using rule 65 (expr)
 
 
-Estado 60
+State 60
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -1047,32 +1076,32 @@ Estado 60
    80 function-call: expr . LPAR arg-list RPAR
    82 arg-list: expr .
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 82 (arg-list)
+    $default  reduce using rule 82 (arg-list)
 
 
-Estado 61
+State 61
 
    80 function-call: expr LPAR arg-list . RPAR
    81 arg-list: arg-list . COMMA expr
 
-    RPAR   deslocar, e ir ao estado 70
-    COMMA  deslocar, e ir ao estado 71
+    RPAR   shift, and go to state 70
+    COMMA  shift, and go to state 71
 
 
-Estado 62
+State 62
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -1088,16 +1117,16 @@ Estado 62
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    LPAR        deslocar, e ir ao estado 44
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    LPAR        shift, and go to state 44
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 67 (expr)
+    $default  reduce using rule 67 (expr)
 
 
-Estado 63
+State 63
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -1113,16 +1142,16 @@ Estado 63
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    LPAR        deslocar, e ir ao estado 44
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    LPAR        shift, and go to state 44
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 68 (expr)
+    $default  reduce using rule 68 (expr)
 
 
-Estado 64
+State 64
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -1138,14 +1167,14 @@ Estado 64
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    LPAR        deslocar, e ir ao estado 44
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    LPAR        shift, and go to state 44
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 69 (expr)
+    $default  reduce using rule 69 (expr)
 
 
-Estado 65
+State 65
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -1161,118 +1190,118 @@ Estado 65
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    LPAR        deslocar, e ir ao estado 44
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    LPAR        shift, and go to state 44
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 70 (expr)
+    $default  reduce using rule 70 (expr)
 
 
-Estado 66
+State 66
 
     8 function-declaration: type-spec ID LPAR param-list RPAR SEMI .
 
-    $padrão  reduzir usando a regra 8 (function-declaration)
+    $default  reduce using rule 8 (function-declaration)
 
 
-Estado 67
+State 67
 
-   49 compound-stmt: LCB . stmt-list RCB
+   38 compound-stmt: LCB . stmt-list RCB
 
-    $padrão  reduzir usando a regra 51 (stmt-list)
+    $default  reduce using rule 40 (stmt-list)
 
-    stmt-list  ir ao estado 72
+    stmt-list  go to state 72
 
 
-Estado 68
+State 68
 
     9 function-definition: type-spec ID LPAR param-list RPAR compound-stmt .
 
-    $padrão  reduzir usando a regra 9 (function-definition)
+    $default  reduce using rule 9 (function-definition)
 
 
-Estado 69
+State 69
 
    10 param-list: param-list COMMA param-spec .
 
-    $padrão  reduzir usando a regra 10 (param-list)
+    $default  reduce using rule 10 (param-list)
 
 
-Estado 70
+State 70
 
    80 function-call: expr LPAR arg-list RPAR .
 
-    $padrão  reduzir usando a regra 80 (function-call)
+    $default  reduce using rule 80 (function-call)
 
 
-Estado 71
+State 71
 
    81 arg-list: arg-list COMMA . expr
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 73
-    function-call  ir ao estado 31
-
-
-Estado 72
-
-   49 compound-stmt: LCB stmt-list . RCB
-   50 stmt-list: stmt-list . stmt
-
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    RCB       deslocar, e ir ao estado 85
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
-
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 93
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
+    expr           go to state 73
+    function-call  go to state 31
 
 
-Estado 73
+State 72
+
+   38 compound-stmt: LCB stmt-list . RCB
+   39 stmt-list: stmt-list . stmt
+
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    RCB       shift, and go to state 85
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
+
+    type-spec             go to state 87
+    stmt                  go to state 88
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
+
+
+State 73
 
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -1288,304 +1317,304 @@ Estado 73
    80 function-call: expr . LPAR arg-list RPAR
    81 arg-list: arg-list COMMA expr .
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 81 (arg-list)
-
-
-Estado 74
-
-   30 break-stmt: BREAK . SEMI
-
-    SEMI  deslocar, e ir ao estado 105
+    $default  reduce using rule 81 (arg-list)
 
 
-Estado 75
+State 74
 
-   31 case-stmt: CASE . expr COLON stmt
+   53 break-stmt: BREAK . SEMI
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
-
-    expr           ir ao estado 106
-    function-call  ir ao estado 31
+    SEMI  shift, and go to state 105
 
 
-Estado 76
+State 75
 
-   29 continue-stmt: CONTINUE . SEMI
+   54 case-stmt: CASE . expr COLON stmt
 
-    SEMI  deslocar, e ir ao estado 107
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-
-Estado 77
-
-   32 default-stmt: DEFAULT . COLON stmt
-
-    COLON  deslocar, e ir ao estado 108
-
-
-Estado 78
-
-   57 do-while-stmt: DO . stmt WHILE LPAR expr RPAR
-
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
-
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 109
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
+    expr           go to state 106
+    function-call  go to state 31
 
 
-Estado 79
+State 76
+
+   52 continue-stmt: CONTINUE . SEMI
+
+    SEMI  shift, and go to state 107
+
+
+State 77
+
+   55 default-stmt: DEFAULT . COLON stmt
+
+    COLON  shift, and go to state 108
+
+
+State 78
+
+   57 do-while-stmt: DO . stmt WHILE LPAR expr RPAR SEMI
+
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
+
+    type-spec             go to state 87
+    stmt                  go to state 109
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
+
+
+State 79
 
    58 for-stmt: FOR . LPAR stmt stmt expr RPAR stmt
    59         | FOR . LPAR stmt stmt RPAR stmt
 
-    LPAR  deslocar, e ir ao estado 110
+    LPAR  shift, and go to state 110
 
 
-Estado 80
+State 80
 
-   54 if-stmt: IF . LPAR expr RPAR stmt
-   55        | IF . LPAR expr RPAR stmt ELSE stmt
+   47 if-stmt: IF . LPAR expr RPAR stmt
+   48        | IF . LPAR expr RPAR stmt ELSE stmt
 
-    LPAR  deslocar, e ir ao estado 111
-
-
-Estado 81
-
-   26 return-stmt: RETURN . return-value SEMI
-
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
-
-    $padrão  reduzir usando a regra 28 (return-value)
-
-    return-value   ir ao estado 112
-    expr           ir ao estado 113
-    function-call  ir ao estado 31
+    LPAR  shift, and go to state 111
 
 
-Estado 82
+State 81
+
+   49 return-stmt: RETURN . return-value SEMI
+
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
+
+    $default  reduce using rule 51 (return-value)
+
+    return-value   go to state 112
+    expr           go to state 113
+    function-call  go to state 31
+
+
+State 82
 
    60 switch-stmt: SWITCH . LPAR expr RPAR stmt
 
-    LPAR  deslocar, e ir ao estado 114
+    LPAR  shift, and go to state 114
 
 
-Estado 83
+State 83
 
    56 while-stmt: WHILE . LPAR expr RPAR stmt
 
-    LPAR  deslocar, e ir ao estado 115
+    LPAR  shift, and go to state 115
 
 
-Estado 84
+State 84
 
-   48 empty-stmt: SEMI .
+   37 empty-stmt: SEMI .
 
-    $padrão  reduzir usando a regra 48 (empty-stmt)
-
-
-Estado 85
-
-   49 compound-stmt: LCB stmt-list RCB .
-
-    $padrão  reduzir usando a regra 49 (compound-stmt)
+    $default  reduce using rule 37 (empty-stmt)
 
 
-Estado 86
+State 85
+
+   38 compound-stmt: LCB stmt-list RCB .
+
+    $default  reduce using rule 38 (compound-stmt)
+
+
+State 86
 
    21 type-spec: ID .
    79 expr: ID .
 
-    ID        reduzir usando a regra 21 (type-spec)
-    $padrão  reduzir usando a regra 79 (expr)
+    ID        reduce using rule 21 (type-spec)
+    $default  reduce using rule 79 (expr)
 
 
-Estado 87
+State 87
 
-   52 var-declaration-stmt: type-spec . var-list SEMI
+   41 var-declaration-stmt: type-spec . var-list SEMI
 
-    ID  deslocar, e ir ao estado 35
+    ID  shift, and go to state 35
 
-    var-list  ir ao estado 18
-    var-part  ir ao estado 19
+    var-list  go to state 18
+    var-part  go to state 19
 
 
-Estado 88
+State 88
 
-   38 stmt: return-stmt .
+   39 stmt-list: stmt-list stmt .
 
-    $padrão  reduzir usando a regra 38 (stmt)
+    $default  reduce using rule 39 (stmt-list)
 
 
-Estado 89
+State 89
 
-   42 stmt: continue-stmt .
+   22 stmt: empty-stmt .
 
-    $padrão  reduzir usando a regra 42 (stmt)
+    $default  reduce using rule 22 (stmt)
 
 
-Estado 90
+State 90
 
-   39 stmt: break-stmt .
+   23 stmt: compound-stmt .
 
-    $padrão  reduzir usando a regra 39 (stmt)
+    $default  reduce using rule 23 (stmt)
 
 
-Estado 91
+State 91
 
-   40 stmt: case-stmt .
+   24 stmt: var-declaration-stmt .
 
-    $padrão  reduzir usando a regra 40 (stmt)
+    $default  reduce using rule 24 (stmt)
 
 
-Estado 92
+State 92
 
-   41 stmt: default-stmt .
+   25 stmt: assign-stmt .
 
-    $padrão  reduzir usando a regra 41 (stmt)
+    $default  reduce using rule 25 (stmt)
 
 
-Estado 93
+State 93
 
-   50 stmt-list: stmt-list stmt .
+   26 stmt: if-stmt .
 
-    $padrão  reduzir usando a regra 50 (stmt-list)
+    $default  reduce using rule 26 (stmt)
 
 
-Estado 94
+State 94
 
-   33 stmt: empty-stmt .
+   27 stmt: return-stmt .
 
-    $padrão  reduzir usando a regra 33 (stmt)
+    $default  reduce using rule 27 (stmt)
 
 
-Estado 95
+State 95
 
-   34 stmt: compound-stmt .
+   31 stmt: continue-stmt .
 
-    $padrão  reduzir usando a regra 34 (stmt)
+    $default  reduce using rule 31 (stmt)
 
 
-Estado 96
+State 96
 
-   35 stmt: var-declaration-stmt .
+   28 stmt: break-stmt .
 
-    $padrão  reduzir usando a regra 35 (stmt)
+    $default  reduce using rule 28 (stmt)
 
 
-Estado 97
+State 97
 
-   36 stmt: assign-stmt .
+   29 stmt: case-stmt .
 
-    $padrão  reduzir usando a regra 36 (stmt)
+    $default  reduce using rule 29 (stmt)
 
 
-Estado 98
+State 98
 
-   37 stmt: if-stmt .
+   30 stmt: default-stmt .
 
-    $padrão  reduzir usando a regra 37 (stmt)
+    $default  reduce using rule 30 (stmt)
 
 
-Estado 99
+State 99
 
-   44 stmt: while-stmt .
+   32 stmt: while-stmt .
 
-    $padrão  reduzir usando a regra 44 (stmt)
+    $default  reduce using rule 32 (stmt)
 
 
-Estado 100
+State 100
 
-   45 stmt: do-while-stmt .
+   33 stmt: do-while-stmt .
 
-    $padrão  reduzir usando a regra 45 (stmt)
+    $default  reduce using rule 33 (stmt)
 
 
-Estado 101
+State 101
 
-   46 stmt: for-stmt .
+   34 stmt: for-stmt .
 
-    $padrão  reduzir usando a regra 46 (stmt)
+    $default  reduce using rule 34 (stmt)
 
 
-Estado 102
+State 102
 
-   47 stmt: switch-stmt .
+   35 stmt: switch-stmt .
 
-    $padrão  reduzir usando a regra 47 (stmt)
+    $default  reduce using rule 35 (stmt)
 
 
-Estado 103
+State 103
 
-   43 stmt: expr-stmt .
+   36 stmt: expr-stmt .
 
-    $padrão  reduzir usando a regra 43 (stmt)
+    $default  reduce using rule 36 (stmt)
 
 
-Estado 104
+State 104
 
-   53 assign-stmt: expr . ASSIGN expr SEMI
+   46 assign-stmt: expr . ASSIGN expr SEMI
    61 expr-stmt: expr . SEMI
    62 expr: expr . LT expr
    63     | expr . BT expr
@@ -1600,32 +1629,32 @@ Estado 104
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    ASSIGN      deslocar, e ir ao estado 116
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    SEMI        deslocar, e ir ao estado 117
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    ASSIGN      shift, and go to state 116
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    SEMI        shift, and go to state 117
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
 
-Estado 105
+State 105
 
-   30 break-stmt: BREAK SEMI .
+   53 break-stmt: BREAK SEMI .
 
-    $padrão  reduzir usando a regra 30 (break-stmt)
+    $default  reduce using rule 53 (break-stmt)
 
 
-Estado 106
+State 106
 
-   31 case-stmt: CASE expr . COLON stmt
+   54 case-stmt: CASE expr . COLON stmt
    62 expr: expr . LT expr
    63     | expr . BT expr
    64     | expr . LET expr
@@ -1639,162 +1668,162 @@ Estado 106
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    COLON       deslocar, e ir ao estado 118
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    COLON       shift, and go to state 118
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
 
-Estado 107
+State 107
 
-   29 continue-stmt: CONTINUE SEMI .
+   52 continue-stmt: CONTINUE SEMI .
 
-    $padrão  reduzir usando a regra 29 (continue-stmt)
-
-
-Estado 108
-
-   32 default-stmt: DEFAULT COLON . stmt
-
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
-
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 119
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
+    $default  reduce using rule 52 (continue-stmt)
 
 
-Estado 109
+State 108
 
-   57 do-while-stmt: DO stmt . WHILE LPAR expr RPAR
+   55 default-stmt: DEFAULT COLON . stmt
 
-    WHILE  deslocar, e ir ao estado 120
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
+
+    type-spec             go to state 87
+    stmt                  go to state 119
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
 
 
-Estado 110
+State 109
+
+   57 do-while-stmt: DO stmt . WHILE LPAR expr RPAR SEMI
+
+    WHILE  shift, and go to state 120
+
+
+State 110
 
    58 for-stmt: FOR LPAR . stmt stmt expr RPAR stmt
    59         | FOR LPAR . stmt stmt RPAR stmt
 
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
 
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 121
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
-
-
-Estado 111
-
-   54 if-stmt: IF LPAR . expr RPAR stmt
-   55        | IF LPAR . expr RPAR stmt ELSE stmt
-
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
-
-    expr           ir ao estado 122
-    function-call  ir ao estado 31
+    type-spec             go to state 87
+    stmt                  go to state 121
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
 
 
-Estado 112
+State 111
 
-   26 return-stmt: RETURN return-value . SEMI
+   47 if-stmt: IF LPAR . expr RPAR stmt
+   48        | IF LPAR . expr RPAR stmt ELSE stmt
 
-    SEMI  deslocar, e ir ao estado 123
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
+
+    expr           go to state 122
+    function-call  go to state 31
 
 
-Estado 113
+State 112
 
-   27 return-value: expr .
+   49 return-stmt: RETURN return-value . SEMI
+
+    SEMI  shift, and go to state 123
+
+
+State 113
+
+   50 return-value: expr .
    62 expr: expr . LT expr
    63     | expr . BT expr
    64     | expr . LET expr
@@ -1808,193 +1837,193 @@ Estado 113
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
-    $padrão  reduzir usando a regra 27 (return-value)
+    $default  reduce using rule 50 (return-value)
 
 
-Estado 114
+State 114
 
    60 switch-stmt: SWITCH LPAR . expr RPAR stmt
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 124
-    function-call  ir ao estado 31
+    expr           go to state 124
+    function-call  go to state 31
 
 
-Estado 115
+State 115
 
    56 while-stmt: WHILE LPAR . expr RPAR stmt
 
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 125
-    function-call  ir ao estado 31
-
-
-Estado 116
-
-   53 assign-stmt: expr ASSIGN . expr SEMI
-
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
-
-    expr           ir ao estado 126
-    function-call  ir ao estado 31
+    expr           go to state 125
+    function-call  go to state 31
 
 
-Estado 117
+State 116
+
+   46 assign-stmt: expr ASSIGN . expr SEMI
+
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
+
+    expr           go to state 126
+    function-call  go to state 31
+
+
+State 117
 
    61 expr-stmt: expr SEMI .
 
-    $padrão  reduzir usando a regra 61 (expr-stmt)
+    $default  reduce using rule 61 (expr-stmt)
 
 
-Estado 118
+State 118
 
-   31 case-stmt: CASE expr COLON . stmt
+   54 case-stmt: CASE expr COLON . stmt
 
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
 
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 127
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
-
-
-Estado 119
-
-   32 default-stmt: DEFAULT COLON stmt .
-
-    $padrão  reduzir usando a regra 32 (default-stmt)
+    type-spec             go to state 87
+    stmt                  go to state 127
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
 
 
-Estado 120
+State 119
 
-   57 do-while-stmt: DO stmt WHILE . LPAR expr RPAR
+   55 default-stmt: DEFAULT COLON stmt .
 
-    LPAR  deslocar, e ir ao estado 128
+    $default  reduce using rule 55 (default-stmt)
 
 
-Estado 121
+State 120
+
+   57 do-while-stmt: DO stmt WHILE . LPAR expr RPAR SEMI
+
+    LPAR  shift, and go to state 128
+
+
+State 121
 
    58 for-stmt: FOR LPAR stmt . stmt expr RPAR stmt
    59         | FOR LPAR stmt . stmt RPAR stmt
 
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
 
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 129
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
+    type-spec             go to state 87
+    stmt                  go to state 129
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
 
 
-Estado 122
+State 122
 
-   54 if-stmt: IF LPAR expr . RPAR stmt
-   55        | IF LPAR expr . RPAR stmt ELSE stmt
+   47 if-stmt: IF LPAR expr . RPAR stmt
+   48        | IF LPAR expr . RPAR stmt ELSE stmt
    62 expr: expr . LT expr
    63     | expr . BT expr
    64     | expr . LET expr
@@ -2008,29 +2037,29 @@ Estado 122
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    RPAR        deslocar, e ir ao estado 130
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    RPAR        shift, and go to state 130
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
 
-Estado 123
+State 123
 
-   26 return-stmt: RETURN return-value SEMI .
+   49 return-stmt: RETURN return-value SEMI .
 
-    $padrão  reduzir usando a regra 26 (return-stmt)
+    $default  reduce using rule 49 (return-stmt)
 
 
-Estado 124
+State 124
 
    60 switch-stmt: SWITCH LPAR expr . RPAR stmt
    62 expr: expr . LT expr
@@ -2046,22 +2075,22 @@ Estado 124
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    RPAR        deslocar, e ir ao estado 131
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    RPAR        shift, and go to state 131
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
 
-Estado 125
+State 125
 
    56 while-stmt: WHILE LPAR expr . RPAR stmt
    62 expr: expr . LT expr
@@ -2077,24 +2106,24 @@ Estado 125
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    RPAR        deslocar, e ir ao estado 132
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    RPAR        shift, and go to state 132
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
 
-Estado 126
+State 126
 
-   53 assign-stmt: expr ASSIGN expr . SEMI
+   46 assign-stmt: expr ASSIGN expr . SEMI
    62 expr: expr . LT expr
    63     | expr . BT expr
    64     | expr . LET expr
@@ -2108,221 +2137,221 @@ Estado 126
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    SEMI        deslocar, e ir ao estado 133
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    SEMI        shift, and go to state 133
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
 
-Estado 127
+State 127
 
-   31 case-stmt: CASE expr COLON stmt .
+   54 case-stmt: CASE expr COLON stmt .
 
-    $padrão  reduzir usando a regra 31 (case-stmt)
-
-
-Estado 128
-
-   57 do-while-stmt: DO stmt WHILE LPAR . expr RPAR
-
-    LPAR      deslocar, e ir ao estado 24
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
-
-    expr           ir ao estado 134
-    function-call  ir ao estado 31
+    $default  reduce using rule 54 (case-stmt)
 
 
-Estado 129
+State 128
+
+   57 do-while-stmt: DO stmt WHILE LPAR . expr RPAR SEMI
+
+    LPAR      shift, and go to state 24
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
+
+    expr           go to state 134
+    function-call  go to state 31
+
+
+State 129
 
    58 for-stmt: FOR LPAR stmt stmt . expr RPAR stmt
    59         | FOR LPAR stmt stmt . RPAR stmt
 
-    LPAR      deslocar, e ir ao estado 24
-    RPAR      deslocar, e ir ao estado 135
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 28
-    STR_VAL   deslocar, e ir ao estado 29
+    LPAR      shift, and go to state 24
+    RPAR      shift, and go to state 135
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 28
+    STR_VAL   shift, and go to state 29
 
-    expr           ir ao estado 136
-    function-call  ir ao estado 31
-
-
-Estado 130
-
-   54 if-stmt: IF LPAR expr RPAR . stmt
-   55        | IF LPAR expr RPAR . stmt ELSE stmt
-
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
-
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 137
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
+    expr           go to state 136
+    function-call  go to state 31
 
 
-Estado 131
+State 130
+
+   47 if-stmt: IF LPAR expr RPAR . stmt
+   48        | IF LPAR expr RPAR . stmt ELSE stmt
+
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
+
+    type-spec             go to state 87
+    stmt                  go to state 137
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
+
+
+State 131
 
    60 switch-stmt: SWITCH LPAR expr RPAR . stmt
 
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
 
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 138
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
+    type-spec             go to state 87
+    stmt                  go to state 138
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
 
 
-Estado 132
+State 132
 
    56 while-stmt: WHILE LPAR expr RPAR . stmt
 
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
 
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 139
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
-
-
-Estado 133
-
-   53 assign-stmt: expr ASSIGN expr SEMI .
-
-    $padrão  reduzir usando a regra 53 (assign-stmt)
+    type-spec             go to state 87
+    stmt                  go to state 139
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
 
 
-Estado 134
+State 133
 
-   57 do-while-stmt: DO stmt WHILE LPAR expr . RPAR
+   46 assign-stmt: expr ASSIGN expr SEMI .
+
+    $default  reduce using rule 46 (assign-stmt)
+
+
+State 134
+
+   57 do-while-stmt: DO stmt WHILE LPAR expr . RPAR SEMI
    62 expr: expr . LT expr
    63     | expr . BT expr
    64     | expr . LET expr
@@ -2336,72 +2365,72 @@ Estado 134
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    RPAR        deslocar, e ir ao estado 140
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    RPAR        shift, and go to state 140
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
 
-Estado 135
+State 135
 
    59 for-stmt: FOR LPAR stmt stmt RPAR . stmt
 
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
 
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 141
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
+    type-spec             go to state 87
+    stmt                  go to state 141
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
 
 
-Estado 136
+State 136
 
    58 for-stmt: FOR LPAR stmt stmt expr . RPAR stmt
    62 expr: expr . LT expr
@@ -2417,168 +2446,175 @@ Estado 136
    73     | expr . MINUSMINUS
    80 function-call: expr . LPAR arg-list RPAR
 
-    EQ          deslocar, e ir ao estado 39
-    LT          deslocar, e ir ao estado 40
-    BT          deslocar, e ir ao estado 41
-    LET         deslocar, e ir ao estado 42
-    BET         deslocar, e ir ao estado 43
-    LPAR        deslocar, e ir ao estado 44
-    RPAR        deslocar, e ir ao estado 142
-    PLUS        deslocar, e ir ao estado 45
-    MINUS       deslocar, e ir ao estado 46
-    STAR        deslocar, e ir ao estado 47
-    OVER        deslocar, e ir ao estado 48
-    PLUSPLUS    deslocar, e ir ao estado 49
-    MINUSMINUS  deslocar, e ir ao estado 50
+    EQ          shift, and go to state 39
+    LT          shift, and go to state 40
+    BT          shift, and go to state 41
+    LET         shift, and go to state 42
+    BET         shift, and go to state 43
+    LPAR        shift, and go to state 44
+    RPAR        shift, and go to state 142
+    PLUS        shift, and go to state 45
+    MINUS       shift, and go to state 46
+    STAR        shift, and go to state 47
+    OVER        shift, and go to state 48
+    PLUSPLUS    shift, and go to state 49
+    MINUSMINUS  shift, and go to state 50
 
 
-Estado 137
+State 137
 
-   54 if-stmt: IF LPAR expr RPAR stmt .
-   55        | IF LPAR expr RPAR stmt . ELSE stmt
+   47 if-stmt: IF LPAR expr RPAR stmt .
+   48        | IF LPAR expr RPAR stmt . ELSE stmt
 
-    ELSE  deslocar, e ir ao estado 143
+    ELSE  shift, and go to state 143
 
-    $padrão  reduzir usando a regra 54 (if-stmt)
+    $default  reduce using rule 47 (if-stmt)
 
 
-Estado 138
+State 138
 
    60 switch-stmt: SWITCH LPAR expr RPAR stmt .
 
-    $padrão  reduzir usando a regra 60 (switch-stmt)
+    $default  reduce using rule 60 (switch-stmt)
 
 
-Estado 139
+State 139
 
    56 while-stmt: WHILE LPAR expr RPAR stmt .
 
-    $padrão  reduzir usando a regra 56 (while-stmt)
+    $default  reduce using rule 56 (while-stmt)
 
 
-Estado 140
+State 140
 
-   57 do-while-stmt: DO stmt WHILE LPAR expr RPAR .
+   57 do-while-stmt: DO stmt WHILE LPAR expr RPAR . SEMI
 
-    $padrão  reduzir usando a regra 57 (do-while-stmt)
+    SEMI  shift, and go to state 144
 
 
-Estado 141
+State 141
 
    59 for-stmt: FOR LPAR stmt stmt RPAR stmt .
 
-    $padrão  reduzir usando a regra 59 (for-stmt)
+    $default  reduce using rule 59 (for-stmt)
 
 
-Estado 142
+State 142
 
    58 for-stmt: FOR LPAR stmt stmt expr RPAR . stmt
 
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
 
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 144
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
-
-
-Estado 143
-
-   55 if-stmt: IF LPAR expr RPAR stmt ELSE . stmt
-
-    VOID      deslocar, e ir ao estado 4
-    CHAR      deslocar, e ir ao estado 5
-    SHORT     deslocar, e ir ao estado 6
-    INT       deslocar, e ir ao estado 7
-    FLOAT     deslocar, e ir ao estado 8
-    DOUBLE    deslocar, e ir ao estado 9
-    BREAK     deslocar, e ir ao estado 74
-    CASE      deslocar, e ir ao estado 75
-    CONTINUE  deslocar, e ir ao estado 76
-    DEFAULT   deslocar, e ir ao estado 77
-    DO        deslocar, e ir ao estado 78
-    FOR       deslocar, e ir ao estado 79
-    IF        deslocar, e ir ao estado 80
-    RETURN    deslocar, e ir ao estado 81
-    SWITCH    deslocar, e ir ao estado 82
-    WHILE     deslocar, e ir ao estado 83
-    LPAR      deslocar, e ir ao estado 24
-    SEMI      deslocar, e ir ao estado 84
-    LCB       deslocar, e ir ao estado 67
-    MINUS     deslocar, e ir ao estado 25
-    INT_VAL   deslocar, e ir ao estado 26
-    REAL_VAL  deslocar, e ir ao estado 27
-    ID        deslocar, e ir ao estado 86
-    STR_VAL   deslocar, e ir ao estado 29
-
-    type-spec             ir ao estado 87
-    return-stmt           ir ao estado 88
-    continue-stmt         ir ao estado 89
-    break-stmt            ir ao estado 90
-    case-stmt             ir ao estado 91
-    default-stmt          ir ao estado 92
-    stmt                  ir ao estado 145
-    empty-stmt            ir ao estado 94
-    compound-stmt         ir ao estado 95
-    var-declaration-stmt  ir ao estado 96
-    assign-stmt           ir ao estado 97
-    if-stmt               ir ao estado 98
-    while-stmt            ir ao estado 99
-    do-while-stmt         ir ao estado 100
-    for-stmt              ir ao estado 101
-    switch-stmt           ir ao estado 102
-    expr-stmt             ir ao estado 103
-    expr                  ir ao estado 104
-    function-call         ir ao estado 31
+    type-spec             go to state 87
+    stmt                  go to state 145
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
 
 
-Estado 144
+State 143
+
+   48 if-stmt: IF LPAR expr RPAR stmt ELSE . stmt
+
+    VOID      shift, and go to state 4
+    CHAR      shift, and go to state 5
+    SHORT     shift, and go to state 6
+    INT       shift, and go to state 7
+    FLOAT     shift, and go to state 8
+    DOUBLE    shift, and go to state 9
+    BREAK     shift, and go to state 74
+    CASE      shift, and go to state 75
+    CONTINUE  shift, and go to state 76
+    DEFAULT   shift, and go to state 77
+    DO        shift, and go to state 78
+    FOR       shift, and go to state 79
+    IF        shift, and go to state 80
+    RETURN    shift, and go to state 81
+    SWITCH    shift, and go to state 82
+    WHILE     shift, and go to state 83
+    LPAR      shift, and go to state 24
+    SEMI      shift, and go to state 84
+    LCB       shift, and go to state 67
+    MINUS     shift, and go to state 25
+    INT_VAL   shift, and go to state 26
+    REAL_VAL  shift, and go to state 27
+    ID        shift, and go to state 86
+    STR_VAL   shift, and go to state 29
+
+    type-spec             go to state 87
+    stmt                  go to state 146
+    empty-stmt            go to state 89
+    compound-stmt         go to state 90
+    var-declaration-stmt  go to state 91
+    assign-stmt           go to state 92
+    if-stmt               go to state 93
+    return-stmt           go to state 94
+    continue-stmt         go to state 95
+    break-stmt            go to state 96
+    case-stmt             go to state 97
+    default-stmt          go to state 98
+    while-stmt            go to state 99
+    do-while-stmt         go to state 100
+    for-stmt              go to state 101
+    switch-stmt           go to state 102
+    expr-stmt             go to state 103
+    expr                  go to state 104
+    function-call         go to state 31
+
+
+State 144
+
+   57 do-while-stmt: DO stmt WHILE LPAR expr RPAR SEMI .
+
+    $default  reduce using rule 57 (do-while-stmt)
+
+
+State 145
 
    58 for-stmt: FOR LPAR stmt stmt expr RPAR stmt .
 
-    $padrão  reduzir usando a regra 58 (for-stmt)
+    $default  reduce using rule 58 (for-stmt)
 
 
-Estado 145
+State 146
 
-   55 if-stmt: IF LPAR expr RPAR stmt ELSE stmt .
+   48 if-stmt: IF LPAR expr RPAR stmt ELSE stmt .
 
-    $padrão  reduzir usando a regra 55 (if-stmt)
+    $default  reduce using rule 48 (if-stmt)
