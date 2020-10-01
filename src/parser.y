@@ -36,7 +36,9 @@ void yyerror(char const *s);
 %precedence UMINUS
 %precedence RPAR
 %precedence ELSE
-%left LPAR // Associação da chamada de função
+%precedence POINTER
+%left LPAR  // Associação da chamada de função
+%left LB    // Associação do operador de índice
 
 // TODO Outras precedências e associatividade
 
@@ -73,17 +75,17 @@ param-list :
     ;
 param-spec :
       type-spec
-    | type-spec ID      { $$ = $1 + " " + "x"; }
+    | type-spec ID        { $$ = $1 + " " + "x"; }
     ;
 
 type-spec :
-      VOID              { $$ = std::string("void"); }
-    | CHAR              { $$ = std::string("char"); }
-    | SHORT             { $$ = std::string("short"); }
-    | INT               { $$ = std::string("int"); }
-    | FLOAT             { $$ = std::string("float"); }
-    | DOUBLE            { $$ = std::string("double"); }
-    | ID                { $$ = std::string("x"); }
+      VOID                { $$ = std::string("void"); }
+    | CHAR                { $$ = std::string("char"); }
+    | SHORT               { $$ = std::string("short"); }
+    | INT                 { $$ = std::string("int"); }
+    | FLOAT               { $$ = std::string("float"); }
+    | DOUBLE              { $$ = std::string("double"); }
+    | ID                  { $$ = std::string("x"); }
     ;
 
 
@@ -122,22 +124,23 @@ var-declaration-stmt :
     type-spec var-list SEMI         { $$ = $1 + " " + $2 + ";\n" ; }
     ;
 var-list :
-      var-list COMMA var-part       { $$ = $1 + ", " + $3; }
-    | var-part
+      var-list COMMA var-item       { $$ = $1 + ", " + $3; }
+    | var-item
     ;
-var-part :
+var-item :
       ID                            { $$ = std::string("x"); }
     | ID ASSIGN expr                { $$ = std::string("x") + " = " + $3; }
-    | array-stmt ///////////////////////////  ARRAY  //////////////////////////
-    ;
-array-stmt: 
-    array 
-    | array ASSIGN LCB arg-list RCB
-    ;
-array: 
-    ID LB expr RB 
-    | ID LB RB 
-    ;    
+//     | array-var-item ///////////////////////////  ARRAY  //////////////////////////
+//     ;
+// array-var-item: 
+//     array-var 
+//     | array-var ASSIGN array-expr
+//     ;
+// array-expr : LCB expr-list RCB
+// array-var: 
+//     ID LB expr RB 
+//     | ID LB RB 
+//     ;    
 
 assign-stmt :
       expr ASSIGN expr SEMI         { $$ = $1 + " = " + $3 + ";\n" ; }
@@ -192,35 +195,39 @@ expr-stmt :
     ;
 
 
-expr: expr LT expr          { $$ = std::string("(") + $1 + "<" + $3 + ")"; }
-    | expr BT expr          { $$ = std::string("(") + $1 + ">" + $3 + ")"; }
-    | expr LET expr         { $$ = std::string("(") + $1 + "<=" + $3 + ")"; }
-    | expr BET expr         { $$ = std::string("(") + $1 + ">=" + $3 + ")"; }
-    | expr EQ expr          { $$ = std::string("(") + $1 + "==" + $3 + ")"; }
-    | expr PLUS expr        { $$ = std::string("(") + $1 + "+" + $3 + ")"; }
-    | expr MINUS expr       { $$ = std::string("(") + $1 + "-" + $3 + ")"; }
-    | expr STAR expr        { $$ = std::string("(") + $1 + "*" + $3 + ")"; }
-    | expr OVER expr        { $$ = std::string("(") + $1 + "/" + $3 + ")"; }
+expr: expr LT expr              { $$ = std::string("(") + $1 + "<" + $3 + ")"; }
+    | expr BT expr              { $$ = std::string("(") + $1 + ">" + $3 + ")"; }
+    | expr LET expr             { $$ = std::string("(") + $1 + "<=" + $3 + ")"; }
+    | expr BET expr             { $$ = std::string("(") + $1 + ">=" + $3 + ")"; }
+    | expr EQ expr              { $$ = std::string("(") + $1 + "==" + $3 + ")"; }
+    | expr PLUS expr            { $$ = std::string("(") + $1 + "+" + $3 + ")"; }
+    | expr MINUS expr           { $$ = std::string("(") + $1 + "-" + $3 + ")"; }
+    | expr STAR expr            { $$ = std::string("(") + $1 + "*" + $3 + ")"; }
+    | expr OVER expr            { $$ = std::string("(") + $1 + "/" + $3 + ")"; }
     | MINUS expr %prec UMINUS   { $$ = std::string("(-") + $2 + ")"; }
-    | expr PLUSPLUS         { $$ = std::string("(") + $1 + "++" + ")"; }
-    | expr MINUSMINUS       { $$ = std::string("(") + $1 + "--" + ")"; }
-    | LPAR expr RPAR        { $$ = std::string("(") + $2 + ")"; }
-    | function-call         { $$ = std::string("(") + $1 + ")"; }
-    | INT_VAL               { $$ = std::string("0"); }
-    | REAL_VAL              { $$ = std::string("0.0"); }
-    | STR_VAL               { $$ = std::string("\"\""); }
-    | ID                    { $$ = std::string("x"); }
+    | expr PLUSPLUS             { $$ = std::string("(") + $1 + "++" + ")"; }
+    | expr MINUSMINUS           { $$ = std::string("(") + $1 + "--" + ")"; }
+    | LPAR expr RPAR            { $$ = std::string("(") + $2 + ")"; }
+    | function-call             { $$ = std::string("(") + $1 + ")"; }
+    | expr LB expr RB           { $$ = std::string("(") + $1 + "(" + $3 + ")"; }
+    | STAR expr  %prec POINTER  { $$ = std::string("(*") + $1 + ")"; }
+    | INT_VAL                   { $$ = std::string("0"); }
+    | REAL_VAL                  { $$ = std::string("0.0"); }
+    | STR_VAL                   { $$ = std::string("\"\""); }
+    | ID                        { $$ = std::string("x"); }
     ;
     // TODO acesso de índice, derreferenciação, acesso de membro (incluindo ->)
     // cast
 
 function-call :
-    expr LPAR arg-list RPAR     { $$ = $1 + "(" + $3 + ")"; }
+    expr LPAR expr-list RPAR     { $$ = $1 + "(" + $3 + ")"; }
     ;
-arg-list :
-      arg-list COMMA expr       { $$ = $1 + ", " + $3; }
+  
+expr-list :
+      expr-list COMMA expr      { $$ = $1 + ", " + $3; }
     | expr                      { $$ = $1; }
     | %empty                    { $$ = std::string(""); }
+    ;
 
 %%
 
