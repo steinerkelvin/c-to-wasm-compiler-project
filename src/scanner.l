@@ -48,6 +48,7 @@ float            {return FLOAT;}
 for              {return FOR;}
 goto             {return GOTO;}
 if               {return IF;}
+inline           {return INLINE;}
 int              {return INT;}
 long             {return LONG;}
 register         {return REGISTER;}
