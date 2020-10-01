@@ -3,6 +3,8 @@
 %define parse.error verbose // Give proper messages when a syntax error is found.
 %define parse.lac full      // Enable LAC to improve syntax error handling.
 
+%define parse.trace
+
 %define api.value.type {std::string}
 
 %code requires {
@@ -41,11 +43,13 @@ void yyerror(char const *s);
 %left LPAR  // Associação da chamada de função
 %left LB    // Associação do operador de índice
 
+// %precedence INIT-RULE
+
 // TODO Outras precedências e associatividade
 
 %%
 
-all : program                   { $$ = $1; std::cout << $$ << std::endl; }
+all : program                   // { $$ = $1; std::cout << $$ << std::endl; }
 
 program :
       program program-part      { $$ = $1 + $2; }
@@ -56,15 +60,16 @@ program-part :
     | declaration
     ;
 
-// declaration :
-//       function-declaration
-//     | var-declaration-stmt
-//     ;
-
 declaration :
 	  declaration-specifiers SEMI
 	| declaration-specifiers init-declarator-list SEMI
 	;
+
+// declaration :
+//       declaration-specifier declaration
+//     | declaration-specifier SEMI
+//     | declaration-specifier init-declarator-list SEMI  %prec INIT-RULE
+//     ;
 
 declaration-specifiers :
 	  declaration-specifiers declaration-specifier
@@ -96,8 +101,8 @@ type-specifier :
     | DOUBLE              		{ $$ = std::string("double"); }
 	| SIGNED            		{ $$ = std::string("signed"); }
 	| UNSIGNED 					{ $$ = std::string("unsigned"); }
-    | ID                  		{ $$ = std::string("x"); }
-	| typedef-name
+    // | ID                     { $$ = std::string("x"); }
+	// | typedef-name              // TODO Causa conflito
 	| struct-or-union-spec
 	| enum-specifier
     ;
@@ -201,8 +206,10 @@ direct-declarator :
 	| direct-declarator LB type-qualifier-list-opt STAR RB
 	// TODO static?
 	| direct-declarator LPAR parameter-type-list RPAR
-	// | direct-declarator LPAR identifier-list-opt RPAR  // TODO
+	| direct-declarator LPAR identifier-list-opt RPAR
 	;
+
+identifier-list-opt : %empty // TODO
 
 type-qualifier-list :
   	  type-qualifier-list type-qualifier
@@ -243,25 +250,19 @@ array-init-expr : LCB expr-list RCB	;
 //     ;
 
 function-definition :
-      type-specifier ID LPAR param-list RPAR compound-stmt   { $$ = $1 + " " + "x" + "(" + $4 + ")" + $6; }
+      declaration-specifiers declarator declaration-list-opt compound-stmt       // { $$ = $1 + " " + "x" + "(" + $4 + ")" + $6; }
     ;
 
-// ? Há maneira melhor de especificar lista de elementos separados por vírgula?
-param-list :
-      param-list COMMA param-spec   { $$ = $1 + ", " + $3; }
-    | param-spec
+declaration-list-opt :
+      declaration-list-opt declaration
     | %empty
-    ;
-param-spec :
-      type-specifier
-    | type-specifier ID        { $$ = $1 + " " + "x"; }
     ;
 
 
 stmt :
-      empty-stmt
+      declaration
+    | empty-stmt
     | compound-stmt
-    | var-declaration-stmt
     | assign-stmt
     | if-stmt
     | return-stmt
@@ -287,29 +288,6 @@ stmt-list :
       stmt-list stmt                { $$ = $1 + $2; }
     | %empty                        { $$ = std::string(""); }
     ;
-
-// TODO qualificadores, ponteiros, arrays
-var-declaration-stmt :
-    type-specifier var-list SEMI         { $$ = $1 + " " + $2 + ";\n" ; }
-    ;
-var-list :
-      var-list COMMA var-item       { $$ = $1 + ", " + $3; }
-    | var-item
-    ;
-var-item :
-      ID                            { $$ = std::string("x"); }
-    | ID ASSIGN expr                { $$ = std::string("x") + " = " + $3; }
-//     | array-var-item ///////////////////////////  ARRAY  //////////////////////////
-//     ;
-// array-var-item:
-//     array-var
-//     | array-var ASSIGN array-expr
-//     ;
-// array-expr : LCB expr-list RCB
-// array-var:
-//     ID LB expr RB
-//     | ID LB R
-//     ;
 
 assign-stmt :
       expr ASSIGN expr SEMI         { $$ = $1 + " = " + $3 + ";\n" ; }
@@ -401,6 +379,7 @@ expr-list :
 %%
 
 int main(void) {
+    // yydebug = 1;
     if (yyparse() == 0) fprintf(stderr, "PARSE SUCCESSFUL!\n");
     else                fprintf(stderr, "PARSE FAILED!\n");
     return 0;
