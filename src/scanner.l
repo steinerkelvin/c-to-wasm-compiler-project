@@ -87,6 +87,7 @@ while            {return WHILE;}
 "}"              {return RCB;}
 ";"              {return SEMI;}
 ":"				 {return COLON;}
+    /* TODO bitwise operators */
 
 {digit}          {return INT_VAL;}
 {real}           {return REAL_VAL;}
