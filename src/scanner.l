@@ -88,6 +88,7 @@ while            {return WHILE;}
 ";"              {return SEMI;}
 ":"				 {return COLON;}
     /* TODO bitwise operators */
+    /* TODO acesso a campos ( . e -> ) */
 
 {digit}          {return INT_VAL;}
 {real}           {return REAL_VAL;}
