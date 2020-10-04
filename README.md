@@ -1,23 +1,26 @@
 # compiladores-trabalho
 
-C to WebAssemply compiler
+Hopefully, a C to WebAssemply compiler.
 
-ATENÇÃO:
+## Guidelines
 
-1- Incluí as regras dos comentários em C e já está funcionando para todos os tipos de comentários existentes, inclusive com comentários que terminam em EOF (o comentário é a última coisa do arquivo);
-
-2- Já está compilando o parser, mas com uma série de avisos de "regras inúteis", devido a ausência de uma hierarquia de regras;
-
-3- Só fiz as regras que envolvem funções. Comentei algumas regras vindas da EZlang que podem ser úteis para servirem de referência posteriormente;
-
-4- Ainda não fiz nenhum teste além dos comentários. Façam-nos;
-
-5- Precisamos estabelecer uma hirarquia para as regras, o que demanda considerável raciocínio;
-
-6- Se tiverem alguma solução mais elegante para qualquer uma das regras, não hesitem em alterá-las;
-
-Me desculpem caso esteja fazendo alguma besteira, sou noob no GIT.
+- Os arquivos de teste com entradas bem formadas devem compilar com o GCC e
+  Clang, utilizados aqui como implementações de referência.
 
 ## Requisitos para compilação
 
-sudo apt install flex bison clang -y
+- Make
+- Flex
+- Bison
+- Clang 10
+
+### Como installar
+- Ubuntu: `sudo apt install make flex bison clang -y`
+- Arch Linux: `sudo pacman -S make flex bison clang`
+
+### Testado com as versões
+
+- Make: `4.3-3` (Arch)
+- Flex: `2.6.4-3` (Arch)
+- Bison: `3.6.4-1` (Arch)
+- Clang: `10.0.1-1` (Arch)
