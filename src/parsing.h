@@ -10,7 +10,7 @@ typedef union token_value {
 } token_value_t;
 
 typedef struct token {
-    yytoken_kind_t type;
+    enum yytokentype type;
     char *lexeme;
     token_value_t value;
 } token_t;
