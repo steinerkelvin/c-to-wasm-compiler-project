@@ -5,7 +5,7 @@
 
 %define parse.trace
 
-%define api.value.type {std::string}
+%define api.value.type {struct YYSTYPE}
 
 %code requires {
 #include <string>
@@ -15,6 +15,10 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
+#include <string.h>
+#include "parsing.h"
+#include "symtable.h"
+#include "util.h"
 
 int yylex(void);
 void yyerror(char const *s);
@@ -29,7 +33,8 @@ void yyerror(char const *s);
 %token BREAK CASE CONTINUE DEFAULT DO ELSE FOR GOTO IF RETURN SWITCH WHILE
 %token ASSIGN EQ LT BT LET BET LPAR RPAR SEMI LCB RCB COLON LB RB
 %token PLUS MINUS STAR OVER PLUSPLUS MINUSMINUS
-%token INT_VAL REAL_VAL ID STR_VAL
+%token INT_VAL REAL_VAL STR_VAL
+%token ID TYPENAME
 
 %left COMMA
 %left EQ LT BT LET BET
@@ -43,17 +48,15 @@ void yyerror(char const *s);
 %left LPAR  // Associação da chamada de função
 %left LB    // Associação do operador de índice
 
-// %precedence INIT-RULE
-
 // TODO Outras precedências e associatividade
 
 %%
 
-all : program                   // { $$ = $1; std::cout << $$ << std::endl; }
+all : program
 
 program :
-      program program-part      { $$ = $1 + $2; }
-    | %empty                    { $$ = std::string(""); }
+      program program-part
+    | %empty
     ;
 program-part :
       function-definition
@@ -62,18 +65,22 @@ program-part :
 
 declaration :
 	  declaration-specifiers SEMI
-	| declaration-specifiers init-declarator-list SEMI
+	| declaration-specifiers init-declarator-list {
+		  	for (auto it : *$1.value.slist) {
+				if (it.tag != TOKEN) { continue; }
+				if (strcmp(it.value.token.lexeme, "typedef") == 0) {
+					for (auto it : *$2.value.slist) {
+						if (it.tag != TOKEN) { continue; }
+						insert_typename(it.value.token.lexeme);
+					}
+				}
+			}
+		} SEMI
 	;
 
-// declaration :
-//       declaration-specifier declaration
-//     | declaration-specifier SEMI
-//     | declaration-specifier init-declarator-list SEMI  %prec INIT-RULE
-//     ;
-
 declaration-specifiers :
-	  declaration-specifiers declaration-specifier
-	| declaration-specifier
+	  declaration-specifiers declaration-specifier 	{ $$ = $1; (*$$.value.slist).push_back($2); }
+	| declaration-specifier							{ $$ = (stype_t){ .tag = SLIST }; $$.value.slist = new std::list<stype_t>{ $1 }; }
 	;
 declaration-specifier :
 	  storage-class-specifier
@@ -92,22 +99,21 @@ storage-class-specifier :
 	;
 
 type-specifier :
-      VOID                		{ $$ = std::string("void"); }
-    | CHAR                		{ $$ = std::string("char"); }
-    | SHORT               		{ $$ = std::string("short"); }
-    | INT                 		{ $$ = std::string("int"); }
-	| LONG	               		{ $$ = std::string("long"); }
-    | FLOAT               		{ $$ = std::string("float"); }
-    | DOUBLE              		{ $$ = std::string("double"); }
-	| SIGNED            		{ $$ = std::string("signed"); }
-	| UNSIGNED 					{ $$ = std::string("unsigned"); }
-    // | ID                     { $$ = std::string("x"); }
-	// | typedef-name              // TODO Causa conflito
+      VOID
+    | CHAR
+    | SHORT
+    | INT
+	| LONG
+    | FLOAT
+    | DOUBLE
+	| SIGNED
+	| UNSIGNED
 	| struct-or-union-spec
 	| enum-specifier
+	| typedef-name
     ;
 
-typedef-name : ID ;
+typedef-name : TYPENAME ;
 
 struct-or-union-spec :
 	  struct-or-union ID
@@ -180,8 +186,8 @@ function-specifier :
 // 	;
 
 init-declarator-list :
-	  init-declarator-list COMMA init-declarator
-	| init-declarator
+	  init-declarator-list COMMA init-declarator	{ $$ = $1; (*$$.value.slist).push_back($3); }
+	| init-declarator								{ $$ = (stype_t){ .tag = SLIST }; $$.value.slist = new std::list<stype_t>{ $1 }; }
 	;
 init-declarator :
 	  declarator ASSIGN initializer
@@ -189,7 +195,7 @@ init-declarator :
 	;
 
 declarator :
-	  pointer direct-declarator
+	  pointer direct-declarator		{ $$ = $2; }
 	| direct-declarator
 	;
 
@@ -200,7 +206,7 @@ pointer :
 
 direct-declarator :
 	  ID
-	| LPAR declarator RPAR
+	| LPAR declarator RPAR	{ $$ = $2; }
 	| direct-declarator LB type-qualifier-list-opt expr RB
 	| direct-declarator LB type-qualifier-list-opt      RB
 	| direct-declarator LB type-qualifier-list-opt STAR RB
@@ -246,11 +252,11 @@ initializer :
 array-init-expr : LCB expr-list RCB	;
 
 // function-declaration :
-//       type-specifier ID LPAR param-list RPAR SEMI            { $$ = $1 + " " + "x" + "(" + $4 + ")" + ";\n"; }
+//       type-specifier ID LPAR param-list RPAR SEMI
 //     ;
 
 function-definition :
-      declaration-specifiers declarator declaration-list-opt compound-stmt       // { $$ = $1 + " " + "x" + "(" + $4 + ")" + $6; }
+      declaration-specifiers declarator declaration-list-opt compound-stmt
     ;
 
 declaration-list-opt :
@@ -278,109 +284,101 @@ stmt :
     ;
 
 empty-stmt :
-      SEMI                          { $$ = std::string(";\n"); }
+      SEMI
     ;
 
 compound-stmt :
-      LCB stmt-list RCB             { $$ = std::string("{\n") + $2 + "}\n"; }
+      LCB {open_scope();} stmt-list {close_scope();} RCB
     ;
 stmt-list :
-      stmt-list stmt                { $$ = $1 + $2; }
-    | %empty                        { $$ = std::string(""); }
+      stmt-list stmt
+    | %empty
     ;
 
 assign-stmt :
-      expr ASSIGN expr SEMI         { $$ = $1 + " = " + $3 + ";\n" ; }
+      expr ASSIGN expr SEMI
     ;
 
 if-stmt :
-      IF LPAR expr RPAR stmt                { std::string("if (") + $3 + ")" + $4; }
-    | IF LPAR expr RPAR stmt ELSE stmt      { std::string("if (") + $3 + ")" + $4 + "else" + $6; }
+      IF LPAR expr RPAR stmt
+    | IF LPAR expr RPAR stmt ELSE stmt
     ;
 
 return-stmt :
-    RETURN return-value SEMI        { $$ = std::string("return ") + $2 + ";\n" ;  }
+    RETURN return-value SEMI
     ;
 return-value :
-      expr                          { $$ = $1; }
-    | %empty                        { $$ = std::string(""); }
+      expr
+    | %empty
     ;
 
 continue-stmt :
-      CONTINUE SEMI                 { $$ = std::string("continue") + ";\n" ; }
+      CONTINUE SEMI
     ;
 break-stmt :
-      BREAK SEMI                    { $$ = std::string("break") + ";\n" ; }
+      BREAK SEMI
     ;
 case-stmt :
-      CASE expr COLON stmt          { $$ = std::string("case ") + $2 + ":\n" + $4 ; }
+      CASE expr COLON stmt
     ;
 default-stmt :
-      DEFAULT COLON stmt            { $$ = std::string("default ") + ":\n" + $3 ; }
+      DEFAULT COLON stmt
     ;
 
 while-stmt :
-      WHILE LPAR expr RPAR stmt     { $$ = std::string("while (") + $3 + ") " + $5; }
+      WHILE LPAR expr RPAR stmt
     ;
 
 do-while-stmt :
-    DO stmt WHILE LPAR expr RPAR SEMI   { $$ = std::string("do ") + $2 + "while (" + $5 + ")" + ";\n" ; }
+    DO stmt WHILE LPAR expr RPAR SEMI
     ;
 
 // TODO corrigir esses stmt
 for-stmt:
-      FOR LPAR stmt stmt expr RPAR stmt     { $$ = std::string("for (;;) ") + $7; }
-    | FOR LPAR stmt stmt RPAR stmt          { $$ = std::string("for (;;) ") + $6; }
+      FOR LPAR stmt stmt expr RPAR stmt
+    | FOR LPAR stmt stmt RPAR stmt
     ;
 
 switch-stmt :
-      SWITCH LPAR expr RPAR stmt            { $$ = std::string("switch (") + $3 + ") " + $5; }
+      SWITCH LPAR expr RPAR stmt
     ;
 
 expr-stmt :
-      expr SEMI                             { $$ = $1 + ";\n" ; }
-    ;
+	expr SEMI
+	;
 
-
-expr: expr LT expr              { $$ = std::string("(") + $1 + "<" + $3 + ")"; }
-    | expr BT expr              { $$ = std::string("(") + $1 + ">" + $3 + ")"; }
-    | expr LET expr             { $$ = std::string("(") + $1 + "<=" + $3 + ")"; }
-    | expr BET expr             { $$ = std::string("(") + $1 + ">=" + $3 + ")"; }
-    | expr EQ expr              { $$ = std::string("(") + $1 + "==" + $3 + ")"; }
-    | expr PLUS expr            { $$ = std::string("(") + $1 + "+" + $3 + ")"; }
-    | expr MINUS expr           { $$ = std::string("(") + $1 + "-" + $3 + ")"; }
-    | expr STAR expr            { $$ = std::string("(") + $1 + "*" + $3 + ")"; }
-    | expr OVER expr            { $$ = std::string("(") + $1 + "/" + $3 + ")"; }
-    | MINUS expr %prec UMINUS   { $$ = std::string("(-") + $2 + ")"; }
-    | expr PLUSPLUS             { $$ = std::string("(") + $1 + "++" + ")"; }
-    | expr MINUSMINUS           { $$ = std::string("(") + $1 + "--" + ")"; }
-    | LPAR expr RPAR            { $$ = std::string("(") + $2 + ")"; }
-    | function-call             { $$ = std::string("(") + $1 + ")"; }
-    | expr LB expr RB           { $$ = std::string("(") + $1 + "(" + $3 + ")"; }
-    | STAR expr  %prec POINTER  { $$ = std::string("(*") + $1 + ")"; }
-    | INT_VAL                   { $$ = std::string("0"); }
-    | REAL_VAL                  { $$ = std::string("0.0"); }
-    | STR_VAL                   { $$ = std::string("\"\""); }
-    | ID                        { $$ = std::string("x"); }
+expr: expr LT expr
+    | expr BT expr
+    | expr LET expr
+    | expr BET expr
+    | expr EQ expr
+    | expr PLUS expr
+    | expr MINUS expr
+    | expr STAR expr
+    | expr OVER expr
+    | MINUS expr %prec UMINUS
+    | expr PLUSPLUS
+    | expr MINUSMINUS
+    | LPAR expr RPAR
+    | function-call
+    | expr LB expr RB
+    | STAR expr  %prec POINTER
+    | INT_VAL
+    | REAL_VAL
+    | STR_VAL
+    | ID
     ;
     // TODO acesso de índice, derreferenciação, acesso de membro (incluindo ->)
     // cast
 
 function-call :
-    expr LPAR expr-list RPAR     { $$ = $1 + "(" + $3 + ")"; }
+    expr LPAR expr-list RPAR
     ;
 
 expr-list :
-      expr-list COMMA expr      { $$ = $1 + ", " + $3; }
-    | expr                      { $$ = $1; }
-    | %empty                    { $$ = std::string(""); }
+      expr-list COMMA expr
+    | expr
+    | %empty
     ;
 
 %%
-
-int main(void) {
-    // yydebug = 1;
-    if (yyparse() == 0) fprintf(stderr, "PARSE SUCCESSFUL!\n");
-    else                fprintf(stderr, "PARSE FAILED!\n");
-    return 0;
-}

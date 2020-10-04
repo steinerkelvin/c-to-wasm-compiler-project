@@ -2,4 +2,4 @@
 set -e
 
 make 
-< test.c ./exe | tee "./output.c"
+< test.c ./exe   # | tee "./output.c"

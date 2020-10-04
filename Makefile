@@ -17,7 +17,7 @@ src/parser.cpp src/parser.h: src/parser.y
 src/scanner.cpp: src/scanner.l src/parser.h
 	(cd src/; flex scanner.l)
 
-exe: src/scanner.cpp src/parser.cpp
+exe: src/scanner.cpp src/parser.cpp src/symtable.cpp src/main.cpp
 	$(cc) $(flags) -o ${exe} $^ ${flags}
 
 
