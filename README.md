@@ -18,3 +18,6 @@ ATENÇÃO:
 
 Me desculpem caso esteja fazendo alguma besteira, sou noob no GIT.
 
+## Requisitos para compilação
+
+sudo apt install flex bison clang -y
