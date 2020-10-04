@@ -5,12 +5,15 @@
 
 #include "parser.h"
 
+typedef enum yytokentype yytoken_kind_t;
+
+
 typedef union token_value {
 
 } token_value_t;
 
 typedef struct token {
-    enum yytokentype type;
+    yytoken_kind_t type;
     char *lexeme;
     token_value_t value;
 } token_t;
