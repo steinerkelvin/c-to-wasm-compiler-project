@@ -14,6 +14,14 @@ versão anterior do Bison, adicionamos essa declaração, em `parsing.h` e
 explicitamos no arquivo README quais versões das ferramentas foram utilizadas
 para desenvolvimento e testes.
 
+## Testes
+
+Decidimos compilar um executável separado que apenas imprime os tokens
+identificados pelo scanner para possibilitar a inspeção desse componente. Isso é
+feito passando um parâmetro para o compilador para definir um nome de macro (`-D
+DUMP_TOKENS`) que faz com que sejam condicionalmente definidas macros
+alternativas para o tratamento dos tokens, i.e. que imprimem os tokens.
+
 ## Suporte CRLF
 
 Os caracteres de controle que representam uma quebra de linha em arquivos de
