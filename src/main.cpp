@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "parser.h"
+#include "generated_parser.h"
 #include "symtable.h"
 
 int main(void) {

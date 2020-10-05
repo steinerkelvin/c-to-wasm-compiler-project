@@ -11,16 +11,16 @@ bison: src/parser.cpp src/parser.h
 flex: src/scanner.cpp
 
 
-src/parser.cpp src/parser.h: src/parser.y
+src/generated_parser.cpp src/generated_parser.h: src/parser.y
 	(cd src/; bison -v parser.y)
 
-src/scanner.cpp: src/scanner.l src/parser.h
+src/scanner.cpp: src/scanner.l src/generated_parser.h
 	(cd src/; flex scanner.l)
 
-exe: src/scanner.cpp src/parser.cpp src/symtable.cpp src/main.cpp
+exe: src/scanner.cpp src/generated_parser.cpp src/symtable.cpp src/main.cpp
 	$(cc) $(flags) -o ${exe} $^ ${flags}
 
 
 clean:
 	rm -f ./exe
-	(cd src/; rm -f *.output parser.h parser.cpp scanner.cpp)
+	(cd src/; rm -f *.output generated_parser.h generated_parser.cpp scanner.cpp)

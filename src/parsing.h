@@ -3,7 +3,7 @@
 
 #include <list>
 
-#include "parser.h"
+#include "generated_parser.h"
 
 typedef enum yytokentype yytoken_kind_t;
 

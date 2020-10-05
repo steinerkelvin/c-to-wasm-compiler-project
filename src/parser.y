@@ -1,5 +1,5 @@
-%output "parser.cpp"        // File name of generated parser.
-%defines "parser.h"         // Produces a 'parser.h'
+%output "generated_parser.cpp"        // File name of generated parser.
+%defines "generated_parser.h"         // Produces a 'parser.h'
 %define parse.error verbose // Give proper messages when a syntax error is found.
 %define parse.lac full      // Enable LAC to improve syntax error handling.
 

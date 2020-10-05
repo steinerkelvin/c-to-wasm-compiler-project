@@ -6,7 +6,6 @@
 
 %{
 #include <stdio.h>
-#include "parser.h"
 #include "parsing.h"
 #include "symtable.h"
 
