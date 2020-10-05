@@ -8,21 +8,21 @@
 // Tipo definido pelo Bison que é retornado pelo scanner
 typedef enum yytokentype yytoken_kind_t;
 
-typedef union token_value {
-} token_value_t;
-
+// Estrutura para armazenar informações de um token, incluindo o lexema
 typedef struct token {
     yytoken_kind_t type;
     char *lexeme;
-    token_value_t value;
+    // token_value_t value;
 } token_t;
 
+// Enumeração de tipos possíveis de um valor semântico do parser
 typedef enum svalue_type {
     EMPTY = 0,
     TOKEN,
     SLIST,
 } svalue_type_t;
 
+// União discriminada que consiste em um valor semântico do parser
 typedef struct YYSTYPE stype_t;
 struct YYSTYPE {
     svalue_type_t tag;
@@ -32,7 +32,10 @@ struct YYSTYPE {
     } value;
 };
 
+// Macros para o scanner para tratar um token
 #if defined(DUMP_TOKENS)
+// Estas apenas imprimem o tipo do token seguido do lexema.  
+// Usada para testes/debug.
 #define HANDLE_TOKEN(TOK, PROC)                                                \
     { printf("%s : %s\n", #TOK, yytext); }
 #define HANDLE_TOKEN_ID(PROC) HANDLE_TOKEN(ID, PROC);
@@ -45,7 +48,6 @@ struct YYSTYPE {
         yylval.value.token = {                                                 \
             .type = (TOK),                                                     \
             .lexeme = strdup((yytext)),                                        \
-            .value = {},                                                       \
         };                                                                     \
         PROC;                                                                  \
         return TOK;                                                            \

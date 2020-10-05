@@ -1,6 +1,3 @@
-parser.h
-parser.cpp
-parser.output
 generated_parser.h
 generated_parser.cpp
 generated_parser.output
