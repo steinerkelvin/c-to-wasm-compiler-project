@@ -24,7 +24,7 @@ src/scanner.cpp: src/scanner.l src/generated_parser.h
 bin/compiler: src/scanner.cpp src/generated_parser.cpp src/symtable.cpp src/main.cpp | bin/
 	$(cc) $(flags) -o "$@" $^ ${flags}
 
-bin/dump-tokens: src/dump_tokens.cpp | bin/
+bin/dump-tokens: src/scanner.cpp src/dump_tokens.cpp | bin/
 	$(cc) $(flags) -o "$@" $^ ${flags} -D DUMP_TOKENS
 
 clean:
