@@ -23,14 +23,14 @@ real         (0|([1-9]+[0-9]*))"."[0-9]+
 %%
 
     /* Ignora espacos em branco */
-[ \t\n]                 { }
+[ \t\n\r]                 { }
 
     /* Ignora comentarios */
 "/*"[^*/]*"*/"          { } 
-"//".*(\\\n.*)*\n       { }
+"//".*(\\(\r\n|\n).*)*\n       { }
 
     /* Ignora diretivas para o preprocessador */
-^[ \t\n]*"#".*\n        { }
+^[ \t\n\r]*"#".*\n        { }
 
 auto                    { HANDLE_TOKEN(AUTO, {}); }
 break                   { HANDLE_TOKEN(BREAK, {}); }
