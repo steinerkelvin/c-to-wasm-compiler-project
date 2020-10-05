@@ -94,9 +94,8 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 {real}                  { HANDLE_TOKEN(REAL_VAL, {}); }
     /* TODO corrigir e adicionar outras representações */
 
-\"([^\r\n\"]|"\\\"")*\"          { HANDLE_TOKEN(STR_VAL, {}); }
-    /* TODO literal de caracter */
-    /* TODO escape de aspas */
+\'([^\r\n\']|"\\\'")*\'         { HANDLE_TOKEN(CHAR_VAL, {}); }
+\"([^\r\n\"]|"\\\"")*\"         { HANDLE_TOKEN(STR_VAL, {}); }
 
 [a-zA-Z_][0-9a-zA-Z_]*  { HANDLE_TOKEN_ID({}); }
 

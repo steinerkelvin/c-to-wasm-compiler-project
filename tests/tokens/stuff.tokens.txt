@@ -70,6 +70,23 @@ ID : p
 ASSIGN : =
 STR_VAL : "Este programa não imprime \"Hello World\""
 SEMI : ;
+CHAR : char
+ID : k
+ASSIGN : =
+CHAR_VAL : 'A'
+SEMI : ;
+ID : k
+ASSIGN : =
+CHAR_VAL : '\0'
+SEMI : ;
+ID : k
+ASSIGN : =
+CHAR_VAL : '\n'
+SEMI : ;
+ID : k
+ASSIGN : =
+CHAR_VAL : '\''
+SEMI : ;
 INT : int
 ID : a
 ASSIGN : =

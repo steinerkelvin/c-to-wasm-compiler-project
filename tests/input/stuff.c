@@ -20,8 +20,12 @@ obscuro
 int main() {
     char *p = "Este programa não imprime \"Hello World\"";
 
+    char k = 'A';
+    k = '\0';
+    k = '\n';
+    k = '\'';
+
     int a = 2, b;
-    // char d = 'd';  // TODO PROBLEMA COM '
     const int _01;
 
     a == b;
