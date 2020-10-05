@@ -10,7 +10,7 @@
 #include "symtable.h"
 
 void yyerror (char const* s) {
-    printf("SYNTAX ERROR (%d): %s\n", yylineno, s);
+    fprintf(stderr, "SYNTAX ERROR (%d): %s\n", yylineno, s);
     exit(EXIT_FAILURE);
 }
 %}
