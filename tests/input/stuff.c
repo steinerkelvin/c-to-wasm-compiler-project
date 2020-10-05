@@ -17,17 +17,15 @@ um \
 comentario		 \
 obscuro
 
-// // TODO está falhando
-// struct ponto {
-//     double x;
-//     double y;
-// };
-// typedef struct ponto ponto_t;
+typedef struct ponto {
+    double x;
+    double y;
+} ponto_t;
 
 int main() {
     char *p = "Este programa não imprime \"Hello World\"";
 
-    // ponto_t ponto = { .x = 10.0, .y = 0.0 };
+    ponto_t ponto = { .x = 10.0, .y = 0.0 };
 
     char k = 'A';
     k = '\0';

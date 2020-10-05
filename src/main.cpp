@@ -5,6 +5,7 @@
 
 int main(void) {
     // yydebug = 1;
+
     if (yyparse() == 0) {
         fprintf(stderr, "PARSE SUCCESSFUL!\n");
         return 0;

@@ -129,8 +129,8 @@ struct-declaration-list :
 	;
 
 struct-declaration :
-	specifier-qualifier-list struct-declarator-list SEMI
-	specifier-qualifier-list SEMI
+	  specifier-qualifier-list struct-declarator-list SEMI
+	| specifier-qualifier-list SEMI
 	// | static_assert-declaration
 	;
 
