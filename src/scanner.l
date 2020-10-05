@@ -72,8 +72,6 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 "/"                     { HANDLE_TOKEN(OVER, {}); }
 "++"                    { HANDLE_TOKEN(PLUSPLUS, {}); }
 "--"                    { HANDLE_TOKEN(MINUSMINUS, {}); }
-,                       { HANDLE_TOKEN(COMMA, {}); }
-"="                     { HANDLE_TOKEN(ASSIGN, {}); }
 "=="                    { HANDLE_TOKEN(EQ, {}); }
 "<"                     { HANDLE_TOKEN(LT, {}); }
 ">"                     { HANDLE_TOKEN(BT, {}); }
@@ -87,6 +85,10 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 "}"                     { HANDLE_TOKEN(RCB, {}); }
 ";"                     { HANDLE_TOKEN(SEMI, {}); }
 ":"                     { HANDLE_TOKEN(COLON, {}); }
+","                     { HANDLE_TOKEN(COMMA, {}); }
+"."                     { HANDLE_TOKEN(DOT, {}); }
+"="                     { HANDLE_TOKEN(ASSIGN, {}); }
+    /* TODO  *= /= %= += -= <<= >>= &= ^= |=  */
     /* TODO bitwise operators */
     /* TODO acesso a campos ( . e -> ) */
 

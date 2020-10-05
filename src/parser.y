@@ -33,10 +33,12 @@ void yyerror(char const *s);
 %token BREAK CASE CONTINUE DEFAULT DO ELSE FOR GOTO IF RETURN SWITCH WHILE
 %token ASSIGN EQ LT BT LET BET LPAR RPAR SEMI LCB RCB COLON LB RB
 %token PLUS MINUS STAR OVER PLUSPLUS MINUSMINUS
+%token DOT
 %token INT_VAL REAL_VAL CHAR_VAL STR_VAL 
 %token ID TYPENAME
 
 %left COMMA
+%right ASSIGN
 %left EQ LT BT LET BET
 %left PLUS MINUS
 %left STAR OVER
@@ -153,11 +155,11 @@ struct-or-union : STRUCT | UNION ;
 
 enum-specifier :
 	  ENUM ID
-	| ENUM ID LCB enumerator-list traling-comma RCB
-	| ENUM    LCB enumerator-list traling-comma RCB
+	| ENUM ID LCB enumerator-list trailing-comma RCB
+	| ENUM    LCB enumerator-list trailing-comma RCB
 	;
 
-traling-comma : COMMA | %empty ;
+trailing-comma : COMMA | %empty ;
 
 enumerator-list :
 	  enumerator-list COMMA enumerator
@@ -244,16 +246,26 @@ abstract-declarator-opt : %empty;  // TODO
 
 
 initializer : 
-	  expr
-	// | initializer-list trailing-comma  // TODO
-	| array-init-expr
+	  expr					/* assignment-expression*/
+	| LCB initializer-list trailing-comma RCB  // TODO
 	;
 
-array-init-expr : LCB expr-list RCB	;
+initializer-list :
+	  designation-opt initializer
+	| initializer-list COMMA designation-opt initializer
 
-// function-declaration :
-//       type-specifier ID LPAR param-list RPAR SEMI
-//     ;
+designation-opt :
+	  designator-list ASSIGN
+	| %empty
+
+designator-list :
+	  designator
+	| designator-list designator
+
+designator :
+	  LB expr RB			/* constant-expression */
+	| DOT ID
+
 
 function-definition :
       declaration-specifiers declarator declaration-list-opt compound-stmt
@@ -269,7 +281,6 @@ stmt :
       declaration
     | empty-stmt
     | compound-stmt
-    | assign-stmt
     | if-stmt
     | return-stmt
     | break-stmt
@@ -293,10 +304,6 @@ compound-stmt :
 stmt-list :
       stmt-list stmt
     | %empty
-    ;
-
-assign-stmt :
-      expr ASSIGN expr SEMI
     ;
 
 if-stmt :
@@ -363,6 +370,7 @@ expr: expr LT expr
     | function-call
     | expr LB expr RB
     | STAR expr  %prec POINTER
+	| expr ASSIGN expr
     | INT_VAL
     | REAL_VAL
 	| CHAR_VAL
