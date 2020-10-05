@@ -98,10 +98,7 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
     /* TODO literal de caracter */
     /* TODO escape de aspas */
 
-[a-zA-Z_][0-9a-zA-Z_]*  { 
-            if (is_typename(yytext)) { HANDLE_TOKEN(TYPENAME, {}); }
-            else                     { HANDLE_TOKEN(ID, {}); }
-        }
+[a-zA-Z_][0-9a-zA-Z_]*  { HANDLE_TOKEN_ID({}); }
 
 .                       {   printf("LEXICAL ERROR: Unknown symbol %s\n", yytext);
                             exit(EXIT_FAILURE); }

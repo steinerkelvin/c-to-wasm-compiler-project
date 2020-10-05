@@ -5,11 +5,10 @@
 
 #include "generated_parser.h"
 
+// Tipo definido pelo Bison que é retornado pelo scanner
 typedef enum yytokentype yytoken_kind_t;
 
-
 typedef union token_value {
-
 } token_value_t;
 
 typedef struct token {
@@ -33,9 +32,13 @@ struct YYSTYPE {
     } value;
 };
 
+#if defined(DUMP_TOKENS)
+#define HANDLE_TOKEN(TOK, PROC)                                                \
+    { printf("%s : %s\n", #TOK, yytext); }
+#define HANDLE_TOKEN_ID(PROC) HANDLE_TOKEN(ID, PROC);
+#else
 #define HANDLE_TOKEN(TOK, PROC)                                                \
     {                                                                          \
-        /* printf("%s: %s\n", #TOK, yytext); */                                \
         yylval = (YYSTYPE){                                                    \
             .tag = TOKEN,                                                      \
         };                                                                     \
@@ -44,7 +47,17 @@ struct YYSTYPE {
             .lexeme = strdup((yytext)),                                        \
             .value = {},                                                       \
         };                                                                     \
+        PROC;                                                                  \
         return TOK;                                                            \
     }
+#define HANDLE_TOKEN_ID(PROC)                                                  \
+    {                                                                          \
+        if (is_typename(yytext)) {                                             \
+            HANDLE_TOKEN(TYPENAME, PROC);                                      \
+        } else {                                                               \
+            HANDLE_TOKEN(ID, PROC);                                            \
+        }                                                                      \
+    }
+#endif
 
 #endif // PARSING_H

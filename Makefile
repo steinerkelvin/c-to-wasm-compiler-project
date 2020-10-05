@@ -1,15 +1,16 @@
 cc=clang++
 flags=-Wall
 
-all: bin/compiler
+all: exe
 
-test: all
+test: exe
 	./run_tests.sh
-
-bison: src/parser.cpp src/parser.h
 
 flex: src/scanner.cpp
 
+bison: src/parser.cpp src/parser.h
+
+exe: bin/compiler bin/dump-tokens
 
 %/:
 	mkdir -p $@
@@ -23,6 +24,8 @@ src/scanner.cpp: src/scanner.l src/generated_parser.h
 bin/compiler: src/scanner.cpp src/generated_parser.cpp src/symtable.cpp src/main.cpp | bin/
 	$(cc) $(flags) -o "$@" $^ ${flags}
 
+bin/dump-tokens: src/dump_tokens.cpp | bin/
+	$(cc) $(flags) -o "$@" $^ ${flags} -D DUMP_TOKENS
 
 clean:
 	rm -f bin/*
