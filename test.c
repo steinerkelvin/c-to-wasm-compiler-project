@@ -18,6 +18,7 @@ comentario		 \
 obscuro
 
 int main() {
+    char *p = "comentario";
     int a = 2, b;
     // char d = 'd';  // TODO PROBLEMA COM '
     const int _01;

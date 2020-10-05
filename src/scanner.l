@@ -94,7 +94,7 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 {real}                  { HANDLE_TOKEN(REAL_VAL, {}); }
     /* TODO corrigir e adicionar outras representações */
 
-\".*\"                  { HANDLE_TOKEN(STR_VAL, {}); }
+\"[^\r\n\"]*\"          { HANDLE_TOKEN(STR_VAL, {}); }
     /* TODO literal de caracter */
     /* TODO escape de aspas */
 
@@ -103,5 +103,5 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
             else                     { HANDLE_TOKEN(ID, {}); }
         }
 
-.                           { printf("LEXICAL ERROR: Unknown symbol %s\n", yytext);
-                              exit(EXIT_FAILURE); }
+.                       {   printf("LEXICAL ERROR: Unknown symbol %s\n", yytext);
+                            exit(EXIT_FAILURE); }
