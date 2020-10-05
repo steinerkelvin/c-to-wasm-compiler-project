@@ -1,18 +1,53 @@
 # Relatório CP1 — Grupo DOPE
 
+O desenvolvimento do parser seguiu correndo bem, até o fatídico momento em que
+tentamos definir e resolver os conflitos das regras referentes a declarações,
+que contém uma regra do tipo:
+
+```
+declaration : declaration-specifiers | declaration-specifiers init-declarator-list
+```
+
+isto é, uma lista de especificadores de tipo, qualificadores, etc, seguida de
+uma lista de - simplificando - identificadores sendo declarados, que é opcional.
+
+Ocorre que identificadores em C podem ser associados a um tipo (via `typedef`) e
+assim podem ser utilizados como um especificador de tipo. Isso gera o problema
+de determinar em qual token de identificador deixamos de tratar de um
+especificador de tipo e passamos a tratar um nome a ser declarado, de variável
+etc, uma vez que o Bison utiliza apenas um token de lookahead. Pesquisando sobre
+o problema chegamos a decepcionante descoberta de que o problema é ainda pior e
+a gramática de C contem uma ambiguidade um tanto inconveniente [(link)][blog]
+[(link)][roskind].
+
+```
+T(a);
+```
+
+O código acima pode ser a chamada da função `T` com argumento `a` ou uma
+declaração da variável `a` com tipo `T`.
+
+Para resolver essa ambiguidade precisamos alimentar o lexer com informação da
+tabela de símbolos para podermos distinguir os identificadores que foram
+definidos como tipos. Para isso escrevemos uma implementação mínima de tabela de
+símbolos com as operações de abrir e fechar escopo e de adicionar e verificar se
+um identificador é um nome de tipo.
+
+## Versões do Bisão
+
 Tivemos um problema que surgiu devido a versões diferentes do Bison sendo usadas
-no desenvolvimento. Como é possível ver no [changelog do Bison][1], recentemente
-(aparentemente na versão 3.6) foi adicionado um alias para o tipo que deve ser
-retornado pelo scanner `enum yytokentype`:
+no desenvolvimento. Como é possível ver no [changelog do Bison][changelog],
+recentemente (aparentemente na versão 3.6) foi adicionado um alias para o tipo
+que deve ser retornado pelo scanner `enum yytokentype`:
 
 ```c
 typedef enum yytokentype yytoken_kind_t;
 ```
 
 Para que esse nome (`yytoken_kind_t`) possa ser utilizado normalmente com a
-versão anterior do Bison, adicionamos essa declaração, em `parsing.h` e
-explicitamos no arquivo README quais versões das ferramentas foram utilizadas
-para desenvolvimento e testes.
+versão anterior do Bison, adicionamos essa declaração no cabeçalho `parsing.h`.
+Também explicitamos no arquivo README quais versões das ferramentas foram
+utilizadas para desenvolvimento e testes.
 
 ## Testes
 
@@ -21,6 +56,8 @@ identificados pelo scanner para possibilitar a inspeção desse componente. Isso
 feito passando um parâmetro para o compilador para definir um nome de macro (`-D
 DUMP_TOKENS`) que faz com que sejam condicionalmente definidas macros
 alternativas para o tratamento dos tokens, i.e. que imprimem os tokens.
+
+TODO
 
 ## Suporte CRLF
 
@@ -38,4 +75,6 @@ corresponde a qualquer byte exceto `\n` (`0x0A`), desta forma, só precisamos
 explicitar o caso CRLF nos comentários de linha (marcados por `//`) que possuem
 quebra de linha.
 
-[1]: https://fossies.org/linux/bison/ChangeLog
+[changelog]: https://fossies.org/linux/bison/ChangeLog
+[blog]: http://calculist.blogspot.com/2009/02/c-typedef-parsing-problem.html
+[roskind]: https://pdos.csail.mit.edu/archive/l/c/roskind.html
