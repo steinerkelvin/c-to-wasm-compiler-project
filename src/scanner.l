@@ -92,7 +92,11 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 
 {digit}                 { HANDLE_TOKEN(INT_VAL, {}); }
 {real}                  { HANDLE_TOKEN(REAL_VAL, {}); }
+    /* TODO corrigir e adicionar outras representações */
+
 \".*\"                  { HANDLE_TOKEN(STR_VAL, {}); }
+    /* TODO literal de caracter */
+    /* TODO escape de aspas */
 
 [a-zA-Z_][0-9a-zA-Z_]*  { 
             if (is_typename(yytext)) { HANDLE_TOKEN(TYPENAME, {}); }

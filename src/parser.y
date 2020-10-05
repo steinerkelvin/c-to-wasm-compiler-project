@@ -334,7 +334,7 @@ do-while-stmt :
     ;
 
 // TODO corrigir esses stmt
-for-stmt:
+for-stmt :
       FOR LPAR stmt stmt expr RPAR stmt
     | FOR LPAR stmt stmt RPAR stmt
     ;

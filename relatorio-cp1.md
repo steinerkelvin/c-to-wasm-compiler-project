@@ -1,4 +1,3 @@
-
 # Relatório CP1 — Grupo DOPE
 
 Tivemos um problema que surgiu devido a versões diferentes do Bison sendo usadas
@@ -17,17 +16,18 @@ para desenvolvimento e testes.
 
 ## Suporte CRLF
 
-O caractere de controle que representa a quebra de linha em arquivos pode ser
-diferente dependendo do sistema operacional, esses caracteres são CR (carriage
-return) e LF (line feed) respectivamente 0x0D (13 decimal, representado por
-"\n") e 0x0A (10 decimal, representado por "\r"). Sistemas baseados em Unix
-utilizam a terminação LF, e o Windows utiliza dois caracteres CR LF. O antigo
-MacOS (pré-OSX MacIntosh) utilizava apenas CR, porém escolhemos não dar suporte
-a essa formatação em nosso scanner.
+Os caracteres de controle que representam uma quebra de linha em arquivos de
+texto podem ser diferente dependendo do SO. Esses caracteres são CR (_carriage
+return_) e LF (_line feed_), respectivamente `0x0D` (representado por "\n") e
+`0x0A` (representado por "\r"). Sistemas Unix utilizam a terminação `LF`,
+enquanto o Windows utiliza dois caracteres: `CR LF`. O antigo MacOS (pré-OSX
+Macintosh) utilizava apenas `CR`, porém escolhemos não dar suporte a essa
+formatação em nosso scanner por ser extremamente legado.
 
-Para a maioria dos casos, não é necessário explicitar o caso \r\n como quebra de
-linha, já que o caractere \r está representado no _pattern_ "." ,que representa
-qualquer byte exceto LF (0x0A), desta forma, só precisamos explicitar o caso
-CRLF nos comentários de linha (marcados por //) que possuem quebra de linha.
+Para a maioria dos casos, não é necessário explicitar o caso `\r\n` como quebra
+de linha, já que o caractere `\r` está representado no _pattern_ `.`, que
+corresponde a qualquer byte exceto `\n` (`0x0A`), desta forma, só precisamos
+explicitar o caso CRLF nos comentários de linha (marcados por `//`) que possuem
+quebra de linha.
 
 [1]: https://fossies.org/linux/bison/ChangeLog

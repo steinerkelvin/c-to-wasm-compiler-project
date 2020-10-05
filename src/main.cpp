@@ -11,7 +11,5 @@ int main(void) {
         fprintf(stderr, "PARSE FAILED!\n");
     }
 
-    std::cout << is_typename("kek") << std::endl;
-
     return 0;
 }
