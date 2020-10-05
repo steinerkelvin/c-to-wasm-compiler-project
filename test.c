@@ -18,7 +18,8 @@ comentario		 \
 obscuro
 
 int main() {
-    char *p = "comentario";
+    char *p = "Este programa não imprime \"Hello World\"";
+
     int a = 2, b;
     // char d = 'd';  // TODO PROBLEMA COM '
     const int _01;

@@ -1,3 +1,5 @@
-tmp
-exe
 .idea
+
+/tmp/
+/exe
+/a.out

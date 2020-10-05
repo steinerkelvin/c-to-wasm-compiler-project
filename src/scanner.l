@@ -94,7 +94,7 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 {real}                  { HANDLE_TOKEN(REAL_VAL, {}); }
     /* TODO corrigir e adicionar outras representações */
 
-\"[^\r\n\"]*\"          { HANDLE_TOKEN(STR_VAL, {}); }
+\"([^\r\n\"]|"\\\"")*\"          { HANDLE_TOKEN(STR_VAL, {}); }
     /* TODO literal de caracter */
     /* TODO escape de aspas */
 
