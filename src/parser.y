@@ -61,7 +61,7 @@ void yyerror(char const *s);
 
 %%
 
-all : program
+all : program ;
 
 program :
       program program-part
@@ -173,7 +173,7 @@ enumerator-list :
 	| enumerator
 	;
 enumerator :
-	  ID ASSIGN expr
+	  ID ASSIGN constant-expression
 	| ID
 	;
 
@@ -216,9 +216,9 @@ pointer :
 direct-declarator :
 	  ID
 	| LPAR declarator RPAR	{ $$ = $2; }
-	| direct-declarator LB type-qualifier-list-opt expr RB
-	| direct-declarator LB type-qualifier-list-opt      RB
-	| direct-declarator LB type-qualifier-list-opt STAR RB
+	| direct-declarator LB type-qualifier-list-opt assignment-expression RB
+	| direct-declarator LB type-qualifier-list-opt                       RB
+	| direct-declarator LB type-qualifier-list-opt STAR                  RB
 	// TODO static?
 	| direct-declarator LPAR parameter-type-list RPAR
 	| direct-declarator LPAR identifier-list-opt RPAR
@@ -272,10 +272,10 @@ direct-abstract-declarator-opt :
       ;
 direct-abstract-declarator :
 	  LPAR abstract-declarator RPAR
-    | direct-abstract-declarator-opt LB type-qualifier-list-opt expr LB
-    | direct-abstract-declarator-opt LB type-qualifier-list-opt      LB
-    | direct-abstract-declarator-opt LB STATIC type-qualifier-list-opt expr LB
-    | direct-abstract-declarator-opt LB type-qualifier-list STATIC     expr LB
+    | direct-abstract-declarator-opt LB type-qualifier-list-opt assignment-expression LB
+    | direct-abstract-declarator-opt LB type-qualifier-list-opt                       LB
+    | direct-abstract-declarator-opt LB STATIC type-qualifier-list-opt assignment-expression LB
+    | direct-abstract-declarator-opt LB type-qualifier-list STATIC     assignment-expression LB
     // | direct-abstract-declarator-opt LB STAR LB  // TODO conflito; hierarquia de expressões?
     // | direct-abstract-declarator-opt LPAR parameter-type-list RPAR   // TODO conflito
     // | direct-abstract-declarator-opt LPAR                     RPAR
@@ -283,25 +283,29 @@ direct-abstract-declarator :
 
 
 initializer : 
-	  expr					/* assignment-expression */
+	  assignment-expression
 	| LCB initializer-list trailing-comma RCB
 	;
 
 initializer-list :
 	  designation-opt initializer
 	| initializer-list COMMA designation-opt initializer
+    ;
 
 designation-opt :
 	  designator-list ASSIGN
 	| %empty
+    ;
 
 designator-list :
 	  designator
 	| designator-list designator
+    ;
 
 designator :
-	  LB expr RB			/* constant-expression */
+	  LB constant-expression RB
 	| DOT ID
+    ;
 
 
 function-definition :
@@ -344,16 +348,12 @@ stmt-list :
     ;
 
 if-stmt :
-      IF LPAR expr RPAR stmt
-    | IF LPAR expr RPAR stmt ELSE stmt
+      IF LPAR expression RPAR stmt
+    | IF LPAR expression RPAR stmt ELSE stmt
     ;
 
 return-stmt :
-    RETURN return-value SEMI
-    ;
-return-value :
-      expr
-    | %empty
+      RETURN expression-opt SEMI
     ;
 
 continue-stmt :
@@ -363,67 +363,163 @@ break-stmt :
       BREAK SEMI
     ;
 case-stmt :
-      CASE expr COLON stmt
+      CASE constant-expression COLON stmt
     ;
 default-stmt :
       DEFAULT COLON stmt
     ;
 
 while-stmt :
-      WHILE LPAR expr RPAR stmt
+      WHILE LPAR expression RPAR stmt
     ;
 
 do-while-stmt :
-    DO stmt WHILE LPAR expr RPAR SEMI
+    DO stmt WHILE LPAR expression RPAR SEMI
     ;
 
-// TODO corrigir esses stmt
 for-stmt :
-      FOR LPAR stmt stmt expr RPAR stmt
-    | FOR LPAR stmt stmt RPAR stmt
+      FOR LPAR expression-opt SEMI expression-opt SEMI expression-opt RPAR stmt
+    | FOR LPAR declaration         expression-opt SEMI expression-opt RPAR stmt
     ;
 
 switch-stmt :
-      SWITCH LPAR expr RPAR stmt
+      SWITCH LPAR expression RPAR stmt
     ;
 
 expr-stmt :
-	expr SEMI
+	  expression SEMI
 	;
 
-expr : 
-      expr LT expr
-    | expr GT expr
-    | expr LET expr
-    | expr GET expr
-    | expr EQ expr
-    | expr PLUS expr
-    | expr MINUS expr
-    | expr STAR expr
-    | expr OVER expr
-    | PLUS expr  %prec PREFIX
-    | MINUS expr %prec PREFIX
-    | expr PLUSPLUS
-    | expr MINUSMINUS
-    | LPAR expr RPAR
-    | expr LPAR argument-expression-list-opt RPAR
-    | expr LB expr RB
-    | STAR expr  %prec POINTER
-    | LPAR type-name RPAR expr
-	| expr ASSIGN expr
-    | INT_VAL
-    | REAL_VAL
-	| CHAR_VAL
-    | STR_VAL
-    | ID
+expression-opt : expression | %empty ;
+
+expression : comma-expression ;
+
+comma-expression : 
+      assignment-expression
+    | expression COMMA assignment-expression
     ;
-    // TODO acesso de índice, derreferenciação, acesso de membro (incluindo ->)
-    // cast
+
+assignment-expression :
+      conditional-expression
+    | unary-expression assignment-operator assignment-expression
+    ;
+
+assignment-operator : ASSIGN ;
+    // TODO *= /= %= += -= <<= >>= &= ^= |=
+
+constant-expression : conditional-expression ;
+
+conditional-expression :
+      or-expression
+    | or-expression QUEST expression COLON conditional-expression
+    ;
+
+or-expression :
+      and-expression
+    | or-expression OR and-expression
+    ;
+
+and-expression :
+      bit-or-expression
+    | and-expression AND bit-or-expression
+    ;
+
+bit-or-expression :
+      bit-xor-expression
+    | bit-or-expression BTOR bit-xor-expression
+    ;
+
+bit-xor-expression :
+      bit-and-expression
+    | bit-xor-expression BTXOR bit-and-expression
+    ;
+
+bit-and-expression :
+      equality-expression
+    | bit-and-expression BTAND equality-expression
+    ;
+
+equality-expression :
+      relational-expression
+    | equality-expression EQ  relational-expression
+    | equality-expression NEQ relational-expression
+    ;
+
+relational-expression :
+      shift-expression
+    | relational-expression LT shift-expression
+    | relational-expression GT shift-expression
+    | relational-expression LET shift-expression
+    | relational-expression GET shift-expression
+    ;
+
+shift-expression :
+      additive-expression
+    | shift-expression LEFT  additive-expression
+    | shift-expression RIGHT additive-expression
+    ;
+
+additive-expression :
+      multiplicative-expression
+    | additive-expression PLUS  multiplicative-expression
+    | additive-expression MINUS multiplicative-expression
+    ;
+
+multiplicative-expression :
+      cast-expression
+    | multiplicative-expression STAR cast-expression
+    | multiplicative-expression OVER cast-expression
+    | multiplicative-expression PERC cast-expression
+    ;
+
+cast-expression :
+      unary-expression
+    | LPAR type-name RPAR cast-expression
+    ;
+
+unary-expression :
+      postfix-expression
+    | PLUSPLUS   unary-expression
+    | MINUSMINUS unary-expression
+    | AMPER cast-expression
+    | STAR  cast-expression
+    | PLUS  cast-expression
+    | MINUS cast-expression
+    | BTNOT cast-expression
+    | NOT   cast-expression
+    // | sizeof unary-expression
+    // | sizeof ( type-name )
+    // | _Alignof ( type-name )
+    ;
+
+postfix-expression :
+      primary-expression
+    | postfix-expression LB expression RB
+    | postfix-expression LPAR argument-expression-list-opt RPAR
+    | postfix-expression DOT   ID
+    | postfix-expression ARROW ID
+    | postfix-expression PLUSPLUS
+    | postfix-expression MINUSMINUS
+    // | ( type-name ) { initializer-list }     // TODO
+    // | ( type-name ) { initializer-list , }
+    ;
+
 
 argument-expression-list-opt : argument-expression-list | %empty ;
 argument-expression-list :
-      argument-expression-list COMMA expr
-    | expr
+      argument-expression-list COMMA assignment-expression
+    | assignment-expression
     ;
+
+primary-expression :
+      ID
+    | INT_VAL
+    | REAL_VAL
+    | CHAR_VAL
+    | STR_VAL
+    | LPAR expression RPAR
+    // | generic-expression ??
+    ;
+
 
 %%
