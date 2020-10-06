@@ -18,6 +18,10 @@ int test5(a, b) { return a - b; }
 // abstract-declarator
 int test6(int *, int *);
 
+int voidp_to_int(void *p) {
+    int *ip = (int *)p;
+    return *ip;
+}
 
 //testando\
 um \

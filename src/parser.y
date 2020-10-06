@@ -247,8 +247,7 @@ parameter-declaration :
 	;
 
 
-// type-name :
-// 	  specifier-qualifier-list abstract-declarator-opt
+type-name : specifier-qualifier-list abstract-declarator-opt ;
 
 abstract-declarator-opt :
       abstract-declarator
@@ -385,7 +384,8 @@ expr-stmt :
 	expr SEMI
 	;
 
-expr: expr LT expr
+expr : 
+      expr LT expr
     | expr BT expr
     | expr LET expr
     | expr BET expr
@@ -401,6 +401,7 @@ expr: expr LT expr
     | function-call
     | expr LB expr RB
     | STAR expr  %prec POINTER
+    | LPAR type-name RPAR expr
 	| expr ASSIGN expr
     | INT_VAL
     | REAL_VAL
