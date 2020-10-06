@@ -32,7 +32,7 @@ void yyerror(char const *s);
 %token BREAK CASE CONTINUE DEFAULT DO ELSE FOR GOTO IF RETURN SWITCH WHILE
 %token ASSIGN
 %token PLUS MINUS STAR OVER PERC PLUSPLUS MINUSMINUS
-%token EQ NEQ LT GT LET GET
+%token EQ NEQ LT GT LET GET STARASS OVERASS MODASS PLUSASS MINASS SLASS SRASS ANDASS XORASS ORASS
 %token AND OR
 %token BTOR BTXOR
 %token NOT BTNOT
@@ -402,8 +402,21 @@ assignment-expression :
     | unary-expression assignment-operator assignment-expression
     ;
 
-assignment-operator : ASSIGN ;
-    // TODO *= /= %= += -= <<= >>= &= ^= |=
+assignment-operator : 
+      ASSIGN 
+    | STARASS 
+    | OVERASS
+    | MODASS
+    | PLUSASS 
+    | MINASS
+    | SLASS
+    | SRASS
+    | ANDASS
+    | XORASS
+    | ORASS
+    ;
+
+    // TODO <<= >>= &= ^= |=
 
 constant-expression : conditional-expression ;
 
