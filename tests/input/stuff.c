@@ -37,6 +37,7 @@ int main() {
     char *p = "Este programa não imprime \"Hello World\"";
 
     ponto_t ponto = {.x = 10.0, .y = 0.0};
+    ponto.y = 20;
 
     char k = 'A';
     k = '\0';
@@ -45,6 +46,9 @@ int main() {
 
     int a = 2, b;
     const int _01;
+
+    int *ap = &a;
+    *ap = 7;
 
     a == b;
 

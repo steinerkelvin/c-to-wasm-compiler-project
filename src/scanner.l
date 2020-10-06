@@ -81,7 +81,7 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 ">="                    { HANDLE_TOKEN(GET, {}); }
 "&&"                    { HANDLE_TOKEN(AND, {}); }
 "||"                    { HANDLE_TOKEN(OR, {}); }
-"&"                     { HANDLE_TOKEN(BTAND, {}); }
+"&"                     { HANDLE_TOKEN(AMPER, {}); }
 "|"                     { HANDLE_TOKEN(BTOR, {}); }
 "^"                     { HANDLE_TOKEN(BTXOR, {}); }
 "!"                     { HANDLE_TOKEN(NOT, {}); }
@@ -98,13 +98,10 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 ";"                     { HANDLE_TOKEN(SEMI, {}); }
 ":"                     { HANDLE_TOKEN(COLON, {}); }
 ","                     { HANDLE_TOKEN(COMMA, {}); }
-"&"                     { HANDLE_TOKEN(AMPER, {}); }
 "."                     { HANDLE_TOKEN(DOT, {}); }
 "->"                    { HANDLE_TOKEN(ARROW, {}); }
 "="                     { HANDLE_TOKEN(ASSIGN, {}); }
     /* TODO  *= /= %= += -= <<= >>= &= ^= |=  */
-    /* TODO bitwise operators */
-    /* TODO acesso a campos ( . e -> ) */
 
 {digit}                 { HANDLE_TOKEN(INT_VAL, {}); }
 {real}                  { HANDLE_TOKEN(REAL_VAL, {}); }

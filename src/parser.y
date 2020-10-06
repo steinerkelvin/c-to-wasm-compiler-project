@@ -18,7 +18,6 @@
 #include <string.h>
 #include "parsing.h"
 #include "symtable.h"
-#include "util.h"
 
 int yylex(void);
 void yyerror(char const *s);
@@ -35,29 +34,28 @@ void yyerror(char const *s);
 %token PLUS MINUS STAR OVER PERC PLUSPLUS MINUSMINUS
 %token EQ NEQ LT GT LET GET
 %token AND OR
-%token BTAND BTOR BTXOR
+%token BTOR BTXOR
 %token NOT BTNOT
 %token LEFT RIGHT
 %token LPAR RPAR LCB RCB LB RB
 %token DOT ARROW AMPER
-%token SEMI COLON QUEST
+%token SEMI COLON COMMA QUEST
 %token INT_VAL REAL_VAL CHAR_VAL STR_VAL 
 %token ID TYPENAME
 
-%left COMMA
-%right ASSIGN
-%left EQ LT GT LET GET
-%left PLUS MINUS
-%left STAR OVER
-%precedence PLUSPLUS MINUSMINUS
-%precedence PREFIX
+// %left COMMA
+// %right ASSIGN
+// %left EQ LT GT LET GET
+// %left PLUS MINUS
+// %left STAR OVER
+// %precedence PLUSPLUS MINUSMINUS
+// %precedence PREFIX
 %precedence RPAR
 %precedence ELSE
-%precedence POINTER
-%left LPAR  // Associação da chamada de função
-%left LB    // Associação do operador de índice
+// %precedence POINTER
+// %left LPAR  // Associação da chamada de função
+// %left LB    // Associação do operador de índice
 
-// TODO Outras precedências e associatividade
 
 %%
 
@@ -74,7 +72,7 @@ program-part :
 
 declaration :
 	  declaration-specifiers SEMI
-	| declaration-specifiers init-declarator-list {
+	| declaration-specifiers init-declarator-list {      // TODO melhorar legibilidade
 		  	for (auto it : *$1.value.slist) {
 				if (it.tag != TOKEN) { continue; }
 				if (strcmp(it.value.token.lexeme, "typedef") == 0) {
@@ -276,7 +274,7 @@ direct-abstract-declarator :
     | direct-abstract-declarator-opt LB type-qualifier-list-opt                       LB
     | direct-abstract-declarator-opt LB STATIC type-qualifier-list-opt assignment-expression LB
     | direct-abstract-declarator-opt LB type-qualifier-list STATIC     assignment-expression LB
-    // | direct-abstract-declarator-opt LB STAR LB  // TODO conflito; hierarquia de expressões?
+    // | direct-abstract-declarator-opt LB STAR LB  // TODO conflito
     // | direct-abstract-declarator-opt LPAR parameter-type-list RPAR   // TODO conflito
     // | direct-abstract-declarator-opt LPAR                     RPAR
     ;
@@ -436,7 +434,7 @@ bit-xor-expression :
 
 bit-and-expression :
       equality-expression
-    | bit-and-expression BTAND equality-expression
+    | bit-and-expression AMPER equality-expression
     ;
 
 equality-expression :
