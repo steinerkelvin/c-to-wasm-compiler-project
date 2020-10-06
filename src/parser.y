@@ -31,19 +31,26 @@ void yyerror(char const *s);
 %token SIZEOF
 %token ENUM STRUCT UNION
 %token BREAK CASE CONTINUE DEFAULT DO ELSE FOR GOTO IF RETURN SWITCH WHILE
-%token ASSIGN EQ LT BT LET BET LPAR RPAR SEMI LCB RCB COLON LB RB
-%token PLUS MINUS STAR OVER PLUSPLUS MINUSMINUS
-%token DOT
+%token ASSIGN
+%token PLUS MINUS STAR OVER PERC PLUSPLUS MINUSMINUS
+%token EQ NEQ LT GT LET GET
+%token AND OR
+%token BTAND BTOR BTXOR
+%token NOT BTNOT
+%token LEFT RIGHT
+%token LPAR RPAR LCB RCB LB RB
+%token DOT ARROW AMPER
+%token SEMI COLON QUEST
 %token INT_VAL REAL_VAL CHAR_VAL STR_VAL 
 %token ID TYPENAME
 
 %left COMMA
 %right ASSIGN
-%left EQ LT BT LET BET
+%left EQ LT GT LET GET
 %left PLUS MINUS
 %left STAR OVER
 %precedence PLUSPLUS MINUSMINUS
-%precedence UMINUS
+%precedence PREFIX
 %precedence RPAR
 %precedence ELSE
 %precedence POINTER
@@ -386,19 +393,20 @@ expr-stmt :
 
 expr : 
       expr LT expr
-    | expr BT expr
+    | expr GT expr
     | expr LET expr
-    | expr BET expr
+    | expr GET expr
     | expr EQ expr
     | expr PLUS expr
     | expr MINUS expr
     | expr STAR expr
     | expr OVER expr
-    | MINUS expr %prec UMINUS
+    | PLUS expr  %prec PREFIX
+    | MINUS expr %prec PREFIX
     | expr PLUSPLUS
     | expr MINUSMINUS
     | LPAR expr RPAR
-    | function-call
+    | expr LPAR argument-expression-list-opt RPAR
     | expr LB expr RB
     | STAR expr  %prec POINTER
     | LPAR type-name RPAR expr
@@ -412,14 +420,10 @@ expr :
     // TODO acesso de índice, derreferenciação, acesso de membro (incluindo ->)
     // cast
 
-function-call :
-    expr LPAR expr-list RPAR
-    ;
-
-expr-list :
-      expr-list COMMA expr
+argument-expression-list-opt : argument-expression-list | %empty ;
+argument-expression-list :
+      argument-expression-list COMMA expr
     | expr
-    | %empty
     ;
 
 %%

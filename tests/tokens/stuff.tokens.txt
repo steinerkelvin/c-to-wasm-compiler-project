@@ -198,7 +198,7 @@ SEMI : ;
 IF : if
 LPAR : (
 ID : b
-BT : >
+GT : >
 INT_VAL : 1
 RPAR : )
 LCB : {
