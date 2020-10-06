@@ -217,7 +217,11 @@ direct-declarator :
 	| direct-declarator LPAR identifier-list-opt RPAR
 	;
 
-identifier-list-opt : %empty // TODO
+identifier-list-opt : 
+	  identifier-list-opt COMMA ID
+	| ID
+	| %empty
+	;
 
 type-qualifier-list :
   	  type-qualifier-list type-qualifier

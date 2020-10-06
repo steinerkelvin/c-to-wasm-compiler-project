@@ -12,6 +12,9 @@ int test4(int a, int);
 
 int test4(int a, int b) { return a + b; }
 
+int test5(int, int);
+int test5(a, b) { return a - b; }
+
 //testando\
 um \
 comentario		 \
@@ -25,7 +28,7 @@ typedef struct ponto {
 int main() {
     char *p = "Este programa não imprime \"Hello World\"";
 
-    ponto_t ponto = { .x = 10.0, .y = 0.0 };
+    ponto_t ponto = {.x = 10.0, .y = 0.0};
 
     char k = 'A';
     k = '\0';
@@ -67,7 +70,8 @@ int main() {
     switch (a) {
     case (107): {
         printf("%d\n", a);
-        case 1: ; break;
+    case 1:;
+        break;
     }
     }
     // i++++;
