@@ -223,13 +223,13 @@ identifier-list-opt :
 	| %empty
 	;
 
-type-qualifier-list :
-  	  type-qualifier-list type-qualifier
-	| type-qualifier
-	;
 type-qualifier-list-opt :
 	  type-qualifier-list
 	| %empty
+	;
+type-qualifier-list :
+  	  type-qualifier-list type-qualifier
+	| type-qualifier
 	;
 
 parameter-type-list :
@@ -246,12 +246,39 @@ parameter-declaration :
 	| declaration-specifiers abstract-declarator-opt
 	;
 
-abstract-declarator-opt : %empty;  // TODO
+
+// type-name :
+// 	  specifier-qualifier-list abstract-declarator-opt
+
+abstract-declarator-opt :
+      abstract-declarator
+    | %empty
+    ;
+abstract-declarator :
+	  pointer
+	| pointer direct-abstract-declarator
+    | direct-abstract-declarator
+	;
+
+direct-abstract-declarator-opt :
+      direct-abstract-declarator
+      | %empty
+      ;
+direct-abstract-declarator :
+	  LPAR abstract-declarator RPAR
+    | direct-abstract-declarator-opt LB type-qualifier-list-opt expr LB
+    | direct-abstract-declarator-opt LB type-qualifier-list-opt      LB
+    | direct-abstract-declarator-opt LB STATIC type-qualifier-list-opt expr LB
+    | direct-abstract-declarator-opt LB type-qualifier-list STATIC     expr LB
+    // | direct-abstract-declarator-opt LB STAR LB  // TODO conflito; hierarquia de expressões?
+    // | direct-abstract-declarator-opt LPAR parameter-type-list RPAR   // TODO conflito
+    // | direct-abstract-declarator-opt LPAR                     RPAR
+    ;
 
 
 initializer : 
-	  expr					/* assignment-expression*/
-	| LCB initializer-list trailing-comma RCB  // TODO
+	  expr					/* assignment-expression */
+	| LCB initializer-list trailing-comma RCB
 	;
 
 initializer-list :

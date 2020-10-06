@@ -15,6 +15,10 @@ int test4(int a, int b) { return a + b; }
 int test5(int, int);
 int test5(a, b) { return a - b; }
 
+// abstract-declarator
+int test6(int *, int *);
+
+
 //testando\
 um \
 comentario		 \

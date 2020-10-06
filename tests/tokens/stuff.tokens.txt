@@ -81,6 +81,16 @@ MINUS : -
 ID : b
 SEMI : ;
 RCB : }
+INT : int
+ID : test6
+LPAR : (
+INT : int
+STAR : *
+COMMA : ,
+INT : int
+STAR : *
+RPAR : )
+SEMI : ;
 TYPEDEF : typedef
 STRUCT : struct
 ID : ponto
