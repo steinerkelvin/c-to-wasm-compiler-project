@@ -1,6 +1,0 @@
-int i = 0;
-//testando comentario \
-a\
-b
-int c;//
-/**/

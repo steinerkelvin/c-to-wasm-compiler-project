@@ -71,185 +71,185 @@ program-part :
     ;
 
 declaration :
-	  declaration-specifiers SEMI
-	| declaration-specifiers init-declarator-list {      // TODO melhorar legibilidade
-		  	for (auto it : *$1.value.slist) {
-				if (it.tag != TOKEN) { continue; }
-				if (strcmp(it.value.token.lexeme, "typedef") == 0) {
-					for (auto it : *$2.value.slist) {
-						if (it.tag != TOKEN) { continue; }
-						insert_typename(it.value.token.lexeme);
-					}
-				}
-			}
-		} SEMI
-	;
+      declaration-specifiers SEMI
+    | declaration-specifiers init-declarator-list {      // TODO melhorar legibilidade
+              for (auto it : *$1.value.slist) {
+                if (it.tag != TOKEN) { continue; }
+                if (strcmp(it.value.token.lexeme, "typedef") == 0) {
+                    for (auto it : *$2.value.slist) {
+                        if (it.tag != TOKEN) { continue; }
+                        insert_typename(it.value.token.lexeme);
+                    }
+                }
+            }
+        } SEMI
+    ;
 
 declaration-specifiers :
-	  declaration-specifiers declaration-specifier 	{ $$ = $1; (*$$.value.slist).push_back($2); }
-	| declaration-specifier							{ $$ = (stype_t){ .tag = SLIST }; $$.value.slist = new std::list<stype_t>{ $1 }; }
-	;
+      declaration-specifiers declaration-specifier     { $$ = $1; (*$$.value.slist).push_back($2); }
+    | declaration-specifier                            { $$ = (stype_t){ .tag = SLIST }; $$.value.slist = new std::list<stype_t>{ $1 }; }
+    ;
 declaration-specifier :
-	  storage-class-specifier
-	| type-specifier
-	| type-qualifier
-	| function-specifier
-	// | alignment-specifier
-	;
+      storage-class-specifier
+    | type-specifier
+    | type-qualifier
+    | function-specifier
+    // | alignment-specifier
+    ;
 
 storage-class-specifier :
-	  TYPEDEF
-	| EXTERN
-	| STATIC
-	| AUTO
-	| REGISTER
-	;
+      TYPEDEF
+    | EXTERN
+    | STATIC
+    | AUTO
+    | REGISTER
+    ;
 
 type-specifier :
       VOID
     | CHAR
     | SHORT
     | INT
-	| LONG
+    | LONG
     | FLOAT
     | DOUBLE
-	| SIGNED
-	| UNSIGNED
-	| struct-or-union-spec
-	| enum-specifier
-	| typedef-name
+    | SIGNED
+    | UNSIGNED
+    | struct-or-union-spec
+    | enum-specifier
+    | typedef-name
     ;
 
 typedef-name : TYPENAME ;
 
 struct-or-union-spec :
-	  struct-or-union ID
-	| struct-or-union ID LCB struct-declaration-list RCB
-	| struct-or-union    LCB struct-declaration-list RCB
-	;
+      struct-or-union ID
+    | struct-or-union ID LCB struct-declaration-list RCB
+    | struct-or-union    LCB struct-declaration-list RCB
+    ;
 
 struct-declaration-list :
-	  struct-declaration
-	| struct-declaration-list struct-declaration
-	;
+      struct-declaration
+    | struct-declaration-list struct-declaration
+    ;
 
 struct-declaration :
-	  specifier-qualifier-list struct-declarator-list SEMI
-	| specifier-qualifier-list SEMI
-	// | static_assert-declaration
-	;
+      specifier-qualifier-list struct-declarator-list SEMI
+    | specifier-qualifier-list SEMI
+    // | static_assert-declaration
+    ;
 
 specifier-qualifier-list :
-	  specifier-qualifier-list type-specifier
-	| specifier-qualifier-list type-qualifier
-	| type-specifier
-	| type-qualifier
-	;
+      specifier-qualifier-list type-specifier
+    | specifier-qualifier-list type-qualifier
+    | type-specifier
+    | type-qualifier
+    ;
 
 struct-declarator-list :
-	  struct-declarator
-	| struct-declarator-list COMMA struct-declarator
-	;
+      struct-declarator
+    | struct-declarator-list COMMA struct-declarator
+    ;
 
 struct-declarator :
-	declarator
-	//| declarator COLON constant-expression
-	;
+    declarator
+    //| declarator COLON constant-expression
+    ;
 
 struct-or-union : STRUCT | UNION ;
 
 enum-specifier :
-	  ENUM ID
-	| ENUM ID LCB enumerator-list trailing-comma RCB
-	| ENUM    LCB enumerator-list trailing-comma RCB
-	;
+      ENUM ID
+    | ENUM ID LCB enumerator-list trailing-comma RCB
+    | ENUM    LCB enumerator-list trailing-comma RCB
+    ;
 
 trailing-comma : COMMA | %empty ;
 
 enumerator-list :
-	  enumerator-list COMMA enumerator
-	| enumerator
-	;
+      enumerator-list COMMA enumerator
+    | enumerator
+    ;
 enumerator :
-	  ID ASSIGN constant-expression
-	| ID
-	;
+      ID ASSIGN constant-expression
+    | ID
+    ;
 
 type-qualifier :
-	  CONST
-	| RESTRICT
-	| VOLATILE
-	// | "_Atomic"
-	;
+      CONST
+    | RESTRICT
+    | VOLATILE
+    // | "_Atomic"
+    ;
 
 function-specifier :
-	  INLINE
-	// | "_Noreturn"
-	;
+      INLINE
+    // | "_Noreturn"
+    ;
 
 // alignment-specifier :
-// 	  "_Alignas" LPAR type-name RPAR
-// 	| "_Alignas" LPAR constant-expression RPAR
-// 	;
+//       "_Alignas" LPAR type-name RPAR
+//     | "_Alignas" LPAR constant-expression RPAR
+//     ;
 
 init-declarator-list :
-	  init-declarator-list COMMA init-declarator	{ $$ = $1; (*$$.value.slist).push_back($3); }
-	| init-declarator								{ $$ = (stype_t){ .tag = SLIST }; $$.value.slist = new std::list<stype_t>{ $1 }; }
-	;
+      init-declarator-list COMMA init-declarator    { $$ = $1; (*$$.value.slist).push_back($3); }
+    | init-declarator                               { $$ = (stype_t){ .tag = SLIST }; $$.value.slist = new std::list<stype_t>{ $1 }; }
+    ;
 init-declarator :
-	  declarator ASSIGN initializer
-	| declarator
-	;
+      declarator ASSIGN initializer
+    | declarator
+    ;
 
 declarator :
-	  pointer direct-declarator		{ $$ = $2; }
-	| direct-declarator
-	;
+      pointer direct-declarator        { $$ = $2; }
+    | direct-declarator
+    ;
 
 pointer :
-	  pointer STAR type-qualifier-list-opt
-	| STAR type-qualifier-list-opt
-	;
+      pointer STAR type-qualifier-list-opt
+    | STAR type-qualifier-list-opt
+    ;
 
 direct-declarator :
-	  ID
-	| LPAR declarator RPAR	{ $$ = $2; }
-	| direct-declarator LB type-qualifier-list-opt assignment-expression RB
-	| direct-declarator LB type-qualifier-list-opt                       RB
-	| direct-declarator LB type-qualifier-list-opt STAR                  RB
-	// TODO static?
-	| direct-declarator LPAR parameter-type-list RPAR
-	| direct-declarator LPAR identifier-list-opt RPAR
-	;
+      ID
+    | LPAR declarator RPAR    { $$ = $2; }
+    | direct-declarator LB type-qualifier-list-opt assignment-expression RB
+    | direct-declarator LB type-qualifier-list-opt                       RB
+    | direct-declarator LB type-qualifier-list-opt STAR                  RB
+    // TODO static?
+    | direct-declarator LPAR parameter-type-list RPAR
+    | direct-declarator LPAR identifier-list-opt RPAR
+    ;
 
 identifier-list-opt : 
-	  identifier-list-opt COMMA ID
-	| ID
-	| %empty
-	;
+      identifier-list-opt COMMA ID
+    | ID
+    | %empty
+    ;
 
 type-qualifier-list-opt :
-	  type-qualifier-list
-	| %empty
-	;
+      type-qualifier-list
+    | %empty
+    ;
 type-qualifier-list :
-  	  type-qualifier-list type-qualifier
-	| type-qualifier
-	;
+        type-qualifier-list type-qualifier
+    | type-qualifier
+    ;
 
 parameter-type-list :
-	  parameter-list
-	// | parameter-list COMMA "..."
-	;
+      parameter-list
+    // | parameter-list COMMA "..."
+    ;
 
 parameter-list :
-	  parameter-declaration
-	| parameter-list COMMA parameter-declaration
-	;
+      parameter-declaration
+    | parameter-list COMMA parameter-declaration
+    ;
 parameter-declaration :
-	  declaration-specifiers declarator
-	| declaration-specifiers abstract-declarator-opt
-	;
+      declaration-specifiers declarator
+    | declaration-specifiers abstract-declarator-opt
+    ;
 
 
 type-name : specifier-qualifier-list abstract-declarator-opt ;
@@ -259,17 +259,17 @@ abstract-declarator-opt :
     | %empty
     ;
 abstract-declarator :
-	  pointer
-	| pointer direct-abstract-declarator
+      pointer
+    | pointer direct-abstract-declarator
     | direct-abstract-declarator
-	;
+    ;
 
 direct-abstract-declarator-opt :
       direct-abstract-declarator
       | %empty
       ;
 direct-abstract-declarator :
-	  LPAR abstract-declarator RPAR
+      LPAR abstract-declarator RPAR
     | direct-abstract-declarator-opt LB type-qualifier-list-opt assignment-expression LB
     | direct-abstract-declarator-opt LB type-qualifier-list-opt                       LB
     | direct-abstract-declarator-opt LB STATIC type-qualifier-list-opt assignment-expression LB
@@ -281,28 +281,28 @@ direct-abstract-declarator :
 
 
 initializer : 
-	  assignment-expression
-	| LCB initializer-list trailing-comma RCB
-	;
+      assignment-expression
+    | LCB initializer-list trailing-comma RCB
+    ;
 
 initializer-list :
-	  designation-opt initializer
-	| initializer-list COMMA designation-opt initializer
+      designation-opt initializer
+    | initializer-list COMMA designation-opt initializer
     ;
 
 designation-opt :
-	  designator-list ASSIGN
-	| %empty
+      designator-list ASSIGN
+    | %empty
     ;
 
 designator-list :
-	  designator
-	| designator-list designator
+      designator
+    | designator-list designator
     ;
 
 designator :
-	  LB constant-expression RB
-	| DOT ID
+      LB constant-expression RB
+    | DOT ID
     ;
 
 
@@ -385,8 +385,8 @@ switch-stmt :
     ;
 
 expr-stmt :
-	  expression SEMI
-	;
+      expression SEMI
+    ;
 
 expression-opt : expression | %empty ;
 
@@ -498,9 +498,9 @@ unary-expression :
     | MINUS cast-expression
     | BTNOT cast-expression
     | NOT   cast-expression
-    // | sizeof unary-expression
-    // | sizeof ( type-name )
-    // | _Alignof ( type-name )
+    | SIZEOF unary-expression
+    | SIZEOF LPAR type-name RPAR
+    // | _Alignof LPAR type-name RPAR
     ;
 
 postfix-expression :
