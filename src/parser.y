@@ -229,7 +229,7 @@ type-qualifier-list :
 
 parameter-type-list :
       parameter-list
-    // | parameter-list COMMA "..."
+    // | parameter-list COMMA "..."     // TODO ellipsis
     ;
 
 parameter-list :
@@ -264,9 +264,9 @@ direct-abstract-declarator :
     | direct-abstract-declarator-opt LB type-qualifier-list-opt                       LB
     | direct-abstract-declarator-opt LB STATIC type-qualifier-list-opt assignment-expression LB
     | direct-abstract-declarator-opt LB type-qualifier-list STATIC     assignment-expression LB
-    // | direct-abstract-declarator-opt LB STAR LB  // TODO conflito
+    // | direct-abstract-declarator-opt LB STAR LB                      // TODO conflito
     // | direct-abstract-declarator-opt LPAR parameter-type-list RPAR   // TODO conflito
-    // | direct-abstract-declarator-opt LPAR                     RPAR
+    // | direct-abstract-declarator-opt LPAR                     RPAR   // TODO conflito
     ;
 
 
@@ -406,8 +406,6 @@ assignment-operator :
     | ORASS
     ;
 
-    // TODO <<= >>= &= ^= |=
-
 constant-expression : conditional-expression ;
 
 conditional-expression :
@@ -493,6 +491,7 @@ unary-expression :
     // | _Alignof LPAR type-name RPAR
     ;
 
+// TODO conflito em LB
 postfix-expression :
       primary-expression
     | postfix-expression LB expression RB

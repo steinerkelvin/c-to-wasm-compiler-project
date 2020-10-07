@@ -79,17 +79,6 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 ">"                     { HANDLE_TOKEN(GT, {}); }
 "<="                    { HANDLE_TOKEN(LET, {}); }
 ">="                    { HANDLE_TOKEN(GET, {}); }
-"*="                    { HANDLE_TOKEN(STARASS, {}); } 
-"/="                    { HANDLE_TOKEN(OVERASS, {}); }
-"%="                    { HANDLE_TOKEN(MODASS, {}); }
-"+="                    { HANDLE_TOKEN(PLUSASS, {}); }
-"-="                    { HANDLE_TOKEN(MINASS, {}); }
-"<<="                   { HANDLE_TOKEN(SLASS, {}); }
-">>="                   { HANDLE_TOKEN(SRASS, {}); }
-"&="                    { HANDLE_TOKEN(ANDASS, {}); }
-"^="                    { HANDLE_TOKEN(XORASS, {}); }
-"|="                    { HANDLE_TOKEN(ORASS, {}); }
-
 "&&"                    { HANDLE_TOKEN(AND, {}); }
 "||"                    { HANDLE_TOKEN(OR, {}); }
 "&"                     { HANDLE_TOKEN(AMPER, {}); }
@@ -112,7 +101,16 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 "."                     { HANDLE_TOKEN(DOT, {}); }
 "->"                    { HANDLE_TOKEN(ARROW, {}); }
 "="                     { HANDLE_TOKEN(ASSIGN, {}); }
-    /* TODO  *= /= %= += -= <<= >>= &= ^= |=  */
+"*="                    { HANDLE_TOKEN(STARASS, {}); } 
+"/="                    { HANDLE_TOKEN(OVERASS, {}); }
+"%="                    { HANDLE_TOKEN(MODASS, {}); }
+"+="                    { HANDLE_TOKEN(PLUSASS, {}); }
+"-="                    { HANDLE_TOKEN(MINASS, {}); }
+"<<="                   { HANDLE_TOKEN(SLASS, {}); }
+">>="                   { HANDLE_TOKEN(SRASS, {}); }
+"&="                    { HANDLE_TOKEN(ANDASS, {}); }
+"^="                    { HANDLE_TOKEN(XORASS, {}); }
+"|="                    { HANDLE_TOKEN(ORASS, {}); }
 
 {digit}                 { HANDLE_TOKEN(INT_VAL, {}); }
 {real}                  { HANDLE_TOKEN(REAL_VAL, {}); }
