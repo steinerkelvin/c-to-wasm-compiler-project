@@ -32,14 +32,45 @@ struct YYSTYPE {
     } value;
 };
 
+static inline stype_t slist_new() {
+    stype_t slist = (stype_t){.tag = SLIST};
+    slist.value.slist = new std::list<stype_t>();
+    return slist;
+}
+
+static inline stype_t *slist_push(stype_t *slist, stype_t item) {
+    (*slist).value.slist->push_back(item);
+    return slist;
+}
+
+#define HANDLE_DECLARATION(SPECS, INITS)                                       \
+    {                                                                          \
+        for (auto it : *(SPECS).value.slist) {                                 \
+            if (it.tag != TOKEN) {                                             \
+                continue;                                                      \
+            }                                                                  \
+            if (strcmp(it.value.token.lexeme, "typedef") == 0) {               \
+                for (auto it : *(INITS).value.slist) {                         \
+                    if (it.tag != TOKEN) {                                     \
+                        continue;                                              \
+                    }                                                          \
+                    insert_typename(it.value.token.lexeme);                    \
+                }                                                              \
+            }                                                                  \
+        }                                                                      \
+    }
+
 // Macros para o scanner para tratar um token
 #if defined(DUMP_TOKENS)
-// Estas apenas imprimem o tipo do token seguido do lexema.  
+
+// Estas apenas imprimem o tipo do token seguido do lexema.
 // Usada para testes/debug.
 #define HANDLE_TOKEN(TOK, PROC)                                                \
     { printf("%s : %s\n", #TOK, yytext); }
 #define HANDLE_TOKEN_ID(PROC) HANDLE_TOKEN(ID, PROC);
+
 #else
+
 #define HANDLE_TOKEN(TOK, PROC)                                                \
     {                                                                          \
         yylval = (YYSTYPE){                                                    \
@@ -60,6 +91,7 @@ struct YYSTYPE {
             HANDLE_TOKEN(ID, PROC);                                            \
         }                                                                      \
     }
+
 #endif
 
 #endif // PARSING_H

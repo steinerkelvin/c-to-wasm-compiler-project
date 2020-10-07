@@ -72,22 +72,12 @@ program-part :
 
 declaration :
       declaration-specifiers SEMI
-    | declaration-specifiers init-declarator-list {      // TODO melhorar legibilidade
-              for (auto it : *$1.value.slist) {
-                if (it.tag != TOKEN) { continue; }
-                if (strcmp(it.value.token.lexeme, "typedef") == 0) {
-                    for (auto it : *$2.value.slist) {
-                        if (it.tag != TOKEN) { continue; }
-                        insert_typename(it.value.token.lexeme);
-                    }
-                }
-            }
-        } SEMI
+    | declaration-specifiers[specs] init-declarator-list[inits]     { HANDLE_DECLARATION($specs, $inits); } SEMI
     ;
 
 declaration-specifiers :
-      declaration-specifiers declaration-specifier     { $$ = $1; (*$$.value.slist).push_back($2); }
-    | declaration-specifier                            { $$ = (stype_t){ .tag = SLIST }; $$.value.slist = new std::list<stype_t>{ $1 }; }
+      declaration-specifiers[list] declaration-specifier[spec]      { $$ = $list;       slist_push(&($$), $spec); }
+    | declaration-specifier[spec]                                   { $$ = slist_new(); slist_push(&($$), $spec); }
     ;
 declaration-specifier :
       storage-class-specifier
@@ -193,8 +183,8 @@ function-specifier :
 //     ;
 
 init-declarator-list :
-      init-declarator-list COMMA init-declarator    { $$ = $1; (*$$.value.slist).push_back($3); }
-    | init-declarator                               { $$ = (stype_t){ .tag = SLIST }; $$.value.slist = new std::list<stype_t>{ $1 }; }
+      init-declarator-list[list] COMMA init-declarator[dec]     { $$ = $list;     ; slist_push(&($$), $dec); }
+    | init-declarator[dec]                                      { $$ = slist_new(); slist_push(&($$), $dec); }
     ;
 init-declarator :
       declarator ASSIGN initializer
