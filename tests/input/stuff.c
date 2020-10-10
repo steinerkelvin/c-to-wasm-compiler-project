@@ -39,6 +39,9 @@ int main() {
     ponto_t ponto = {.x = 10.0, .y = 0.0};
     ponto.y = 20;
 
+    int vec[4][4] = {{0}};
+    - vec[4][4]++;
+
     char k = 'A';
     k = '\0';
     k = '\n';
