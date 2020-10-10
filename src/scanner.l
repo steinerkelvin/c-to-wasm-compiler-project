@@ -99,6 +99,7 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 ":"                     { HANDLE_TOKEN(COLON, {}); }
 ","                     { HANDLE_TOKEN(COMMA, {}); }
 "."                     { HANDLE_TOKEN(DOT, {}); }
+"..."                   { HANDLE_TOKEN(ELLIPSIS, {}); }
 "->"                    { HANDLE_TOKEN(ARROW, {}); }
 "="                     { HANDLE_TOKEN(ASSIGN, {}); }
 "*="                    { HANDLE_TOKEN(STARASS, {}); } 

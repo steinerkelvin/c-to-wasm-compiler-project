@@ -17,11 +17,20 @@ int test5(a, b) { return a - b; }
 
 // abstract-declarator
 int test6(int *, int *);
+int test7(int *[8]);
+
+int test8(int (*cb[])());
+int test8(int (*cb[2])()){
+    return cb[0]();
+}
 
 int voidp_to_int(void *p) {
     int *ip = (int *)p;
     return *ip;
 }
+
+void varargs(int, ...);
+void varargs(int dang, ...) {}
 
 //testando\
 um \
@@ -40,7 +49,7 @@ int main() {
     ponto.y = 20;
 
     int vec[4][4] = {{0}};
-    - vec[4][4]++;
+    - vec[1][1]++;
 
     char k = 'A';
     k = '\0';

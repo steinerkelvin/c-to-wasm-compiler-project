@@ -30,21 +30,21 @@ void yyerror(char const *s);
 %token SIZEOF
 %token ENUM STRUCT UNION
 %token BREAK CASE CONTINUE DEFAULT DO ELSE FOR GOTO IF RETURN SWITCH WHILE
-%token ASSIGN
+%token ASSIGN STARASS OVERASS MODASS PLUSASS MINASS SLASS SRASS ANDASS XORASS ORASS
 %token PLUS MINUS STAR OVER PERC PLUSPLUS MINUSMINUS
-%token EQ NEQ LT GT LET GET STARASS OVERASS MODASS PLUSASS MINASS SLASS SRASS ANDASS XORASS ORASS
+%token EQ NEQ LT GT LET GET
 %token AND OR
 %token BTOR BTXOR
 %token NOT BTNOT
 %token LEFT RIGHT
 %token LPAR RPAR LCB RCB LB RB
 %token DOT ARROW AMPER
-%token SEMI COLON COMMA QUEST
+%token SEMI COLON COMMA QUEST ELLIPSIS
 %token INT_VAL REAL_VAL CHAR_VAL STR_VAL
 %token ID TYPENAME
 
-// EZ: Criei dois níveis de prioridades distintos para poder usar nas regras mais para baixo.
-%precedence LOW // Acabei criando um 'token' para a prioridade baixa, mas poderia usar outro.
+// // EZ: Criei dois níveis de prioridades distintos para poder usar nas regras mais para baixo.
+// %precedence LOW // Acabei criando um 'token' para a prioridade baixa, mas poderia usar outro.
 
 // %left COMMA
 // %right ASSIGN
@@ -59,7 +59,7 @@ void yyerror(char const *s);
 // %left LPAR  // Associação da chamada de função
 // %left LB    // Associação do operador de índice
 
-%precedence LB // Aqui tem de ser '[' porque queremos que o parser seja guloso.
+// %precedence LB // Aqui tem de ser '[' porque queremos que o parser seja guloso.
 
 %%
 
@@ -207,11 +207,12 @@ pointer :
 
 direct-declarator :
       ID
-    | LPAR declarator RPAR    { $$ = $2; }
-    | direct-declarator LB type-qualifier-list-opt assignment-expression RB
-    | direct-declarator LB type-qualifier-list-opt                       RB
-    | direct-declarator LB type-qualifier-list-opt STAR                  RB
-    // TODO static?
+    | LPAR declarator RPAR      { $$ = $2; }
+    | direct-declarator LB type-qualifier-list-opt                              RB
+    | direct-declarator LB type-qualifier-list-opt        assignment-expression RB
+    | direct-declarator LB type-qualifier-list STATIC     assignment-expression RB
+    | direct-declarator LB STATIC type-qualifier-list-opt assignment-expression RB
+    | direct-declarator LB type-qualifier-list-opt STAR                         RB
     | direct-declarator LPAR parameter-type-list RPAR
     | direct-declarator LPAR identifier-list-opt RPAR
     ;
@@ -227,13 +228,13 @@ type-qualifier-list-opt :
     | %empty
     ;
 type-qualifier-list :
-        type-qualifier-list type-qualifier
+      type-qualifier-list type-qualifier
     | type-qualifier
     ;
 
 parameter-type-list :
       parameter-list
-    // | parameter-list COMMA "..."     // TODO ellipsis
+    | parameter-list COMMA ELLIPSIS
     ;
 
 parameter-list :
@@ -258,19 +259,22 @@ abstract-declarator :
     | direct-abstract-declarator
     ;
 
-direct-abstract-declarator-opt :
-      direct-abstract-declarator
-      | %empty
-      ;
 direct-abstract-declarator :
       LPAR abstract-declarator RPAR
-    | direct-abstract-declarator-opt LB type-qualifier-list-opt assignment-expression LB
-    | direct-abstract-declarator-opt LB type-qualifier-list-opt                       LB
-    | direct-abstract-declarator-opt LB STATIC type-qualifier-list-opt assignment-expression LB
-    | direct-abstract-declarator-opt LB type-qualifier-list STATIC     assignment-expression LB
-    // | direct-abstract-declarator-opt LB STAR LB                      // TODO conflito
-    // | direct-abstract-declarator-opt LPAR parameter-type-list RPAR   // TODO conflito
-    // | direct-abstract-declarator-opt LPAR                     RPAR   // TODO conflito
+    |                            LB type-qualifier-list-opt assignment-expression RB
+    | direct-abstract-declarator LB type-qualifier-list-opt assignment-expression RB
+    |                            LB type-qualifier-list-opt                       RB
+    | direct-abstract-declarator LB type-qualifier-list-opt                       RB
+    |                            LB STATIC type-qualifier-list-opt assignment-expression RB
+    | direct-abstract-declarator LB STATIC type-qualifier-list-opt assignment-expression RB
+    |                            LB type-qualifier-list STATIC     assignment-expression RB
+    | direct-abstract-declarator LB type-qualifier-list STATIC     assignment-expression RB
+    // |                            LB STAR RB                  // Conflito (mas sinceramente, me parece inútil)
+    // | direct-abstract-declarator LB STAR RB                  // Conflito (mas sinceramente, me parece inútil)
+    |                            LPAR parameter-type-list RPAR
+    | direct-abstract-declarator LPAR parameter-type-list RPAR
+    |                            LPAR                     RPAR
+    | direct-abstract-declarator LPAR                     RPAR
     ;
 
 
@@ -481,9 +485,7 @@ cast-expression :
     ;
 
 unary-expression :
-// EZ: Já essa regra eu só quero que seja usada quando os [] acabarem
-// por isso a baixa prioridade.
-      postfix-expression  %prec LOW
+      postfix-expression                        // %prec LOW
     | PLUSPLUS   unary-expression
     | MINUSMINUS unary-expression
     | AMPER cast-expression
@@ -497,12 +499,9 @@ unary-expression :
     // | _Alignof LPAR type-name RPAR
     ;
 
-// TODO conflito em LB
 postfix-expression :
       primary-expression
-// EZ: Quero que essa regra seja usada o quanto for possível, por isso a prioridade.
-// Dessa forma, dá para consumir coisas como 'x[i][j]++'.
-    | postfix-expression LB expression RB %prec LB
+    | postfix-expression LB expression RB       // %prec LB
     | postfix-expression LPAR argument-expression-list-opt RPAR
     | postfix-expression DOT   ID
     | postfix-expression ARROW ID
