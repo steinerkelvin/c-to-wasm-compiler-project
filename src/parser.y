@@ -40,8 +40,11 @@ void yyerror(char const *s);
 %token LPAR RPAR LCB RCB LB RB
 %token DOT ARROW AMPER
 %token SEMI COLON COMMA QUEST
-%token INT_VAL REAL_VAL CHAR_VAL STR_VAL 
+%token INT_VAL REAL_VAL CHAR_VAL STR_VAL
 %token ID TYPENAME
+
+// EZ: Criei dois níveis de prioridades distintos para poder usar nas regras mais para baixo.
+%precedence LOW // Acabei criando um 'token' para a prioridade baixa, mas poderia usar outro.
 
 // %left COMMA
 // %right ASSIGN
@@ -56,6 +59,7 @@ void yyerror(char const *s);
 // %left LPAR  // Associação da chamada de função
 // %left LB    // Associação do operador de índice
 
+%precedence LB // Aqui tem de ser '[' porque queremos que o parser seja guloso.
 
 %%
 
@@ -212,7 +216,7 @@ direct-declarator :
     | direct-declarator LPAR identifier-list-opt RPAR
     ;
 
-identifier-list-opt : 
+identifier-list-opt :
       identifier-list-opt COMMA ID
     | ID
     | %empty
@@ -270,7 +274,7 @@ direct-abstract-declarator :
     ;
 
 
-initializer : 
+initializer :
       assignment-expression
     | LCB initializer-list trailing-comma RCB
     ;
@@ -382,7 +386,7 @@ expression-opt : expression | %empty ;
 
 expression : comma-expression ;
 
-comma-expression : 
+comma-expression :
       assignment-expression
     | expression COMMA assignment-expression
     ;
@@ -392,12 +396,12 @@ assignment-expression :
     | unary-expression assignment-operator assignment-expression
     ;
 
-assignment-operator : 
-      ASSIGN 
-    | STARASS 
+assignment-operator :
+      ASSIGN
+    | STARASS
     | OVERASS
     | MODASS
-    | PLUSASS 
+    | PLUSASS
     | MINASS
     | SLASS
     | SRASS
@@ -477,7 +481,9 @@ cast-expression :
     ;
 
 unary-expression :
-      postfix-expression
+// EZ: Já essa regra eu só quero que seja usada quando os [] acabarem
+// por isso a baixa prioridade.
+      postfix-expression  %prec LOW
     | PLUSPLUS   unary-expression
     | MINUSMINUS unary-expression
     | AMPER cast-expression
@@ -494,7 +500,9 @@ unary-expression :
 // TODO conflito em LB
 postfix-expression :
       primary-expression
-    | postfix-expression LB expression RB
+// EZ: Quero que essa regra seja usada o quanto for possível, por isso a prioridade.
+// Dessa forma, dá para consumir coisas como 'x[i][j]++'.
+    | postfix-expression LB expression RB %prec LB
     | postfix-expression LPAR argument-expression-list-opt RPAR
     | postfix-expression DOT   ID
     | postfix-expression ARROW ID
