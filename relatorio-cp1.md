@@ -49,6 +49,13 @@ versão anterior do Bison, adicionamos essa declaração no cabeçalho `parsing.
 Também explicitamos no arquivo README quais versões das ferramentas foram
 utilizadas para desenvolvimento e testes.
 
+## Exceções
+
+Devemos pontuar algumas opções que fizemos na implementação:
+- Escolhemos tratar os comandos `break` e `continue` na próxima 
+etapa de implementação (analisador semântico), bem como o tratamento de literais de string 
+no tocante a caracteres especiais como o `\n`. 
+
 ## Testes
 
 Decidimos compilar um executável separado que apenas imprime os tokens
