@@ -20,7 +20,7 @@ Hopefully, a C to WebAssemply compiler.
 
 ### Testado com as versões
 
-- Make: `4.3-3` (Arch)
-- Flex: `2.6.4-3` (Arch)
-- Bison: `3.6.4-1` (Arch)
-- Clang: `10.0.1-1` (Arch)
+- Make: `4.3-3` (Arch), `4.1` (Ubuntu Bionic)
+- Flex: `2.6.4-3` (Arch), `2.6.4-3` (Ubuntu Bionic)
+- Bison: `3.6.4-1` (Arch), `3.0.4` (Ubuntu Bionic)
+- Clang: `10.0.1-1` (Arch) `6.0.0-1` (Ubuntu Bionic)
