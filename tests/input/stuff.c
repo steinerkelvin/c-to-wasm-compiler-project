@@ -103,6 +103,15 @@ int main() {
     do
         i++;
     while (i < 10);
+
+    int flag = 0;
+start:
+    if (flag)
+        goto end;
+    flag = 1;
+end:
+    ;
+
     return 0;
 }
 

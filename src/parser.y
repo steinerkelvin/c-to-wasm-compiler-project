@@ -315,34 +315,39 @@ declaration-list-opt :
 
 
 stmt :
-      declaration
-    | empty-stmt
+      empty-stmt
+    | labeled-stmt
     | compound-stmt
     | if-stmt
-    | return-stmt
-    | break-stmt
+    | switch-stmt
     | case-stmt
     | default-stmt
+    | goto-stmt
+    | break-stmt
     | continue-stmt
+    | return-stmt
     | while-stmt
     | do-while-stmt
     | for-stmt
-    | switch-stmt
     | expr-stmt
-    // TODO labeled statement
     ;
 
 empty-stmt :
       SEMI
     ;
 
+labeled-stmt : ID COLON stmt ;
+
+goto-stmt : GOTO ID SEMI ;
+
 compound-stmt :
-      LCB {open_scope();} stmt-list {close_scope();} RCB
+      LCB {open_scope();} block-list-opt {close_scope();} RCB
     ;
-stmt-list :
-      stmt-list stmt
+block-list-opt :
+      block-list-opt block-item
     | %empty
     ;
+block-item : declaration | stmt ;
 
 if-stmt :
       IF LPAR expression RPAR stmt
