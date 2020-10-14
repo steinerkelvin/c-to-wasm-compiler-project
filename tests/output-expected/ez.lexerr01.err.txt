@@ -1,0 +1,1 @@
+LEXICAL ERROR: Unknown symbol $

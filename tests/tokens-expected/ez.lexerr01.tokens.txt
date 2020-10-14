@@ -1,0 +1,7 @@
+LEXICAL ERROR: Unknown symbol $
+INT : int
+ID : main
+LPAR : (
+RPAR : )
+LCB : {
+INT : int

@@ -122,5 +122,5 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 
 [a-zA-Z_][0-9a-zA-Z_]*  { HANDLE_TOKEN_ID({}); }
 
-.                       {   printf("LEXICAL ERROR: Unknown symbol %s\n", yytext);
+.                       {   fprintf(stderr, "LEXICAL ERROR: Unknown symbol %s\n", yytext);
                             exit(EXIT_FAILURE); }

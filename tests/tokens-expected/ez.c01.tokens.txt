@@ -1,0 +1,23 @@
+INT : int
+ID : print
+LPAR : (
+CONST : const
+CHAR : char
+STAR : *
+ID : str
+RPAR : )
+SEMI : ;
+INT : int
+ID : main
+LPAR : (
+RPAR : )
+LCB : {
+ID : print
+LPAR : (
+STR_VAL : "Hello, world!\n"
+RPAR : )
+SEMI : ;
+RETURN : return
+INT_VAL : 0
+SEMI : ;
+RCB : }

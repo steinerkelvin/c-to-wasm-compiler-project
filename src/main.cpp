@@ -7,10 +7,10 @@ int main(void) {
     // yydebug = 1;
 
     if (yyparse() == 0) {
-        fprintf(stderr, "PARSE SUCCESSFUL!\n");
+        fprintf(stderr, "PARSE SUCCESSFUL\n");
         return 0;
     } else {
-        fprintf(stderr, "PARSE FAILED!\n");
+        fprintf(stderr, "PARSE FAILED\n");
         return 1;
     }
 }
