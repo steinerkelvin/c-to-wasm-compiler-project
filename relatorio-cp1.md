@@ -5,7 +5,9 @@ tentamos definir e resolver os conflitos das regras referentes a declarações,
 que contém uma regra do tipo:
 
 ```
-declaration : declaration-specifiers | declaration-specifiers init-declarator-list
+declaration :
+      declaration-specifiers
+    | declaration-specifiers init-declarator-list
 ```
 
 isto é, uma lista de especificadores de tipo, qualificadores, etc, seguida de
@@ -75,7 +77,7 @@ cada caso de teste.
 
 Os caracteres de controle que representam uma quebra de linha em arquivos de
 texto podem ser diferente dependendo do SO. Esses caracteres são CR (_carriage
-return_) e LF (_line feed_), respectivamente `0x0D` (representado por "\n") e
+return_) e LF (_line feed_), respectivamente `0x0D` (representado por `\n`) e
 `0x0A` (representado por "\r"). Sistemas Unix utilizam a terminação `LF`,
 enquanto o Windows utiliza dois caracteres: `CR LF`. O antigo MacOS (pré-OSX
 Macintosh) utilizava apenas `CR`, porém escolhemos não dar suporte a essa

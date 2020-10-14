@@ -12,6 +12,9 @@ bison: src/parser.cpp src/parser.h
 
 exe: bin/compiler bin/dump-tokens
 
+relatorio:
+	pandoc ./relatorio-cp1.md -o ./relatorio-cp1.pdf
+
 %/:
 	mkdir -p $@
 
