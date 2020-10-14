@@ -16,7 +16,7 @@ assim podem ser utilizados como um especificador de tipo. Isso gera o problema
 de determinar em qual token de identificador deixamos de tratar de um
 especificador de tipo e passamos a tratar um nome a ser declarado, de variável
 etc, uma vez que o Bison utiliza apenas um token de lookahead. Pesquisando sobre
-o problema chegamos a decepcionante descoberta de que o problema é ainda pior e
+o problema chegamos à decepcionante descoberta de que o problema é ainda pior e
 a gramática de C contem uma ambiguidade um tanto inconveniente [(link)][blog]
 [(link)][roskind].
 
@@ -52,9 +52,9 @@ utilizadas para desenvolvimento e testes.
 ## Exceções
 
 Devemos pontuar algumas opções que fizemos na implementação:
-- Escolhemos tratar os comandos `break` e `continue` na próxima 
-etapa de implementação (analisador semântico), bem como o tratamento de literais de string 
-no tocante a caracteres especiais como o `\n`. 
+- Escolhemos tratar os comandos `break` e `continue` na próxima etapa da
+  implementação (analisador semântico), bem como o tratamento de literais de
+  string no tocante a caracteres especiais como o `\n`. 
 
 ## Testes
 
