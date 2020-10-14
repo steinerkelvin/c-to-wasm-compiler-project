@@ -62,9 +62,14 @@ Decidimos compilar um executável separado que apenas imprime os tokens
 identificados pelo scanner para possibilitar a inspeção desse componente. Isso é
 feito passando um parâmetro para o compilador para definir um nome de macro (`-D
 DUMP_TOKENS`) que faz com que sejam condicionalmente definidas macros
-alternativas para o tratamento dos tokens, i.e. que imprimem os tokens.
+alternativas para o tratamento dos tokens, i.e. que apenas imprimem os tokens.
 
-TODO
+Os testes são feitos executando-se esse binário, assim como binário do parser de
+fato, com os arquivos de entrada de exemplo contidos em `tests/input/` e
+armazenando-se as saídas em `tests/tokens/` e `tests/output/`, respectivamente.
+Esses arquivos são então comparados usando `diff` contra os arquivos nas pastas
+correspondentes com o sufixo `-expected`, que contém as saídas experadas para
+cada caso de teste.
 
 ## Suporte CRLF
 
