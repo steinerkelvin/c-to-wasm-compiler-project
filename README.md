@@ -12,7 +12,7 @@ Hopefully, a C to WebAssemply compiler.
 - Make
 - Flex
 - Bison
-- Clang 10
+- Clang
 
 ### Como installar
 - Ubuntu: `sudo apt install make flex bison clang -y`
