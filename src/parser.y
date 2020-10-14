@@ -329,6 +329,7 @@ stmt :
     | for-stmt
     | switch-stmt
     | expr-stmt
+    // TODO labeled statement
     ;
 
 empty-stmt :
