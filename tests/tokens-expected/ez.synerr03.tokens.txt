@@ -1,0 +1,11 @@
+INT : int
+ID : main
+LPAR : (
+RPAR : )
+LCB : {
+INT : int
+ID : x
+EQ : ==
+INT_VAL : 2
+SEMI : ;
+RCB : }

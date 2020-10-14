@@ -1,0 +1,9 @@
+LEXICAL ERROR: Unknown symbol \
+INT : int
+ID : main
+LPAR : (
+RPAR : )
+LCB : {
+ID : x
+ASSIGN : =
+INT_VAL : 4
