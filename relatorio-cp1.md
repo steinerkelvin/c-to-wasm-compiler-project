@@ -2,7 +2,7 @@
 
 O desenvolvimento do parser seguiu correndo bem, até o fatídico momento em que
 tentamos definir e resolver os conflitos das regras referentes a declarações,
-que contém uma regra do tipo:
+que incluem uma regra do tipo:
 
 ```
 declaration :
@@ -15,55 +15,54 @@ uma lista de - simplificando - identificadores sendo declarados, que é opcional
 
 Ocorre que identificadores em C podem ser associados a um tipo (via `typedef`) e
 assim podem ser utilizados como um especificador de tipo. Isso gera o problema
-de determinar em qual token de identificador deixamos de tratar de um
-especificador de tipo e passamos a tratar um nome a ser declarado, de variável
-etc, uma vez que o Bison utiliza apenas um token de lookahead. Pesquisando sobre
-o problema chegamos à decepcionante descoberta de que o problema é ainda pior e
-a gramática de C contem uma ambiguidade um tanto inconveniente [(link)][blog]
-[(link)][roskind].
+de determinar em qual token de identificador deixamos de tratar um especificador
+de tipo e passamos a tratar um nome a ser declarado (de variável etc).
+Pesquisando sobre o problema chegamos à decepcionante descoberta de que o
+problema é ainda pior e a gramática de C contem uma ambiguidade um tanto
+inconveniente [(link)][blog] [(link)][roskind].
 
 ```
 T(a);
 ```
 
-O código acima pode ser a chamada da função `T` com argumento `a` ou uma
-declaração da variável `a` com tipo `T`.
+O código acima pode significar a chamada da função de nome `T` com argumento
+`a`, mas também pode ser uma declaração válida da variável `a` com tipo `T`.
 
 Para resolver essa ambiguidade precisamos alimentar o lexer com informação da
 tabela de símbolos para podermos distinguir os identificadores que foram
-definidos como tipos. Para isso escrevemos uma implementação mínima de tabela de
-símbolos com as operações de abrir e fechar escopo e de adicionar e verificar se
-um identificador é um nome de tipo.
+anteriormente declarados como tipos. Para isso escrevemos uma implementação
+mínima de tabela de símbolos com apenas as operações de abrir e fechar escopo e
+de adicionar e verificar se uma string é um nome de tipo.
 
 ## Versões do Bisão
 
 Tivemos um problema que surgiu devido a versões diferentes do Bison sendo usadas
 no desenvolvimento. Como é possível ver no [changelog do Bison][changelog],
-recentemente (aparentemente na versão 3.6) foi adicionado um alias para o tipo
-que deve ser retornado pelo scanner `enum yytokentype`:
+recentemente (aparentemente na versão 3.6) foi adicionado um _alias_ para o tipo
+que deve ser retornado pelo scanner:
 
 ```c
 typedef enum yytokentype yytoken_kind_t;
 ```
 
-Para que esse nome (`yytoken_kind_t`) possa ser utilizado normalmente com a
+Para que esse nome (`yytoken_kind_t`) possa ser utilizado normalmente com uma
 versão anterior do Bison, adicionamos essa declaração no cabeçalho `parsing.h`.
-Também explicitamos no arquivo README quais versões das ferramentas foram
+Também explicitamos no arquivo `README.md` quais versões das ferramentas foram
 utilizadas para desenvolvimento e testes.
 
 ## Exceções
 
-Devemos pontuar algumas opções que fizemos na implementação:
-- Escolhemos tratar os comandos `break` e `continue` na próxima etapa da
-  implementação (analisador semântico), bem como o tratamento de literais de
-  string no tocante a caracteres especiais como o `\n`. 
+Devemos pontuar algumas opções que fizemos na implementação: escolhemos tratar
+os comandos `break` e `continue` na próxima etapa da implementação (analisador
+semântico), bem como o tratamento de literais de string no tocante a caracteres
+especiais como o `\n`.
 
 ## Testes
 
 Decidimos compilar um executável separado que apenas imprime os tokens
 identificados pelo scanner para possibilitar a inspeção desse componente. Isso é
-feito passando um parâmetro para o compilador para definir um nome de macro (`-D
-DUMP_TOKENS`) que faz com que sejam condicionalmente definidas macros
+feito passando um parâmetro para o compilador para definir um nome de macro
+(`-D DUMP_TOKENS`) que faz com que sejam condicionalmente definidas macros
 alternativas para o tratamento dos tokens, i.e. que apenas imprimem os tokens.
 
 Os testes são feitos executando-se esse binário, assim como binário do parser de

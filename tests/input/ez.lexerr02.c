@@ -1,3 +1,3 @@
 int main() {
-    x = 4 \ 2;  # Should be /
+    x = 4 \ 2;  // Should be /
 }

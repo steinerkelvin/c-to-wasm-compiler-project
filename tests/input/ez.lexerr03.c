@@ -1,3 +1,3 @@
 int main() {
-    int x = 4 # 2;  # unknown operator '#'
+    int x = 4 # 2;  // Unknown operator '#'
 }
