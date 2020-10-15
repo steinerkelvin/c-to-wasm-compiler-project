@@ -33,7 +33,9 @@ for test_file in "${tests_base}"/input/*.c; do
     touch "${output_expected_file}"
     touch "${err_expected_file}"
 
-    diff "${tokens_expected_file}" "${tokens_file}"
-    diff "${output_expected_file}" "${output_expected_file}"
-    diff "${err_expected_file}" "${err_file}"
+    diff -w "${tokens_expected_file}" "${tokens_file}"  || true
+    diff -w "${output_expected_file}" "${output_expected_file}"  || true
+    diff -w "${err_expected_file}" "${err_file}"  || true
+
+    echo
 done
