@@ -7,6 +7,7 @@
 %{
 #include <stdio.h>
 #include "parsing.h"
+#include "strtable.h"
 #include "symtable.h"
 
 void yyerror (char const* s) {
@@ -117,8 +118,8 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 {real}                  { HANDLE_TOKEN(REAL_VAL, {}); }
     /* TODO corrigir e adicionar outras representações */
 
-\'([^\r\n\']|"\\\'")*\'         { HANDLE_TOKEN(CHAR_VAL, {}); }
-\"([^\r\n\"]|"\\\"")*\"         { HANDLE_TOKEN(STR_VAL, {}); }
+\'([^\r\n\']|"\\\'")*\'     { HANDLE_TOKEN(CHAR_VAL, {}); }
+\"([^\r\n\"]|"\\\"")*\"     { HANDLE_TOKEN(STR_VAL, { token->str_id = strtb_add(yytext); }); }
 
 [a-zA-Z_][0-9a-zA-Z_]*  { HANDLE_TOKEN_ID({}); }
 

@@ -18,7 +18,8 @@ void close_scope() {
 
 void insert_typename(const char *namep) {
     assert(table.size() > 0);
-    auto &scope = table[table.size() - 1];
+    const int last = table.size() - 1;
+    auto &scope = table[last];
     std::string name(namep);
     scope[name] = true;
 };

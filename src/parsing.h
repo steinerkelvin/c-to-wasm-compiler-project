@@ -12,7 +12,9 @@ typedef enum yytokentype yytoken_kind_t;
 typedef struct token {
     yytoken_kind_t type;
     char *lexeme;
-    // token_value_t value;
+    union {
+        size_t str_id;
+    };
 } token_t;
 
 // Enumeração de tipos possíveis de um valor semântico do parser
@@ -80,6 +82,7 @@ static inline stype_t *slist_push(stype_t *slist, stype_t item) {
             .type = (TOK),                                                     \
             .lexeme = strdup((yytext)),                                        \
         };                                                                     \
+        __attribute__((unused)) token_t *const token = &yylval.value.token;    \
         PROC;                                                                  \
         return TOK;                                                            \
     }
