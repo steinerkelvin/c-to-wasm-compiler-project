@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "parsing.h"
 #include "strtable.h"
-#include "symtable.h"
+#include "symtable.hpp"
 
 void yyerror (char const* s) {
     fprintf(stderr, "SYNTAX ERROR (%d): %s\n", yylineno, s);

@@ -1,33 +1,38 @@
-#include "symtable.h"
+#include "symtable.hpp"
 #include <cassert>
 #include <map>
 #include <string>
 #include <vector>
 
-using scope_table_t = std::map<std::string, bool>;
+using Scope = std::map<std::string, bool>;
 
-static std::vector<scope_table_t> table{scope_table_t()};
+static std::vector<Scope> scopes;
+static std::vector<ScopeRef> scope_stack;
 
-void open_scope() {
-    table.push_back(scope_table_t());
+ScopeRef open_scope() {
+    size_t idx = scopes.size();
+    scopes.push_back(Scope());
+    scope_stack.push_back(idx);
+    return idx;
 };
 void close_scope() {
-    assert(table.size() > 0);
-    table.pop_back();
+    assert(scope_stack.size() > 0);
+    scope_stack.pop_back();
 };
 
 void insert_typename(const char *namep) {
-    assert(table.size() > 0);
-    const int last = table.size() - 1;
-    auto &scope = table[last];
-    std::string name(namep);
+    assert(scope_stack.size() > 0);
+    const ScopeRef scpref = *(scope_stack.end() - 1);
+    Scope &scope = scopes[scpref];
+    const std::string name(namep);
     scope[name] = true;
 };
 
 bool is_typename(const char *namep) {
     const std::string name(namep);
-    for (auto &scope : table) {
-        auto it = scope.find(name);
+    for (auto &scpref : scope_stack) {
+        const auto &scope = scopes[scpref];
+        const auto it = scope.find(name);
         if (it != scope.end()) {
             return true;
         }

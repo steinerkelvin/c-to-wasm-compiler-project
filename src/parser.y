@@ -17,7 +17,7 @@
 #include <iostream>
 #include <string.h>
 #include "parsing.h"
-#include "symtable.h"
+#include "symtable.hpp"
 
 int yylex(void);
 void yyerror(char const *s);

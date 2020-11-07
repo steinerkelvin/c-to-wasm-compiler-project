@@ -2,10 +2,12 @@
 
 #include "generated_parser.h"
 #include "strtable.h"
-#include "symtable.h"
+#include "symtable.hpp"
 
 int main(void) {
     // yydebug = 1;
+
+    open_scope();
 
     if (yyparse() == 0) {
         fprintf(stderr, "PARSE SUCCESSFUL\n");
@@ -14,7 +16,7 @@ int main(void) {
         return 1;
     }
 
-    strtb_print(stderr);
+    // strtb_print(stderr);
 
     return 0;
 }

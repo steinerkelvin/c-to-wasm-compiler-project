@@ -1,11 +1,13 @@
 #if !defined(SYMTABLE_H)
 #define SYMTABLE_H
-#include <stdbool.h>
+#include <cstdlib>
+
+using ScopeRef = size_t;
 
 /* Cria um novo espopo para nomes. Os nomes serão acidionados no último escopo
- * aberto. Não é necessário inicializar abrindo um primeiro escopo.
+ * aberto.
  */
-void open_scope();
+ScopeRef open_scope();
 /* Fecha o último escopo aberto */
 void close_scope();
 
