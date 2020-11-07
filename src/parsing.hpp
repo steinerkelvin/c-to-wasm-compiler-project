@@ -3,7 +3,7 @@
 
 #include <list>
 
-#include "generated_parser.h"
+#include "generated_parser.hpp"
 
 // Tipo definido pelo Bison que é retornado pelo scanner
 typedef enum yytokentype yytoken_kind_t;

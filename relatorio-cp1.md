@@ -46,7 +46,7 @@ typedef enum yytokentype yytoken_kind_t;
 ```
 
 Para que esse nome (`yytoken_kind_t`) possa ser utilizado normalmente com uma
-versão anterior do Bison, adicionamos essa declaração no cabeçalho `parsing.h`.
+versão anterior do Bison, adicionamos essa declaração no cabeçalho `parsing.hpp`.
 Também explicitamos no arquivo `README.md` quais versões das ferramentas foram
 utilizadas para desenvolvimento e testes.
 

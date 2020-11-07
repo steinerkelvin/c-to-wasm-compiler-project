@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "generated_parser.h"
-#include "strtable.h"
+#include "generated_parser.hpp"
+#include "strtable.hpp"
 #include "symtable.hpp"
 
 int main(void) {

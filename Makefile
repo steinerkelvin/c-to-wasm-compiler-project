@@ -8,7 +8,7 @@ test: exe
 
 flex: src/scanner.cpp
 
-bison: src/parser.cpp src/parser.h
+bison: src/parser.cpp src/parser.hpp
 
 exe: bin/compiler bin/dump-tokens
 
@@ -18,10 +18,10 @@ relatorio:
 %/:
 	mkdir -p $@
 
-src/generated_parser.cpp src/generated_parser.h: src/parser.y
+src/generated_parser.cpp src/generated_parser.hpp: src/parser.y
 	(cd src/; bison -v "parser.y")
 
-src/scanner.cpp: src/scanner.l src/generated_parser.h
+src/scanner.cpp: src/scanner.l src/generated_parser.hpp
 	(cd src/; flex "scanner.l")
 
 bin/compiler: src/scanner.cpp src/generated_parser.cpp src/strtable.cpp src/symtable.cpp src/main.cpp | bin/
@@ -32,4 +32,4 @@ bin/dump-tokens: src/scanner.cpp src/dump_tokens.cpp | bin/
 
 clean:
 	rm -f bin/*
-	(cd src/; rm -f *.output generated_parser.h generated_parser.cpp scanner.cpp)
+	(cd src/; rm -f *.output generated_parser.hpp generated_parser.cpp scanner.cpp)

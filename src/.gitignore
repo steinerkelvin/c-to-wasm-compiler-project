@@ -1,4 +1,4 @@
-generated_parser.h
+generated_parser.hpp
 generated_parser.cpp
 generated_parser.output
 scanner.cpp

@@ -5,9 +5,9 @@
 %option yylineno
 
 %{
-#include <stdio.h>
-#include "parsing.h"
-#include "strtable.h"
+#include <cstdio>
+#include "parsing.hpp"
+#include "strtable.hpp"
 #include "symtable.hpp"
 
 void yyerror (char const* s) {

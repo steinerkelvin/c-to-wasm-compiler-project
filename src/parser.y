@@ -1,8 +1,7 @@
-%output "generated_parser.cpp"        // File name of generated parser.
-%defines "generated_parser.h"         // Produces a 'parser.h'
+%output "generated_parser.cpp"        
+%defines "generated_parser.hpp"        
 %define parse.error verbose // Give proper messages when a syntax error is found.
 %define parse.lac full      // Enable LAC to improve syntax error handling.
-
 %define parse.trace
 
 %define api.value.type {struct YYSTYPE}
@@ -12,11 +11,11 @@
 }
 
 %{
-#include <stdio.h>
-#include <string>
+#include <cstdio>
+#include <cstring>
 #include <iostream>
-#include <string.h>
-#include "parsing.h"
+#include <string>
+#include "parsing.hpp"
 #include "symtable.hpp"
 
 int yylex(void);

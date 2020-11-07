@@ -1,8 +1,8 @@
 #if !defined(STRTABLE_H)
 #define STRTABLE_H
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 
 size_t strtb_add(char *cstr);
 const char *strtb_get(size_t i);

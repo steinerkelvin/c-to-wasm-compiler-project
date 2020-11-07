@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "strtable.h"
+#include "strtable.hpp"
 
 static std::map<std::string, size_t> str_table;
 static std::vector<std::string> str_list;
