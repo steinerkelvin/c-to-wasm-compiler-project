@@ -4,10 +4,12 @@
 %define parse.lac full      // Enable LAC to improve syntax error handling.
 %define parse.trace
 
-%define api.value.type {struct YYSTYPE}
+// %define api.value.type {struct YYSTYPE}
+%define api.value.type union
 
 %code requires {
 #include <string>
+#include "ast.hpp"
 }
 
 %{
@@ -17,10 +19,33 @@
 #include <string>
 #include "parsing.hpp"
 #include "symtable.hpp"
+#include "ast.hpp"
 
 int yylex(void);
 void yyerror(char const *s);
+
+extern Node::Expr* last_expr;
 %}
+
+%type <Node::Expr*> expression
+%type <Node::Expr*> comma-expression
+%type <Node::Expr*> assignment-expression
+%type <Node::Expr*> constant-expression
+%type <Node::Expr*> conditional-expression
+%type <Node::Expr*> or-expression
+%type <Node::Expr*> and-expression
+%type <Node::Expr*> bit-or-expression
+%type <Node::Expr*> bit-xor-expression
+%type <Node::Expr*> bit-and-expression
+%type <Node::Expr*> equality-expression
+%type <Node::Expr*> relational-expression
+%type <Node::Expr*> shift-expression
+%type <Node::Expr*> additive-expression
+%type <Node::Expr*> multiplicative-expression
+%type <Node::Expr*> cast-expression
+%type <Node::Expr*> unary-expression
+%type <Node::Expr*> postfix-expression
+%type <Node::Expr*> primary-expression
 
 %token TYPEDEF EXTERN STATIC AUTO REGISTER
 %token VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED
@@ -39,8 +64,9 @@ void yyerror(char const *s);
 %token LPAR RPAR LCB RCB LB RB
 %token DOT ARROW AMPER
 %token SEMI COLON COMMA QUEST ELLIPSIS
-%token INT_VAL REAL_VAL CHAR_VAL STR_VAL
-%token ID TYPENAME
+
+%token <long> INT_VAL <double> REAL_VAL <char> CHAR_VAL <size_t> STR_VAL
+%token <size_t> ID <size_t> TYPENAME
 
 // // EZ: Criei dois níveis de prioridades distintos para poder usar nas regras mais para baixo.
 // %precedence LOW // Acabei criando um 'token' para a prioridade baixa, mas poderia usar outro.
@@ -75,12 +101,12 @@ program-part :
 
 declaration :
       declaration-specifiers SEMI
-    | declaration-specifiers[specs] init-declarator-list[inits]     { HANDLE_DECLARATION($specs, $inits); } SEMI
+    | declaration-specifiers[specs] init-declarator-list[inits]     /* { HANDLE_DECLARATION($specs, $inits); } */ SEMI
     ;
 
 declaration-specifiers :
-      declaration-specifiers[list] declaration-specifier[spec]      { $$ = $list;       slist_push(&($$), $spec); }
-    | declaration-specifier[spec]                                   { $$ = slist_new(); slist_push(&($$), $spec); }
+      declaration-specifiers[list] declaration-specifier[spec]      // { $$ = $list;       slist_push(&($$), $spec); }
+    | declaration-specifier[spec]                                   // { $$ = slist_new(); slist_push(&($$), $spec); }
     ;
 declaration-specifier :
       storage-class-specifier
@@ -186,8 +212,8 @@ function-specifier :
 //     ;
 
 init-declarator-list :
-      init-declarator-list[list] COMMA init-declarator[dec]     { $$ = $list;     ; slist_push(&($$), $dec); }
-    | init-declarator[dec]                                      { $$ = slist_new(); slist_push(&($$), $dec); }
+      init-declarator-list[list] COMMA init-declarator[dec]     // { $$ = $list;     ; slist_push(&($$), $dec); }
+    | init-declarator[dec]                                      // { $$ = slist_new(); slist_push(&($$), $dec); }
     ;
 init-declarator :
       declarator ASSIGN initializer
@@ -195,7 +221,7 @@ init-declarator :
     ;
 
 declarator :
-      pointer direct-declarator        { $$ = $2; }
+      pointer direct-declarator        // { $$ = $2; }
     | direct-declarator
     ;
 
@@ -204,9 +230,9 @@ pointer :
     | STAR type-qualifier-list-opt
     ;
 
-direct-declarator :
+direct-declarator : 
       ID
-    | LPAR declarator RPAR      { $$ = $2; }
+    | LPAR declarator RPAR      // { $$ = $2; }
     | direct-declarator LB type-qualifier-list-opt                              RB
     | direct-declarator LB type-qualifier-list-opt        assignment-expression RB
     | direct-declarator LB type-qualifier-list STATIC     assignment-expression RB
@@ -393,7 +419,7 @@ expr-stmt :
 
 expression-opt : expression | %empty ;
 
-expression : comma-expression ;
+expression : comma-expression       { $$ = $1; last_expr = $$; } ;
 
 comma-expression :
       assignment-expression
@@ -473,34 +499,34 @@ shift-expression :
 
 additive-expression :
       multiplicative-expression
-    | additive-expression PLUS  multiplicative-expression
-    | additive-expression MINUS multiplicative-expression
+    | additive-expression PLUS  multiplicative-expression   { $$ = new Node::Plus($1, $3); }
+    | additive-expression MINUS multiplicative-expression   { $$ = new Node::Minus($1, $3); }
     ;
 
 multiplicative-expression :
       cast-expression
-    | multiplicative-expression STAR cast-expression
-    | multiplicative-expression OVER cast-expression
+    | multiplicative-expression STAR cast-expression    { $$ = new Node::Times($1, $3); }
+    | multiplicative-expression OVER cast-expression    { $$ = new Node::Over($1, $3); }
     | multiplicative-expression PERC cast-expression
     ;
 
-cast-expression :
+cast-expression : 
       unary-expression
-    | LPAR type-name RPAR cast-expression
+    | LPAR type-name RPAR cast-expression[value]        { $$ = $value; }
     ;
 
-unary-expression :
-      postfix-expression                        // %prec LOW
-    | PLUSPLUS   unary-expression
-    | MINUSMINUS unary-expression
-    | AMPER cast-expression
-    | STAR  cast-expression
-    | PLUS  cast-expression
-    | MINUS cast-expression
-    | BTNOT cast-expression
-    | NOT   cast-expression
-    | SIZEOF unary-expression
-    | SIZEOF LPAR type-name RPAR
+unary-expression : 
+      postfix-expression
+    | PLUSPLUS   unary-expression   { $$ = new Node::PrefixPlusPlus($2); }
+    | MINUSMINUS unary-expression   { $$ = new Node::PrefixMinusMinus($2); }
+    | AMPER cast-expression         { $$ = $2; }
+    | STAR  cast-expression         { $$ = $2; }
+    | PLUS  cast-expression         { $$ = $2; }
+    | MINUS cast-expression         { $$ = new Node::InvertSignal($2); }
+    | BTNOT cast-expression         { $$ = new Node::BitNot($2); }
+    | NOT   cast-expression         { $$ = new Node::Not($2); }
+    | SIZEOF unary-expression       { $$ = $2; } 
+    | SIZEOF LPAR type-name RPAR    { assert(0); }
     // | _Alignof LPAR type-name RPAR
     ;
 
@@ -510,9 +536,9 @@ postfix-expression :
     | postfix-expression LPAR argument-expression-list-opt RPAR
     | postfix-expression DOT   ID
     | postfix-expression ARROW ID
-    | postfix-expression PLUSPLUS
-    | postfix-expression MINUSMINUS
-    // | ( type-name ) { initializer-list }     // TODO
+    | postfix-expression PLUSPLUS       { $$ = new Node::PrefixPlusPlus($1);  }
+    | postfix-expression MINUSMINUS     { $$ = new Node::PrefixMinusMinus($1);  }
+    // | ( type-name ) { initializer-list }
     // | ( type-name ) { initializer-list , }
     ;
 
@@ -524,12 +550,12 @@ argument-expression-list :
     ;
 
 primary-expression :
-      ID
-    | INT_VAL
-    | REAL_VAL
-    | CHAR_VAL
-    | STR_VAL
-    | LPAR expression RPAR
+      ID            { $$ = new Node::Variable($1); }
+    | INT_VAL       { $$ = new Node::IntegerValue($1); }
+    | REAL_VAL      { $$ = new Node::IntegerValue($1); }
+    | CHAR_VAL      { $$ = new Node::CharValue($1); }
+    | STR_VAL       { $$ = new Node::StringValue($1); }
+    | LPAR expression RPAR      { $$ = $2; }
     // | generic-expression ??
     ;
 

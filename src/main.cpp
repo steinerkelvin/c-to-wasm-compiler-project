@@ -3,6 +3,9 @@
 #include "generated_parser.hpp"
 #include "strtable.hpp"
 #include "symtable.hpp"
+#include "ast.hpp"
+
+Node::Expr* last_expr;
 
 int main(void) {
     // yydebug = 1;
@@ -16,6 +19,7 @@ int main(void) {
         return 1;
     }
 
+    // std::cout << (*last_expr) << std::endl;
     // strtb_print(stderr);
 
     return 0;

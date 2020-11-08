@@ -119,7 +119,7 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
     /* TODO corrigir e adicionar outras representações */
 
 \'([^\r\n\']|"\\\'")*\'     { HANDLE_TOKEN(CHAR_VAL, {}); }
-\"([^\r\n\"]|"\\\"")*\"     { HANDLE_TOKEN(STR_VAL, { token->str_id = strtb_add(yytext); }); }
+\"([^\r\n\"]|"\\\"")*\"     { HANDLE_TOKEN(STR_VAL, { yylval.STR_VAL = strtb_add(yytext); }); }
 
 [a-zA-Z_][0-9a-zA-Z_]*  { HANDLE_TOKEN_ID({}); }
 

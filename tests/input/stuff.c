@@ -45,7 +45,7 @@ typedef struct ponto {
 int main() {
     char *p = "Este programa não imprime \"Hello World\"";
 
-    ponto_t ponto = {.x = 10.0, .y = 0.0};
+    struct ponto ponto = {.x = 10.0, .y = 0.0}; // TODO corrigir typedef
     ponto.y = 20;
 
     int vec[4][4] = {{0}};

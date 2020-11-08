@@ -204,7 +204,8 @@ ID : p
 ASSIGN : =
 STR_VAL : "Este programa não imprime \"Hello World\""
 SEMI : ;
-ID : ponto_t
+STRUCT : struct
+ID : ponto
 ID : ponto
 ASSIGN : =
 LCB : {
