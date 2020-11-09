@@ -1,35 +1,73 @@
 cc=clang++ -std=c++17
-flags=-Wall
+cflags=-Wall -g
+
+parser_files = src/generated_parser.cpp src/generated_parser.hpp src/generated_parser.output
+scanner_files = src/scanner.cpp
+generated_files = $(parser_files) $(scanner_files)
+
+# Arquivos de bibliotecas
+src_lib=$(wildcard src/*.cpp)
+objs=$(patsubst src/%.cpp,build/%.o,$(src_lib))
+
+# Arquivos de executáveis
+src_main=$(wildcard main/*.cpp)
+mains=$(patsubst main/%.cpp,bin/%,$(src_main))
+
+src_custom=$(wildcard custom/*.cpp)
+customs=$(patsubst custom/%.cpp,bin/custom/%,$(src_custom))
 
 all: exe
 
 test: exe
 	./run_tests.sh
 
-flex: src/scanner.cpp
-
-bison: src/parser.cpp src/parser.hpp
-
-exe: bin/compiler bin/dump-tokens
-
 relatorio:
 	pandoc ./relatorio-cp1.md -o ./relatorio-cp1.pdf
 
-%/:
-	mkdir -p $@
-
-src/generated_parser.cpp src/generated_parser.hpp: src/parser.y
-	(cd src/; bison -v "parser.y")
-
-src/scanner.cpp: src/scanner.l src/generated_parser.hpp
-	(cd src/; flex "scanner.l")
-
-bin/compiler: src/scanner.cpp src/generated_parser.cpp src/strtable.cpp src/symtable.cpp src/ast.cpp src/global.cpp src/main.cpp | bin/
-	$(cc) $(flags) -o "$@" $^ ${flags}
-
-bin/dump-tokens: src/scanner.cpp src/dump_tokens.cpp | bin/
-	$(cc) $(flags) -o "$@" $^ ${flags} -D DUMP_TOKENS
-
 clean:
-	rm -f bin/*
-	(cd src/; rm -f *.output generated_parser.hpp generated_parser.cpp scanner.cpp)
+	rm -f -r ./.deps
+	rm -f -r ./bin
+	rm -f -r ./build
+	cd src/; rm -f *.output $(parser_files) $(scanner_files)
+
+flex: $(scanner_files)
+
+bison: $(parser_files)
+
+exe: $(mains) $(customs)
+
+# bin/dump-tokens: src/scanner.cpp custom/dump-tokens.cpp
+# 	mkdir -p ./bin
+# 	$(cc) $(cflags) -o "$@" $^ $(cflags) -D DUMP_TOKENS
+
+$(parser_files): src/parser.y
+	cd src/; bison -v "parser.y"
+
+$(scanner_files): src/scanner.l src/generated_parser.hpp
+	cd src/; flex "scanner.l"
+
+
+$(objs) $(customs): $(generated_files)
+$(mains): $(objs)
+
+# Compila bibliotecas de src/ para build/
+build/%.o: src/%.cpp
+	mkdir -p build/ $(dir .dep/src/%)
+	$(cc) $(cflags) -o $@  -c $<
+	$(cc) $(cflags) -MM -MT $@  $< > .dep/$<.d
+
+# Compila de main/ para para bin/
+bin/%: main/%.cpp $(objs)
+	mkdir -p bin/ build/main/ $(dir ./.dep/main/%)
+	$(cc) $(cflags) -I "./src/" -c -o build/main/$*.o $<
+	$(cc) $(cflags) -I "./src/" -o $@ build/main/$*.o $(objs)
+	$(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
+
+# Compila de main/ para para bin/
+bin/custom/%: custom/%.cpp
+	mkdir -p bin/custom/ $(dir ./.dep/custom/%)
+	$(cc) $(cflags) -I "./src/" -o $@ $<
+	$(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
+
+# Inclui as listas de dependências
+include $(wildcard .dep/**/*)

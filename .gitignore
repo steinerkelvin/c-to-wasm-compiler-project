@@ -4,5 +4,8 @@
 
 /tmp/
 /bin/
+/build/
+/main/*.o
+/.dep/
 
 /a.out

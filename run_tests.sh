@@ -2,7 +2,7 @@
 set -e
 
 exe="./bin/compiler"
-dump_tokens_exe="./bin/dump-tokens"
+dump_tokens_exe="./bin/custom/dump-tokens"
 tests_base="./tests"
 
 mkdir -p "${tests_base}/input"
