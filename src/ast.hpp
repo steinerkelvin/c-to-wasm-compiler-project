@@ -112,11 +112,11 @@ struct StringValue : BaseValue<size_t> {
 };
 
 struct Variable : Expr {
-    size_t get_name() { return this->name; };
-    Variable(size_t name) { this->name = name; };
+    std::string get_name() { return this->name; };
+    Variable(std::string& name) { this->name = name; };
 
   protected:
-    size_t name;
+    std::string name;
 };
 
 struct UnOp : SingleNodeBase<Expr> {

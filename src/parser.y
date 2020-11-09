@@ -9,6 +9,8 @@
 
 %code requires {
 #include <string>
+#include "types.hpp"
+#include "declarations.hpp"
 #include "ast.hpp"
 }
 
@@ -17,6 +19,8 @@
 #include <cstring>
 #include <iostream>
 #include <string>
+#include "types.hpp"
+#include "declarations.hpp"
 #include "parsing.hpp"
 #include "symtable.hpp"
 #include "ast.hpp"
@@ -28,6 +32,21 @@ void yyerror(char const *s);
 
 %type <Node::Program*> program
 %type <Node::Declaration*> program-part function-definition declaration
+
+%type <types::TypeQualifier*> type-qualifier
+%type <types::TypeSpec*> type-specifier
+%type <size_t> typedef-name
+%type <bool> struct-or-union
+%type <types::StructOrUnionSpec*> struct-or-union-spec
+%type <types::EnumSpec*> enum-spec
+
+%type <decl::DeclarationSpecs*> declaration-specifiers
+%type <decl::DeclarationSpec*> declaration-specifier
+%type <decl::StorageClassSpec*> storage-class-specifier
+%type <decl::InitDeclarators*> init-declarator-list
+%type <std::string*> init-declarator
+%type <std::string*> declarator
+%type <std::string*> direct-declarator
 
 %type <Node::Statement*> stmt
 %type <Node::Block*> compound-stmt block-list-opt
@@ -67,8 +86,6 @@ void yyerror(char const *s);
 %type <Node::Expr*> postfix-expression
 %type <Node::Expr*> primary-expression
 
-
-
 %token TYPEDEF EXTERN STATIC AUTO REGISTER
 %token VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED
 %token CONST RESTRICT VOLATILE
@@ -88,7 +105,7 @@ void yyerror(char const *s);
 %token SEMI COLON COMMA QUEST ELLIPSIS
 
 %token <long long int> INT_VAL <double> REAL_VAL <char> CHAR_VAL <size_t> STR_VAL
-%token <size_t> ID <size_t> TYPENAME
+%token <std::string*> ID <size_t> TYPENAME
 
 // // EZ: Criei dois níveis de prioridades distintos para poder usar nas regras mais para baixo.
 // %precedence LOW // Acabei criando um 'token' para a prioridade baixa, mas poderia usar outro.
@@ -122,56 +139,74 @@ program-part
     ;
 
 declaration 
-    : declaration-specifiers SEMI                                       { $$ = new Node::Declaration(); }
-    | declaration-specifiers[specs] init-declarator-list[inits] SEMI    { $$ = new Node::Declaration(); }
+    : declaration-specifiers SEMI
+        {
+            $$ = new Node::Declaration();
+        }
+    | declaration-specifiers[specs] init-declarator-list[inits] SEMI
+        { 
+            declare(*$specs, *$inits);
+            delete $specs;
+            delete $inits;
+            $$ = new Node::Declaration();
+        }
         /* { HANDLE_DECLARATION($specs, $inits); } */
     ;
 
-declaration-specifiers :
-      declaration-specifiers[list] declaration-specifier[spec]      // { $$ = $list;       slist_push(&($$), $spec); }
-    | declaration-specifier[spec]                                   // { $$ = slist_new(); slist_push(&($$), $spec); }
+declaration-specifiers
+    : declaration-specifiers[list] declaration-specifier[spec]
+        { $$ = $1; $$->add($2); }
+        // { $$ = $list;       slist_push(&($$), $spec); }
+    | declaration-specifier[spec]
+        { $$ = new decl::DeclarationSpecs(); $$->add($1);  }
+        // { $$ = slist_new(); slist_push(&($$), $spec); }
     ;
-declaration-specifier :
-      storage-class-specifier
-    | type-specifier
-    | type-qualifier
-    | function-specifier
+declaration-specifier
+    : storage-class-specifier   { $$ = $1; }
+    | type-specifier            { $$ = new decl::TypeDeclSpec(*$1); }
+    | type-qualifier            { $$ = new decl::TypeDeclSpec(*$1); }
+    // | function-specifier
     // | alignment-specifier
     ;
 
-storage-class-specifier :
-      TYPEDEF
-    | EXTERN
-    | STATIC
-    | AUTO
-    | REGISTER
+storage-class-specifier
+    : TYPEDEF   { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::TYPEDEF); }
+    | EXTERN    { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::EXTERN); }
+    | STATIC    { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::STATIC); }
+    | AUTO      { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::AUTO); }
+    | REGISTER  { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::REGISTER); }
     ;
 
-type-specifier :
-      VOID
-    | CHAR
-    | SHORT
-    | INT
-    | LONG
-    | FLOAT
-    | DOUBLE
-    | SIGNED
-    | UNSIGNED
-    | struct-or-union-spec
-    | enum-specifier
-    | typedef-name
+type-specifier
+    : VOID      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::VOID); }
+    | CHAR      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::CHAR); }
+    | SHORT     { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::SHORT); }
+    | INT       { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::INT); }
+    | LONG      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::LONG); }
+    | FLOAT     { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::FLOAT); }
+    | DOUBLE    { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::DOUBLE); }
+    | SIGNED    { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::SIGNED); }
+    | UNSIGNED  { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::UNSIGNED); }
+    | struct-or-union-spec  { $$ = $1; }
+    | enum-spec             { $$ = $1; }
+    | typedef-name          { $$ = new types::TypedefName($1); }
     ;
 
 typedef-name : TYPENAME ;
 
 struct-or-union-spec :
-      struct-or-union ID
-    | struct-or-union ID LCB struct-declaration-list RCB
-    | struct-or-union    LCB struct-declaration-list RCB
+      struct-or-union ID                                    { $$ = new types::StructOrUnionSpec($1); }
+    | struct-or-union ID LCB struct-declaration-list RCB    { $$ = new types::StructOrUnionSpec($1); }
+    | struct-or-union    LCB struct-declaration-list RCB    { $$ = new types::StructOrUnionSpec($1); }
     ;
 
-struct-declaration-list :
-      struct-declaration
+struct-or-union
+    : STRUCT    { $$ = false; }
+    | UNION     { $$ = true; }
+    ;
+
+struct-declaration-list 
+    : struct-declaration
     | struct-declaration-list struct-declaration
     ;
 
@@ -198,12 +233,10 @@ struct-declarator :
     //| declarator COLON constant-expression
     ;
 
-struct-or-union : STRUCT | UNION ;
-
-enum-specifier :
-      ENUM ID
-    | ENUM ID LCB enumerator-list trailing-comma RCB
-    | ENUM    LCB enumerator-list trailing-comma RCB
+enum-spec
+    : ENUM ID                                           { $$ = new types::EnumSpec(); }
+    | ENUM ID LCB enumerator-list trailing-comma RCB    { $$ = new types::EnumSpec(); }
+    | ENUM    LCB enumerator-list trailing-comma RCB    { $$ = new types::EnumSpec(); }
     ;
 
 trailing-comma : COMMA | %empty ;
@@ -217,45 +250,49 @@ enumerator :
     | ID
     ;
 
-type-qualifier :
-      CONST
-    | RESTRICT
-    | VOLATILE
+type-qualifier
+    : CONST     { $$ = new types::TypeQualifier{types::TypeQualifier::CONST}; }
+    | RESTRICT  { $$ = new types::TypeQualifier{types::TypeQualifier::RESTRICT}; }
+    | VOLATILE  { $$ = new types::TypeQualifier{types::TypeQualifier::VOLATILE}; }
     // | "_Atomic"
     ;
 
-function-specifier :
-      INLINE
-    // | "_Noreturn"
-    ;
+// function-specifier :
+//       INLINE
+//     // | "_Noreturn"
+//     ;
 
 // alignment-specifier :
 //       "_Alignas" LPAR type-name RPAR
 //     | "_Alignas" LPAR constant-expression RPAR
 //     ;
 
-init-declarator-list :
-      init-declarator-list[list] COMMA init-declarator[dec]     // { $$ = $list;     ; slist_push(&($$), $dec); }
-    | init-declarator[dec]                                      // { $$ = slist_new(); slist_push(&($$), $dec); }
+init-declarator-list
+    : init-declarator-list[list] COMMA init-declarator[dec]
+        { $$ = $list; $$->add($dec); }
+        // { $$ = $list;     ; slist_push(&($$), $dec); }
+    | init-declarator[dec]
+        { $$ = new decl::InitDeclarators(); $$->add($dec); }
+        // { $$ = slist_new(); slist_push(&($$), $dec); }
     ;
-init-declarator :
-      declarator ASSIGN initializer
+init-declarator 
+    : declarator ASSIGN initializer
     | declarator
     ;
 
-declarator :
-      pointer direct-declarator        // { $$ = $2; }
+declarator 
+    : pointer direct-declarator     { $$ = $2; }
     | direct-declarator
     ;
 
-pointer :
-      pointer STAR type-qualifier-list-opt
+pointer
+    : pointer STAR type-qualifier-list-opt
     | STAR type-qualifier-list-opt
     ;
 
-direct-declarator : 
-      ID
-    | LPAR declarator RPAR      // { $$ = $2; }
+direct-declarator
+    : ID
+    | LPAR declarator RPAR  { $$ = $2; }
     | direct-declarator LB type-qualifier-list-opt                              RB
     | direct-declarator LB type-qualifier-list-opt        assignment-expression RB
     | direct-declarator LB type-qualifier-list STATIC     assignment-expression RB
@@ -580,8 +617,8 @@ argument-expression-list :
     | assignment-expression
     ;
 
-primary-expression :
-      ID            { $$ = new Node::Variable($1); }
+primary-expression 
+    : ID            { $$ = new Node::Variable(*$1); delete $1; }
     | INT_VAL       { $$ = new Node::IntegerValue($1); }
     | REAL_VAL      { $$ = new Node::FloatingValue($1); }
     | CHAR_VAL      { $$ = new Node::CharValue($1); }

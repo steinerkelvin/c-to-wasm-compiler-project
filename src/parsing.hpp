@@ -92,7 +92,7 @@ typedef struct token {
             yylval.TYPENAME = 0;                                               \
             HANDLE_TOKEN(TYPENAME, PROC);                                      \
         } else {                                                               \
-            yylval.ID = 0;                                                     \
+            yylval.ID = new std::string(yytext);                                   \
             HANDLE_TOKEN(ID, PROC);                                            \
         }                                                                      \
     }
