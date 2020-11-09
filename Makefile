@@ -21,6 +21,9 @@ all: exe
 test: exe
 	./run_tests.sh
 
+format:
+	clang-format -i src/**.cpp src/**.hpp
+
 relatorio:
 	pandoc ./relatorio-cp1.md -o ./relatorio-cp1.pdf
 

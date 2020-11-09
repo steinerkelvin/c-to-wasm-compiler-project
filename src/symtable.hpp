@@ -12,8 +12,8 @@ ScopeRef open_scope();
 void close_scope();
 
 /* Insere um nome de tipo no último escopo */
-void insert_typename(const char *name);
+void insert_typename(const char* name);
 /* Verifica se um nome de tipo está em escopo (em qualquer nível) */
-bool is_typename(const char *name);
+bool is_typename(const char* name);
 
 #endif // SYMTABLE_H

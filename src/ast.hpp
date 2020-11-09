@@ -16,15 +16,17 @@
     virtual const char* const get_label() const { return (TEXT); };
 #define DECLARE_LABEL(NAME) DECLARE_LABEL_STR(#NAME)
 
-namespace Node {
+namespace ast {
 
 struct Node {
     DECLARE_LABEL(Node);
     virtual bool is_typed() const { return false; }
-    virtual const std::vector<Node*> get_children() const {
+    virtual const std::vector<Node*> get_children() const
+    {
         return std::vector<Node*>();
     }
-    virtual void write_repr(std::ostream& stream) const {
+    virtual void write_repr(std::ostream& stream) const
+    {
         stream << "(" << this->get_label();
         for (auto const& child : this->get_children()) {
             stream << " ";
@@ -33,11 +35,11 @@ struct Node {
         stream << ")";
     }
 };
-}; // namespace Node
+}; // namespace ast
 
-std::ostream& operator<<(std::ostream& stream, const Node::Node& node);
+std::ostream& operator<<(std::ostream& stream, const ast::Node& node);
 
-namespace Node {
+namespace ast {
 using std::string;
 using std::variant;
 
@@ -46,7 +48,8 @@ using std::variant;
 // Root node of type R with single child of type T
 template <typename T, typename R = T>
 struct SingleNodeBase : R {
-    virtual const std::vector<Node*> get_children() const {
+    virtual const std::vector<Node*> get_children() const
+    {
         return std::vector<Node*>{this->child};
     }
 
@@ -57,7 +60,8 @@ struct SingleNodeBase : R {
 // Root node of type R with multiple children of type T
 template <typename T, typename R = T>
 struct MultiNodeBase : T {
-    virtual const std::vector<Node*> get_children() const {
+    virtual const std::vector<Node*> get_children() const
+    {
         std::vector<Node*> result;
         std::copy(
             this->children.cbegin(),
@@ -85,7 +89,8 @@ struct Value : Expr {};
 template <typename T>
 struct BaseValue : Expr {
     BaseValue(T value) { this->value = value; };
-    virtual void write_repr(std::ostream& stream) const {
+    virtual void write_repr(std::ostream& stream) const
+    {
         stream << " ";
         stream << this->value;
     };
@@ -120,7 +125,8 @@ struct Variable : Expr {
 };
 
 struct UnOp : SingleNodeBase<Expr> {
-    UnOp(Expr* child) {
+    UnOp(Expr* child)
+    {
         assert(child != NULL);
         this->type = child->get_type();
         this->child = child;
@@ -128,7 +134,8 @@ struct UnOp : SingleNodeBase<Expr> {
 };
 
 struct BinOp : MultiNodeBase<Expr> {
-    BinOp(Expr* left, Expr* right) {
+    BinOp(Expr* left, Expr* right)
+    {
         assert(left != NULL);
         assert(right != NULL);
         this->children = std::vector<Expr*>{left, right};
@@ -188,7 +195,8 @@ struct Statement : Node {
 
 struct Block : MultiNodeBase<Statement> {
     DECLARE_LABEL(Block);
-    void add(Statement* stmt) {
+    void add(Statement* stmt)
+    {
         // assert(stmt);
         if (stmt)
             this->children.push_back(stmt);
@@ -197,7 +205,8 @@ struct Block : MultiNodeBase<Statement> {
 
 struct ExpressionStmt : SingleNodeBase<Expr, Statement> {
     DECLARE_LABEL(ExpressionStmt);
-    ExpressionStmt(Expr* value) {
+    ExpressionStmt(Expr* value)
+    {
         assert(value);
         this->child = value;
     };
@@ -210,11 +219,13 @@ struct Declaration : Node {
 
 struct FunctionDefinition : Declaration {
     DECLARE_LABEL(FunctionDefinition);
-    FunctionDefinition(Block* body) {
+    FunctionDefinition(Block* body)
+    {
         assert(body);
         this->body = body;
     }
-    virtual const std::vector<Node*> get_children() const {
+    virtual const std::vector<Node*> get_children() const
+    {
         return std::vector<Node*>{this->body};
     }
 
@@ -223,12 +234,13 @@ struct FunctionDefinition : Declaration {
 };
 
 struct Program : MultiNodeBase<Declaration, Node> {
-    void add(Declaration* decl) {
+    void add(Declaration* decl)
+    {
         assert(decl);
         this->children.push_back(decl);
     };
 };
 
-}; // namespace Node
+}; // namespace ast
 
 #endif /* AST_H */

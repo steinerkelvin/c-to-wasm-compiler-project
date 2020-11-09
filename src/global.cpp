@@ -1,3 +1,3 @@
 #include "global.hpp"
-Node::Expr* last_expr;
-Node::Program* root;
+ast::Expr* last_expr;
+ast::Program* root;

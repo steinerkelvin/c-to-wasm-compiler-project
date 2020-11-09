@@ -46,4 +46,3 @@ void declare(const DeclarationSpecs& specs, const InitDeclarators& decls);
 }; // namespace decl
 
 #endif /* DECLARATIONS_H */
- 

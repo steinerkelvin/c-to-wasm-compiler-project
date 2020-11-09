@@ -68,7 +68,9 @@ typedef struct token {
 // Estas apenas imprimem o tipo do token seguido do lexema.
 // Usada para testes/debug.
 #define HANDLE_TOKEN(TOK, PROC)                                                \
-    { printf("%s : %s\n", #TOK, yytext); }
+    {                                                                          \
+        printf("%s : %s\n", #TOK, yytext);                                     \
+    }
 #define HANDLE_TOKEN_ID(PROC) HANDLE_TOKEN(ID, PROC);
 
 #else
@@ -92,7 +94,7 @@ typedef struct token {
             yylval.TYPENAME = 0;                                               \
             HANDLE_TOKEN(TYPENAME, PROC);                                      \
         } else {                                                               \
-            yylval.ID = new std::string(yytext);                                   \
+            yylval.ID = new std::string(yytext);                               \
             HANDLE_TOKEN(ID, PROC);                                            \
         }                                                                      \
     }

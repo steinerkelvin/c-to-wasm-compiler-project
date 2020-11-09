@@ -4,8 +4,8 @@
 
 using namespace decl;
 
-void decl::declare(
-    const DeclarationSpecs& specs, const InitDeclarators& decls) {
+void decl::declare(const DeclarationSpecs& specs, const InitDeclarators& decls)
+{
     // std::cerr << "declaring:";
     // for (auto const& decl : decls) {
     //     std::cerr << " " << *decl;

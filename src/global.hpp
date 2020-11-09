@@ -2,7 +2,7 @@
 #define GLOBAL_H
 
 #include "ast.hpp"
-extern Node::Expr* last_expr;
-extern Node::Program* root;
+extern ast::Expr* last_expr;
+extern ast::Program* root;
 
 #endif /* GLOBAL_H */

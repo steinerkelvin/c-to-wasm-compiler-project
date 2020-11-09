@@ -1,7 +1,8 @@
 #include "ast.hpp"
 #include <iostream>
 
-std::ostream& operator<<(std::ostream& stream, const Node::Node& node) {
+std::ostream& operator<<(std::ostream& stream, const ast::Node& node)
+{
     node.write_repr(stream);
     return stream;
 };

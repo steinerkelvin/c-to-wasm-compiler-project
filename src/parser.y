@@ -4,7 +4,6 @@
 %define parse.lac full      // Enable LAC to improve syntax error handling.
 %define parse.trace
 
-// %define api.value.type {struct YYSTYPE}
 %define api.value.type union
 
 %code requires {
@@ -30,8 +29,8 @@ int yylex(void);
 void yyerror(char const *s);
 %}
 
-%type <Node::Program*> program
-%type <Node::Declaration*> program-part function-definition declaration
+%type <ast::Program*> program
+%type <ast::Declaration*> program-part function-definition declaration
 
 %type <types::TypeQualifier*> type-qualifier
 %type <types::TypeSpec*> type-specifier
@@ -48,43 +47,43 @@ void yyerror(char const *s);
 %type <std::string*> declarator
 %type <std::string*> direct-declarator
 
-%type <Node::Statement*> stmt
-%type <Node::Block*> compound-stmt block-list-opt
-%type <Node::Statement*> block-item
-%type <Node::Statement*> empty-stmt
-%type <Node::Statement*> labeled-stmt
-%type <Node::Statement*> if-stmt
-%type <Node::Statement*> switch-stmt
-%type <Node::Statement*> case-stmt
-%type <Node::Statement*> default-stmt
-%type <Node::Statement*> goto-stmt
-%type <Node::Statement*> break-stmt
-%type <Node::Statement*> continue-stmt
-%type <Node::Statement*> return-stmt
-%type <Node::Statement*> while-stmt
-%type <Node::Statement*> do-while-stmt
-%type <Node::Statement*> for-stmt
-%type <Node::ExpressionStmt*> expr-stmt
+%type <ast::Statement*> stmt
+%type <ast::Block*> compound-stmt block-list-opt
+%type <ast::Statement*> block-item
+%type <ast::Statement*> empty-stmt
+%type <ast::Statement*> labeled-stmt
+%type <ast::Statement*> if-stmt
+%type <ast::Statement*> switch-stmt
+%type <ast::Statement*> case-stmt
+%type <ast::Statement*> default-stmt
+%type <ast::Statement*> goto-stmt
+%type <ast::Statement*> break-stmt
+%type <ast::Statement*> continue-stmt
+%type <ast::Statement*> return-stmt
+%type <ast::Statement*> while-stmt
+%type <ast::Statement*> do-while-stmt
+%type <ast::Statement*> for-stmt
+%type <ast::ExpressionStmt*> expr-stmt
 
-%type <Node::Expr*> expression
-%type <Node::Expr*> comma-expression
-%type <Node::Expr*> assignment-expression
-%type <Node::Expr*> constant-expression
-%type <Node::Expr*> conditional-expression
-%type <Node::Expr*> or-expression
-%type <Node::Expr*> and-expression
-%type <Node::Expr*> bit-or-expression
-%type <Node::Expr*> bit-xor-expression
-%type <Node::Expr*> bit-and-expression
-%type <Node::Expr*> equality-expression
-%type <Node::Expr*> relational-expression
-%type <Node::Expr*> shift-expression
-%type <Node::Expr*> additive-expression
-%type <Node::Expr*> multiplicative-expression
-%type <Node::Expr*> cast-expression
-%type <Node::Expr*> unary-expression
-%type <Node::Expr*> postfix-expression
-%type <Node::Expr*> primary-expression
+%type <ast::Expr*> expression
+%type <ast::Expr*> comma-expression
+%type <ast::Expr*> assignment-expression
+%type <ast::Expr*> constant-expression
+%type <ast::Expr*> conditional-expression
+%type <ast::Expr*> or-expression
+%type <ast::Expr*> and-expression
+%type <ast::Expr*> bit-or-expression
+%type <ast::Expr*> bit-xor-expression
+%type <ast::Expr*> bit-and-expression
+%type <ast::Expr*> equality-expression
+%type <ast::Expr*> relational-expression
+%type <ast::Expr*> shift-expression
+%type <ast::Expr*> additive-expression
+%type <ast::Expr*> multiplicative-expression
+%type <ast::Expr*> cast-expression
+%type <ast::Expr*> unary-expression
+%type <ast::Expr*> postfix-expression
+%type <ast::Expr*> primary-expression
 
 %token TYPEDEF EXTERN STATIC AUTO REGISTER
 %token VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED
@@ -107,30 +106,15 @@ void yyerror(char const *s);
 %token <long long int> INT_VAL <double> REAL_VAL <char> CHAR_VAL <size_t> STR_VAL
 %token <std::string*> ID <size_t> TYPENAME
 
-// // EZ: Criei dois níveis de prioridades distintos para poder usar nas regras mais para baixo.
-// %precedence LOW // Acabei criando um 'token' para a prioridade baixa, mas poderia usar outro.
-
-// %left COMMA
-// %right ASSIGN
-// %left EQ LT GT LET GET
-// %left PLUS MINUS
-// %left STAR OVER
-// %precedence PLUSPLUS MINUSMINUS
-// %precedence PREFIX
 %precedence RPAR
 %precedence ELSE
-// %precedence POINTER
-// %left LPAR  // Associação da chamada de função
-// %left LB    // Associação do operador de índice
-
-// %precedence LB // Aqui tem de ser '[' porque queremos que o parser seja guloso.
 
 %%
 
 all : program { root = $1; } ;
 
 program
-    : %empty                { $$ = new Node::Program(); }
+    : %empty                { $$ = new ast::Program(); }
     | program program-part  { $$ = $1; $$->add($2); }
     ;
 program-part
@@ -141,14 +125,14 @@ program-part
 declaration 
     : declaration-specifiers SEMI
         {
-            $$ = new Node::Declaration();
+            $$ = new ast::Declaration();
         }
     | declaration-specifiers[specs] init-declarator-list[inits] SEMI
         { 
             declare(*$specs, *$inits);
             delete $specs;
             delete $inits;
-            $$ = new Node::Declaration();
+            $$ = new ast::Declaration();
         }
         /* { HANDLE_DECLARATION($specs, $inits); } */
     ;
@@ -194,8 +178,8 @@ type-specifier
 
 typedef-name : TYPENAME ;
 
-struct-or-union-spec :
-      struct-or-union ID                                    { $$ = new types::StructOrUnionSpec($1); }
+struct-or-union-spec
+    : struct-or-union ID                                    { $$ = new types::StructOrUnionSpec($1); }
     | struct-or-union ID LCB struct-declaration-list RCB    { $$ = new types::StructOrUnionSpec($1); }
     | struct-or-union    LCB struct-declaration-list RCB    { $$ = new types::StructOrUnionSpec($1); }
     ;
@@ -210,26 +194,26 @@ struct-declaration-list
     | struct-declaration-list struct-declaration
     ;
 
-struct-declaration :
-      specifier-qualifier-list struct-declarator-list SEMI
+struct-declaration
+    : specifier-qualifier-list struct-declarator-list SEMI
     | specifier-qualifier-list SEMI
     // | static_assert-declaration
     ;
 
-specifier-qualifier-list :
-      specifier-qualifier-list type-specifier
+specifier-qualifier-list
+    : specifier-qualifier-list type-specifier
     | specifier-qualifier-list type-qualifier
     | type-specifier
     | type-qualifier
     ;
 
-struct-declarator-list :
-      struct-declarator
+struct-declarator-list
+    : struct-declarator
     | struct-declarator-list COMMA struct-declarator
     ;
 
-struct-declarator :
-    declarator
+struct-declarator
+    : declarator
     //| declarator COLON constant-expression
     ;
 
@@ -241,12 +225,12 @@ enum-spec
 
 trailing-comma : COMMA | %empty ;
 
-enumerator-list :
-      enumerator-list COMMA enumerator
+enumerator-list
+    : enumerator-list COMMA enumerator
     | enumerator
     ;
-enumerator :
-      ID ASSIGN constant-expression
+enumerator
+    : ID ASSIGN constant-expression
     | ID
     ;
 
@@ -257,13 +241,13 @@ type-qualifier
     // | "_Atomic"
     ;
 
-// function-specifier :
-//       INLINE
+// function-specifier
+//     : INLINE
 //     // | "_Noreturn"
 //     ;
 
-// alignment-specifier :
-//       "_Alignas" LPAR type-name RPAR
+// alignment-specifier
+//     : "_Alignas" LPAR type-name RPAR
 //     | "_Alignas" LPAR constant-expression RPAR
 //     ;
 
@@ -302,50 +286,50 @@ direct-declarator
     | direct-declarator LPAR identifier-list-opt RPAR
     ;
 
-identifier-list-opt :
-      identifier-list-opt COMMA ID
+identifier-list-opt
+    : identifier-list-opt COMMA ID
     | ID
     | %empty
     ;
 
-type-qualifier-list-opt :
-      type-qualifier-list
+type-qualifier-list-opt
+    : type-qualifier-list
     | %empty
     ;
-type-qualifier-list :
-      type-qualifier-list type-qualifier
+type-qualifier-list
+    : type-qualifier-list type-qualifier
     | type-qualifier
     ;
 
-parameter-type-list :
-      parameter-list
+parameter-type-list
+    : parameter-list
     | parameter-list COMMA ELLIPSIS
     ;
 
-parameter-list :
-      parameter-declaration
+parameter-list
+    : parameter-declaration
     | parameter-list COMMA parameter-declaration
     ;
-parameter-declaration :
-      declaration-specifiers declarator
+parameter-declaration
+    : declaration-specifiers declarator
     | declaration-specifiers abstract-declarator-opt
     ;
 
 
 type-name : specifier-qualifier-list abstract-declarator-opt ;
 
-abstract-declarator-opt :
-      abstract-declarator
+abstract-declarator-opt
+    : abstract-declarator
     | %empty
     ;
-abstract-declarator :
-      pointer
+abstract-declarator
+    : pointer
     | pointer direct-abstract-declarator
     | direct-abstract-declarator
     ;
 
-direct-abstract-declarator :
-      LPAR abstract-declarator RPAR
+direct-abstract-declarator
+    : LPAR abstract-declarator RPAR
     |                            LB type-qualifier-list-opt assignment-expression RB
     | direct-abstract-declarator LB type-qualifier-list-opt assignment-expression RB
     |                            LB type-qualifier-list-opt                       RB
@@ -363,39 +347,39 @@ direct-abstract-declarator :
     ;
 
 
-initializer :
-      assignment-expression
+initializer
+    : assignment-expression
     | LCB initializer-list trailing-comma RCB
     ;
 
-initializer-list :
-      designation-opt initializer
+initializer-list
+    : designation-opt initializer
     | initializer-list COMMA designation-opt initializer
     ;
 
-designation-opt :
-      designator-list ASSIGN
+designation-opt
+    : designator-list ASSIGN
     | %empty
     ;
 
-designator-list :
-      designator
+designator-list
+    : designator
     | designator-list designator
     ;
 
-designator :
-      LB constant-expression RB
+designator
+    : LB constant-expression RB
     | DOT ID
     ;
 
 
 function-definition
     : declaration-specifiers declarator declaration-list-opt compound-stmt[body]
-        { $$ = new Node::FunctionDefinition($body); }
+        { $$ = new ast::FunctionDefinition($body); }
     ;
 
-declaration-list-opt :
-      declaration-list-opt declaration
+declaration-list-opt
+    : declaration-list-opt declaration
     | %empty
     ;
 
@@ -418,8 +402,8 @@ stmt
     | expr-stmt         { $$ = $1; }
     ;
 
-empty-stmt :
-      SEMI              { $$ = NULL; }
+empty-stmt
+    : SEMI              { $$ = NULL; }
     ;
 
 labeled-stmt
@@ -434,7 +418,7 @@ compound-stmt
     : LCB {open_scope();} block-list-opt[block] {close_scope();} RCB   { $$ = $block; }
     ;
 block-list-opt
-    : %empty                        { $$ = new Node::Block(); }
+    : %empty                        { $$ = new ast::Block(); }
     | block-list-opt block-item     { $$ = $1; $$->add($2); }
     ;
 block-item
@@ -447,18 +431,18 @@ if-stmt
     | IF LPAR expression RPAR stmt[body] ELSE stmt  { $$ = $body; }
     ;
 
-return-stmt :
-      RETURN expression-opt SEMI    { $$ = NULL; }
+return-stmt
+    : RETURN expression-opt SEMI    { $$ = NULL; }
     ;
 
-continue-stmt :
-      CONTINUE SEMI     { $$ = NULL; }
+continue-stmt
+    : CONTINUE SEMI     { $$ = NULL; }
     ;
-break-stmt :
-      BREAK SEMI        { $$ = NULL; }
+break-stmt
+    : BREAK SEMI        { $$ = NULL; }
     ;
-case-stmt :
-      CASE constant-expression COLON stmt[body]     { $$ = $body; }
+case-stmt
+    : CASE constant-expression COLON stmt[body]     { $$ = $body; }
     ;
 default-stmt
     : DEFAULT COLON stmt[body]                      { $$ = $body; }
@@ -481,16 +465,16 @@ switch-stmt
     : SWITCH LPAR expression RPAR stmt[body]    { $$ = $body; }
     ;
 
-expr-stmt :
-      expression SEMI   { $$ = new Node::ExpressionStmt($1); }
+expr-stmt
+    : expression SEMI   { $$ = new ast::ExpressionStmt($1); }
     ;
 
 expression-opt : expression | %empty ;
 
 expression : comma-expression       { $$ = $1; last_expr = $$; } ;
 
-comma-expression :
-      assignment-expression
+comma-expression
+    : assignment-expression
     | expression COMMA assignment-expression
     ;
 
@@ -499,8 +483,8 @@ assignment-expression
     | unary-expression assignment-operator assignment-expression  { $$ = $3; }
     ;
 
-assignment-operator :
-      ASSIGN
+assignment-operator
+    : ASSIGN
     | STARASS
     | OVERASS
     | MODASS
@@ -515,114 +499,114 @@ assignment-operator :
 
 constant-expression : conditional-expression ;
 
-conditional-expression :
-      or-expression
+conditional-expression
+    : or-expression
     | or-expression QUEST expression COLON conditional-expression
     ;
 
-or-expression :
-      and-expression
+or-expression
+    : and-expression
     | or-expression OR and-expression
     ;
 
-and-expression :
-      bit-or-expression
+and-expression
+    : bit-or-expression
     | and-expression AND bit-or-expression
     ;
 
-bit-or-expression :
-      bit-xor-expression
+bit-or-expression
+    : bit-xor-expression
     | bit-or-expression BTOR bit-xor-expression
     ;
 
-bit-xor-expression :
-      bit-and-expression
+bit-xor-expression
+    : bit-and-expression
     | bit-xor-expression BTXOR bit-and-expression
     ;
 
-bit-and-expression :
-      equality-expression
+bit-and-expression
+    : equality-expression
     | bit-and-expression AMPER equality-expression
     ;
 
-equality-expression :
-      relational-expression
+equality-expression
+    : relational-expression
     | equality-expression EQ  relational-expression
     | equality-expression NEQ relational-expression
     ;
 
-relational-expression :
-      shift-expression
+relational-expression
+    : shift-expression
     | relational-expression LT shift-expression
     | relational-expression GT shift-expression
     | relational-expression LET shift-expression
     | relational-expression GET shift-expression
     ;
 
-shift-expression :
-      additive-expression
+shift-expression
+    : additive-expression
     | shift-expression LEFT  additive-expression
     | shift-expression RIGHT additive-expression
     ;
 
-additive-expression :
-      multiplicative-expression
-    | additive-expression PLUS  multiplicative-expression   { $$ = new Node::Plus($1, $3); }
-    | additive-expression MINUS multiplicative-expression   { $$ = new Node::Minus($1, $3); }
+additive-expression
+    : multiplicative-expression
+    | additive-expression PLUS  multiplicative-expression   { $$ = new ast::Plus($1, $3); }
+    | additive-expression MINUS multiplicative-expression   { $$ = new ast::Minus($1, $3); }
     ;
 
-multiplicative-expression :
-      cast-expression
-    | multiplicative-expression STAR cast-expression    { $$ = new Node::Times($1, $3); }
-    | multiplicative-expression OVER cast-expression    { $$ = new Node::Over($1, $3); }
+multiplicative-expression
+    : cast-expression
+    | multiplicative-expression STAR cast-expression    { $$ = new ast::Times($1, $3); }
+    | multiplicative-expression OVER cast-expression    { $$ = new ast::Over($1, $3); }
     | multiplicative-expression PERC cast-expression
     ;
 
-cast-expression : 
-      unary-expression
+cast-expression
+    : unary-expression
     | LPAR type-name RPAR cast-expression[value]        { $$ = $value; }
     ;
 
-unary-expression : 
-      postfix-expression
-    | PLUSPLUS   unary-expression   { $$ = new Node::PrefixPlusPlus($2); }
-    | MINUSMINUS unary-expression   { $$ = new Node::PrefixMinusMinus($2); }
+unary-expression
+    : postfix-expression
+    | PLUSPLUS   unary-expression   { $$ = new ast::PrefixPlusPlus($2); }
+    | MINUSMINUS unary-expression   { $$ = new ast::PrefixMinusMinus($2); }
     | AMPER cast-expression         { $$ = $2; }
     | STAR  cast-expression         { $$ = $2; }
     | PLUS  cast-expression         { $$ = $2; }
-    | MINUS cast-expression         { $$ = new Node::InvertSignal($2); }
-    | BTNOT cast-expression         { $$ = new Node::BitNot($2); }
-    | NOT   cast-expression         { $$ = new Node::Not($2); }
+    | MINUS cast-expression         { $$ = new ast::InvertSignal($2); }
+    | BTNOT cast-expression         { $$ = new ast::BitNot($2); }
+    | NOT   cast-expression         { $$ = new ast::Not($2); }
     | SIZEOF unary-expression       { $$ = $2; } 
     | SIZEOF LPAR type-name RPAR    { assert(0); }
     // | _Alignof LPAR type-name RPAR
     ;
 
-postfix-expression :
-      primary-expression
+postfix-expression
+    : primary-expression
     | postfix-expression LB expression RB       // %prec LB
     | postfix-expression LPAR argument-expression-list-opt RPAR
     | postfix-expression DOT   ID
     | postfix-expression ARROW ID
-    | postfix-expression PLUSPLUS       { $$ = new Node::PrefixPlusPlus($1);  }
-    | postfix-expression MINUSMINUS     { $$ = new Node::PrefixMinusMinus($1);  }
+    | postfix-expression PLUSPLUS       { $$ = new ast::PrefixPlusPlus($1);  }
+    | postfix-expression MINUSMINUS     { $$ = new ast::PrefixMinusMinus($1);  }
     // | ( type-name ) { initializer-list }
     // | ( type-name ) { initializer-list , }
     ;
 
 
 argument-expression-list-opt : argument-expression-list | %empty ;
-argument-expression-list :
-      argument-expression-list COMMA assignment-expression
+argument-expression-list
+    : argument-expression-list COMMA assignment-expression
     | assignment-expression
     ;
 
 primary-expression 
-    : ID            { $$ = new Node::Variable(*$1); delete $1; }
-    | INT_VAL       { $$ = new Node::IntegerValue($1); }
-    | REAL_VAL      { $$ = new Node::FloatingValue($1); }
-    | CHAR_VAL      { $$ = new Node::CharValue($1); }
-    | STR_VAL       { $$ = new Node::StringValue($1); }
+    : ID            { $$ = new ast::Variable(*$1); delete $1; }
+    | INT_VAL       { $$ = new ast::IntegerValue($1); }
+    | REAL_VAL      { $$ = new ast::FloatingValue($1); }
+    | CHAR_VAL      { $$ = new ast::CharValue($1); }
+    | STR_VAL       { $$ = new ast::StringValue($1); }
     | LPAR expression RPAR      { $$ = $2; }
     // | generic-expression ??
     ;
