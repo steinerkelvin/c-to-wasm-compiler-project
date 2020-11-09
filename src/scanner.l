@@ -114,8 +114,8 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 "^="                    { HANDLE_TOKEN(XORASS, {}); }
 "|="                    { HANDLE_TOKEN(ORASS, {}); }
 
-{digit}                 { HANDLE_TOKEN(INT_VAL, {}); }
-{real}                  { HANDLE_TOKEN(REAL_VAL, {}); }
+{digit}                 { HANDLE_TOKEN(INT_VAL, { yylval.INT_VAL = atoll(yytext); }); }
+{real}                  { HANDLE_TOKEN(REAL_VAL, { yylval.REAL_VAL = atof(yytext); }); }
     /* TODO corrigir e adicionar outras representações */
 
 \'([^\r\n\']|"\\\'")*\'     { HANDLE_TOKEN(CHAR_VAL, {}); }

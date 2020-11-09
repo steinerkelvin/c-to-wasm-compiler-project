@@ -4,8 +4,7 @@
 #include "strtable.hpp"
 #include "symtable.hpp"
 #include "ast.hpp"
-
-Node::Expr* last_expr;
+#include "global.hpp"
 
 int main(void) {
     // yydebug = 1;
@@ -20,6 +19,7 @@ int main(void) {
     }
 
     // std::cout << (*last_expr) << std::endl;
+    // std::cout << (*root) << std::endl;
     // strtb_print(stderr);
 
     return 0;
