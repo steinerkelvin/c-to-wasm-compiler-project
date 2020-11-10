@@ -34,6 +34,7 @@ void yyerror(char const *s);
 
 %type <types::TypeQualifier*> type-qualifier
 %type <types::TypeSpec*> type-specifier
+%type <types::TypeQualOrTypeSpecList*> specifier-qualifier-list
 %type <size_t> typedef-name
 %type <bool> struct-or-union
 %type <types::StructOrUnionSpec*> struct-or-union-spec
@@ -134,21 +135,18 @@ declaration
             delete $inits;
             $$ = new ast::Declaration();
         }
-        /* { HANDLE_DECLARATION($specs, $inits); } */
     ;
 
 declaration-specifiers
     : declaration-specifiers[list] declaration-specifier[spec]
         { $$ = $1; $$->add($2); }
-        // { $$ = $list;       slist_push(&($$), $spec); }
     | declaration-specifier[spec]
         { $$ = new decl::DeclarationSpecs(); $$->add($1);  }
-        // { $$ = slist_new(); slist_push(&($$), $spec); }
     ;
 declaration-specifier
     : storage-class-specifier   { $$ = $1; }
-    | type-specifier            { $$ = new decl::TypeDeclSpec(*$1); }
-    | type-qualifier            { $$ = new decl::TypeDeclSpec(*$1); }
+    | type-specifier            { $$ = new decl::TypeDeclSpec($1); }
+    | type-qualifier            { $$ = new decl::TypeDeclSpec($1); }
     // | function-specifier
     // | alignment-specifier
     ;
@@ -201,10 +199,10 @@ struct-declaration
     ;
 
 specifier-qualifier-list
-    : specifier-qualifier-list type-specifier
-    | specifier-qualifier-list type-qualifier
-    | type-specifier
-    | type-qualifier
+    : type-specifier    { $$ = new types::TypeQualOrTypeSpecList(); $$->add($1); }
+    | type-qualifier    { $$ = new types::TypeQualOrTypeSpecList(); $$->add($1); }
+    | specifier-qualifier-list type-specifier       { $$->add($2); }
+    | specifier-qualifier-list type-qualifier       { $$->add($2); }
     ;
 
 struct-declarator-list

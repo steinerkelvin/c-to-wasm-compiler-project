@@ -1,6 +1,13 @@
 int grobaru = 0;
 
-int main() {
+int test() {
+    
+}
+
+int main()
+{
     int x;
-    0 * 1 + 0 * (-2.4);
+    if (x) {
+        0 * 1 + 0 * (-2.4);
+    }
 }

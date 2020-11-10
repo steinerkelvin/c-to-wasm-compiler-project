@@ -64,16 +64,16 @@ build/%.o: src/%.cpp
 
 # Compila de main/ para para bin/
 bin/%: main/%.cpp $(objs)
-	mkdir -p bin/ build/main/ $(dir ./.dep/main/%)
+	@mkdir -p bin/ build/main/ $(dir ./.dep/main/%)
 	$(cc) $(cflags) -I "./src/" -c -o build/main/$*.o $<
 	$(cc) $(cflags) -I "./src/" -o $@ build/main/$*.o $(objs)
-	$(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
+	@$(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
 
 # Compila de main/ para para bin/
 bin/custom/%: custom/%.cpp
-	mkdir -p bin/custom/ $(dir ./.dep/custom/%)
+	@mkdir -p bin/custom/ $(dir ./.dep/custom/%)
 	$(cc) $(cflags) -I "./src/" -o $@ $<
-	$(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
+	@$(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
 
 # Inclui as listas de dependências
 include $(wildcard .dep/**/*)

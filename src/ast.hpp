@@ -77,10 +77,10 @@ struct MultiNodeBase : R {
 
 struct TypedNode : Node {
     virtual bool is_typed() const { return true; }
-    Type get_type() const { return this->type; };
+    types::Type get_type() const { return this->type; };
 
   protected:
-    Type type;
+    types::Type type;
 };
 
 struct Expr : TypedNode {};
@@ -197,6 +197,7 @@ struct Statement : Node {
 struct Block : MultiNodeBase<Statement> {
     DECLARE_LABEL(Block);
     std::optional<ScopeId> scope_id;
+
     void add(Statement* stmt)
     {
         // assert(stmt);  // TODO

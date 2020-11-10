@@ -25,12 +25,12 @@ struct StorageClassSpec : DeclarationSpec {
     const Kind kind;
 };
 
-using types::TypeQualifierOrSpec;
+using types::TypeQualOrTypeSpecPointer;
 struct TypeDeclSpec : DeclarationSpec {
-    TypeDeclSpec(const TypeQualifierOrSpec value) { this->value = value; }
-
+    TypeDeclSpec(const TypeQualOrTypeSpecPointer value) { this->value = value; }
+    TypeQualOrTypeSpecPointer get() const { return this->value; }
   protected:
-    types::TypeQualifierOrSpec value;
+    types::TypeQualOrTypeSpecPointer value;
 };
 
 struct DeclarationSpecs : std::vector<DeclarationSpec*> {

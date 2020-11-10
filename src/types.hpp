@@ -2,9 +2,24 @@
 #define TYPES_H
 
 #include <cstdlib>
+#include <ostream>
 #include <variant>
+#include <vector>
 
 namespace types {
+
+enum class PrimitiveType {
+    VOID,
+    CHAR,
+    INTEGER,
+    REAL,
+};
+
+struct Type {
+    PrimitiveType kind;
+};
+
+// Estruturas para representar especificadores e qualificadores em declarações
 
 struct TypeQualifier {
     enum TypeQualifierKind {
@@ -14,24 +29,24 @@ struct TypeQualifier {
     } kind;
 };
 
-struct TypeSpec {};
+struct TypeSpec {
+    virtual ~TypeSpec() = default;
+};
 struct SimpleTypeSpec : TypeSpec {
-    enum TypeSpecKind {
+    const enum Kind {
         VOID,
         CHAR,
         SHORT,
         INT,
         LONG,
-        FLOAT,
-        DOUBLE,
         SIGNED,
         UNSIGNED,
-    };
-    SimpleTypeSpec(const TypeSpecKind kind) : kind(kind) {}
-
-  protected:
-    const TypeSpecKind kind;
+        FLOAT,
+        DOUBLE,
+    } kind;
+    SimpleTypeSpec(const Kind kind) : kind(kind) {}
 };
+
 struct StructOrUnionSpec : TypeSpec {
     StructOrUnionSpec(const bool is_un) : is_union_flag(is_un){};
     bool is_union() const { return this->is_union_flag; }
@@ -47,21 +62,14 @@ struct TypedefName : TypeSpec {
     const size_t ref;
 };
 
-using TypeQualifierOrSpec = std::variant<TypeQualifier, TypeSpec>;
+using TypeQualOrTypeSpecPointer = std::variant<TypeQualifier*, TypeSpec*>;
+
+struct TypeQualOrTypeSpecList : std::vector<TypeQualOrTypeSpecPointer> {
+    void add(TypeQualOrTypeSpecPointer item) { this->push_back(item); }
+};
 
 }; // namespace types
 
-enum class PrimitiveType {
-    VOID,
-    INT,
-    CHAR,
-    BOOL,
-    FLOAT,
-    DOUBLE,
-};
-
-typedef struct {
-    PrimitiveType type;
-} Type;
+std::ostream& operator<<(std::ostream& stream, const types::Type& type);
 
 #endif /* TYPES_H */
