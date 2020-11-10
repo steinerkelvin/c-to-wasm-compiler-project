@@ -24,8 +24,11 @@ test: exe
 format:
 	clang-format -i src/**.cpp src/**.hpp
 
-relatorio:
-	pandoc ./relatorio-cp1.md -o ./relatorio-cp1.pdf
+doxygen:
+	doxygen
+
+pdf:
+	pandoc ./relatorio-cp2.md -o ./relatorio-cp2.pdf
 
 clean:
 	rm -f -r ./.deps
