@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+# coding: utf-8
+# https://gist.github.com/pib/240957
+
+import sys
+from string import whitespace
+
+atom_end = set('()"\'') | set(whitespace)
+
+def parse(sexp):
+    stack = [[]]
+    i = 0
+    length = len(sexp)
+    while i < length:
+        c = sexp[i]
+        # print(c, stack)
+        reading = type(stack[-1])
+        if reading == list:
+            if   c == '(': stack.append([])
+            elif c == ')': 
+                stack[-2].append(stack.pop())
+                if stack[-1][0] == ('quote',): stack[-2].append(stack.pop())
+            elif c == '"': stack.append('')
+            elif c == "'": stack.append([('quote',)])
+            elif c in whitespace: pass
+            else: stack.append((c,))
+        elif reading == str:
+            if   c == '"': 
+                stack[-2].append(stack.pop())
+                if stack[-1][0] == ('quote',): stack[-2].append(stack.pop())
+            elif c == '\\': 
+                i += 1
+                stack[-1] += sexp[i]
+            else: stack[-1] += c
+        elif reading == tuple:
+            if c in atom_end:
+                atom = stack.pop()
+                if atom[0][0].isdigit(): stack[-1].append(eval(atom[0]))
+                else: stack[-1].append(atom)
+                if stack[-1][0] == ('quote',): stack[-2].append(stack.pop())
+                continue
+            else: stack[-1] = ((stack[-1][0] + c),)
+        i += 1
+    return stack.pop()
+
+def render_node(node, i = 0):
+    i += 1
+    my_id = i
+    label = []
+    for child in node:
+        if isinstance(child, list):
+            cid, i = render_node(child, i)
+            print(f"node{my_id} -> node{cid};")
+        else:
+            value = child
+            if isinstance(value, tuple):
+                value = value[0]
+            label.append(value)
+    label = list(map(str, label))
+    label_txt = " ".join(label);
+    print(f'node{my_id}[label="{label_txt}"];')
+    return my_id, i
+
+def render_graph(root):
+    print("digraph {\ngraph [ordering=\"out\"];")
+    render_node(root)
+    print("}")
+
+if __name__ == "__main__":
+    data = parse(sys.stdin.read())
+    render_graph(data)

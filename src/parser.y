@@ -415,7 +415,8 @@ goto-stmt
     ;      
 
 compound-stmt
-    : LCB {open_scope();} block-list-opt[block] {close_scope();} RCB   { $$ = $block; }
+    : LCB {$<ScopeId>$ = open_scope();}[scope] block-list-opt[block] {close_scope();} RCB
+        { $$ = $block; $$->set_scope($<ScopeId>scope); }
     ;
 block-list-opt
     : %empty                        { $$ = new ast::Block(); }

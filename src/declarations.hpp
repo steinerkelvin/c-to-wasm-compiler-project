@@ -8,20 +8,21 @@
 
 namespace decl {
 
-struct DeclarationSpec {};
+struct DeclarationSpec {
+    /** Força a classe a ser polimórfica */
+    virtual ~DeclarationSpec() = default;
+};
 
 struct StorageClassSpec : DeclarationSpec {
-    enum StorageClassKind {
+    enum Kind {
         TYPEDEF,
         EXTERN,
         STATIC,
         AUTO,
         REGISTER,
     };
-    StorageClassSpec(const StorageClassKind kind) : kind(kind) {}
-
-  protected:
-    const StorageClassKind kind;
+    StorageClassSpec(const Kind kind) : kind(kind) {}
+    const Kind kind;
 };
 
 using types::TypeQualifierOrSpec;
@@ -32,8 +33,7 @@ struct TypeDeclSpec : DeclarationSpec {
     types::TypeQualifierOrSpec value;
 };
 
-class DeclarationSpecs : std::vector<DeclarationSpec*> {
-  public:
+struct DeclarationSpecs : std::vector<DeclarationSpec*> {
     void add(DeclarationSpec* spec) { this->push_back(spec); }
 };
 

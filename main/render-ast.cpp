@@ -17,9 +17,8 @@ int main(void) {
         fprintf(stderr, "PARSE FAILED\n");
         return 1;
     }
-
     // std::cout << (*last_expr) << std::endl;
-    // std::cout << (*root) << std::endl;
+    std::cout << (*root) << std::endl;
     // strtb_print(stderr);
 
     return 0;
