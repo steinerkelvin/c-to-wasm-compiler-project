@@ -481,19 +481,19 @@ comma-expression
 assignment-expression
     : conditional-expression
     //| unary-expression assignment-operator assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression ASSIGN  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression STARASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression OVERASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression MODASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression PLUSASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression MINASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression SLASS   assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression SRASS   assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression ANDASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression XORASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression ORASS   assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
+    | unary-expression ASSIGN  assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"="); $$ = $3; }
+    | unary-expression STARASS assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"*="); $$ = $3; }
+    | unary-expression OVERASS assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"/="); $$ = $3; }
+    | unary-expression MODASS  assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"%="); $$ = $3; }
+    | unary-expression PLUSASS assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"+="); $$ = $3; }
+    | unary-expression MINASS  assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"-="); $$ = $3; }
+    | unary-expression SLASS   assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"<<="); $$ = $3; }
+    | unary-expression SRASS   assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,">>="); $$ = $3; }
+    | unary-expression ANDASS  assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"&="); $$ = $3; }
+    | unary-expression XORASS  assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"^="); $$ = $3; }
+    | unary-expression ORASS   assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"|="); $$ = $3; }
     ;
-
+/*
 assignment-operator
     : ASSIGN
     | STARASS
@@ -507,7 +507,7 @@ assignment-operator
     | XORASS
     | ORASS
     ;
-
+*/
 constant-expression : conditional-expression ;
 
 conditional-expression
