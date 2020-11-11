@@ -10,7 +10,7 @@ using sbtb::TagRef;
 using sbtb::TagRow;
 using sbtb::TypeRef;
 using sbtb::TypeRow;
-using types::Type;
+using types::PrimType;
 
 struct Scope {
     using IdMap = std::map<std::string, SymId>;
@@ -26,7 +26,7 @@ struct Scope {
     Scope(const ScopeId id, const std::optional<ScopeId> parent)
         : id(id), parent(parent){};
 
-    SymId add_tag(const std::string& name, const Type& type)
+    SymId add_tag(const std::string& name, const PrimType& type)
     {
         assert(tags_map.find(name) == tags_map.end());
         const SymId idx = tags.size();
@@ -35,7 +35,7 @@ struct Scope {
         tags_map[name] = idx;
         return idx;
     }
-    SymId add_type(const std::string& name, const Type& type)
+    SymId add_type(const std::string& name, const PrimType& type)
     {
         assert(types_map.find(name) == types_map.end());
         const SymId idx = types.size();
@@ -44,7 +44,7 @@ struct Scope {
         types_map[name] = idx;
         return idx;
     }
-    SymId add_name(const std::string& name, const Type& type)
+    SymId add_name(const std::string& name, const PrimType& type)
     {
         assert(names_map.find(name) == names_map.end());
         const SymId idx = names.size();
@@ -112,7 +112,7 @@ NameRow& NameRef::get()
     return scope.names[this->sym_id];
 }
 
-TagRef insert_tag(const std::string& name, const Type& type)
+TagRef insert_tag(const std::string& name, const PrimType& type)
 {
     assert(scope_stack.size() > 0);
     const ScopeId scope_id = *(scope_stack.end() - 1);
@@ -121,7 +121,7 @@ TagRef insert_tag(const std::string& name, const Type& type)
     return TagRef{{scope_id, sym_id}};
 }
 
-TypeRef insert_typename(const std::string& name, const Type& type)
+TypeRef insert_typename(const std::string& name, const PrimType& type)
 {
     assert(scope_stack.size() > 0);
     const ScopeId scope_id = *(scope_stack.end() - 1);
@@ -130,7 +130,7 @@ TypeRef insert_typename(const std::string& name, const Type& type)
     return TypeRef{{scope_id, sym_id}};
 }
 
-NameRef insert_name(const std::string& name, const Type& type)
+NameRef insert_name(const std::string& name, const PrimType& type)
 {
     assert(scope_stack.size() > 0);
     const ScopeId scope_id = *(scope_stack.end() - 1);

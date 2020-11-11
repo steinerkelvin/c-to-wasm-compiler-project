@@ -493,21 +493,7 @@ assignment-expression
     | unary-expression XORASS  assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"^="); $$ = $3; }
     | unary-expression ORASS   assignment-expression  { ops::assign_verify($1->get_type().kind,$3->get_type().kind,"|="); $$ = $3; }
     ;
-/*
-assignment-operator
-    : ASSIGN
-    | STARASS
-    | OVERASS
-    | MODASS
-    | PLUSASS
-    | MINASS
-    | SLASS
-    | SRASS
-    | ANDASS
-    | XORASS
-    | ORASS
-    ;
-*/
+
 constant-expression : conditional-expression ;
 
 conditional-expression

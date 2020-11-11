@@ -1,4 +1,4 @@
 #include "global.hpp"
 ast::Expr* last_expr;
 ast::Program* root;
-types::PrimType res_type;
+types::PrimKind res_type;

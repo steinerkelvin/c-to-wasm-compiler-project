@@ -16,27 +16,27 @@ void error_simple_type_spec(const char *const kind_name)
 }
 
 void handle_simple_type_spec(
-    std::optional<types::Type>& result_type, const types::SimpleTypeSpec* spec)
+    std::optional<types::PrimType>& result_type, const types::SimpleTypeSpec* spec)
 {
-    using types::PrimType;
+    using types::PrimKind;
     using types::SimpleTypeSpec;
-    using types::Type;
+    using types::PrimType;
     assert(spec);
 
     switch (spec->kind) {
         case SimpleTypeSpec::VOID:
-            if (result_type && result_type->kind != PrimType::VOID) {
+            if (result_type && result_type->kind != PrimKind::VOID) {
                 error_simple_type_spec("void");
             } else {
-                result_type = Type{PrimType::VOID};
+                result_type = PrimType{PrimKind::VOID};
             }
             break;
         case SimpleTypeSpec::CHAR:
-            if (result_type && result_type->kind != PrimType::CHAR) {
+            if (result_type && result_type->kind != PrimKind::CHAR) {
                 error_simple_type_spec("char");
                 exit(1);
             } else {
-                result_type = Type{PrimType::CHAR};
+                result_type = PrimType{PrimKind::CHAR};
             }
             break;
         case SimpleTypeSpec::SHORT:
@@ -44,20 +44,20 @@ void handle_simple_type_spec(
         case SimpleTypeSpec::LONG:
         case SimpleTypeSpec::SIGNED:
         case SimpleTypeSpec::UNSIGNED:
-            if (result_type && result_type->kind != PrimType::INTEGER) {
+            if (result_type && result_type->kind != PrimKind::INTEGER) {
                 error_simple_type_spec("integer");
                 exit(1);
             } else {
-                result_type = Type{PrimType::INTEGER};
+                result_type = PrimType{PrimKind::INTEGER};
             }
             break;
         case SimpleTypeSpec::FLOAT:
         case SimpleTypeSpec::DOUBLE:
-            if (result_type && result_type->kind != PrimType::REAL) {
+            if (result_type && result_type->kind != PrimKind::REAL) {
                 error_simple_type_spec("floating");
                 exit(1);
             } else {
-                result_type = Type{PrimType::REAL};
+                result_type = PrimType{PrimKind::REAL};
             }
             break;
         default:
@@ -65,13 +65,13 @@ void handle_simple_type_spec(
     }
 }
 
-types::Type make_type(const types::TypeQualOrTypeSpecList& pspecs)
+types::PrimType make_type(const types::TypeQualOrTypeSpecList& pspecs)
 {
     using types::SimpleTypeSpec;
-    using types::Type;
+    using types::PrimType;
     using types::TypeSpec;
 
-    std::optional<Type> result_type;
+    std::optional<PrimType> result_type;
 
     for (const auto& pspec : pspecs) {
         if (const auto it = std::get_if<TypeSpec*>(&pspec)) {
@@ -115,7 +115,7 @@ void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
         }
     }
 
-    types::Type the_type = make_type(typedecl_specs);
+    types::PrimType the_type = make_type(typedecl_specs);
     // std::cerr << the_type << std::endl;
 
     for (auto const& decl : decls) {

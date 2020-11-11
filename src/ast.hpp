@@ -77,16 +77,16 @@ struct MultiNodeBase : R {
 
 struct TypedNode : Node {
     virtual bool is_typed() const { return true; }
-    types::Type get_type() const { return this->type; };
-    void set_type(types::Type t) { this->type = t; };
-    void set_type(types::PrimType k) { this->type = types::Type{k}; };
+    types::PrimType get_type() const { return this->type; };
+    void set_type(types::PrimType t) { this->type = t; };
+    void set_type(types::PrimKind k) { this->type = types::PrimType{k}; };
 
     virtual void write_data_repr(std::ostream& stream) const {
         stream << " [" << this->type << "]";
     }
 
   protected:
-    types::Type type = types::Type{types::PrimType::VOID};
+    types::PrimType type = types::PrimType{types::PrimKind::VOID};
 };
 
 struct Expr : TypedNode {};
@@ -110,25 +110,25 @@ struct BaseValue : Expr {
 struct IntegerValue : BaseValue<long long> {
     DECLARE_LABEL(IntegerValue);
     IntegerValue(long long value) : BaseValue<long long>(value){
-        type = types::Type{types::PrimType::INTEGER};
+        type = types::PrimType{types::PrimKind::INTEGER};
     };
 };
 struct FloatingValue : BaseValue<double> {
     DECLARE_LABEL(FloatingValue);
     FloatingValue(double value) : BaseValue<double>(value){
-        type = types::Type{types::PrimType::REAL};
+        type = types::PrimType{types::PrimKind::REAL};
     };
 };
 struct CharValue : BaseValue<char> {
     DECLARE_LABEL(CharValue);
     CharValue(char value) : BaseValue<char>(value){
-        type = types::Type{types::PrimType::CHAR};
+        type = types::PrimType{types::PrimKind::CHAR};
     };
 };
 struct StringValue : BaseValue<size_t> {
     DECLARE_LABEL(StringValue);
     StringValue(size_t value) : BaseValue<size_t>(value){
-        type = types::Type{types::PrimType::VOID};  // TODO
+        type = types::PrimType{types::PrimKind::VOID};  // TODO
     };
 };
 
