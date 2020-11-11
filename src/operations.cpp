@@ -15,6 +15,15 @@ static void type_error(const char* op, const PrimType t1, const PrimType t2)
     exit(EXIT_FAILURE);
 }
 
+static void type_error_unary(const char* op, const PrimType t1)
+{
+    printf(
+        "SEMANTIC ERROR (0): incompatible type for operator '%s', LHS is '%s'.\n",
+        op,
+        get_prim_text(t1));
+    exit(EXIT_FAILURE);
+}
+
 static const PrimType arith[4][4] = {
     /* void	*/ {VOID, VOID, VOID, VOID},
     /* char	*/ {VOID, INTEGER, INTEGER, VOID},
@@ -55,6 +64,26 @@ PrimType unify_bitwise(PrimType l, PrimType r, const char* op)
     PrimType t = bitwise[l][r];
     if (t == VOID)
         type_error(op, l, r);
+    return t;
+}
+
+static const PrimType unary[4] = {VOID, INTEGER, INTEGER, INTEGER};
+
+PrimType unary_verify(PrimType u, const char* op)
+{
+    PrimType t = unary[u];
+    if (t == VOID)
+        type_error_unary(op, u);
+    return t;
+}
+
+static const PrimType btnot[4] = {VOID, INTEGER, INTEGER, VOID};
+
+PrimType btnot_verify(PrimType u, const char* op)
+{
+    PrimType t = btnot[u];
+    if (t == VOID)
+        type_error_unary(op, u);
     return t;
 }
 

@@ -567,32 +567,33 @@ cast-expression
     | LPAR type-name RPAR cast-expression[value]        { $$ = $value; }
     ;
 
-unary-expression //TODO
+unary-expression
     : postfix-expression
-    | PLUSPLUS   unary-expression   { $$ = new ast::PrefixPlusPlus($2); }
-    | MINUSMINUS unary-expression   { $$ = new ast::PrefixMinusMinus($2); }
+    | PLUSPLUS   unary-expression   { ops::unary_verify($2->get_type().kind,"++"); $$ = new ast::PrefixPlusPlus($2); }
+    | MINUSMINUS unary-expression   { ops::unary_verify($2->get_type().kind,"--"); $$ = new ast::PrefixMinusMinus($2); }
     | AMPER cast-expression         { $$ = $2; }
     | STAR  cast-expression         { $$ = $2; }
-    | PLUS  cast-expression         { $$ = $2; }
-    | MINUS cast-expression         { $$ = new ast::InvertSignal($2); }
-    | BTNOT cast-expression         { $$ = new ast::BitNot($2); }
-    | NOT   cast-expression         { $$ = new ast::Not($2); }
+    | PLUS  cast-expression         { ops::unary_verify($2->get_type().kind,"+"); $$ = $2; }
+    | MINUS cast-expression         { ops::unary_verify($2->get_type().kind,"-"); $$ = new ast::InvertSignal($2);}
+    | BTNOT cast-expression         { ops::btnot_verify($2->get_type().kind,"~"); $$ = new ast::BitNot($2); }
+    | NOT   cast-expression         { ops::unary_verify($2->get_type().kind,"!"); $$ = new ast::Not($2); }
     | SIZEOF unary-expression       { $$ = $2; } 
     | SIZEOF LPAR type-name RPAR    { assert(0); }
     // | _Alignof LPAR type-name RPAR
     ;
 
-postfix-expression //TODO 
+postfix-expression 
     : primary-expression
     | postfix-expression LB expression RB       // %prec LB
     | postfix-expression LPAR argument-expression-list-opt RPAR
     | postfix-expression DOT   ID
     | postfix-expression ARROW ID
-    | postfix-expression PLUSPLUS       { $$ = new ast::PrefixPlusPlus($1);  }
-    | postfix-expression MINUSMINUS     { $$ = new ast::PrefixMinusMinus($1);  }
+    | postfix-expression PLUSPLUS       { ops::unary_verify($1->get_type().kind,"++"); $$ = new ast::PrefixPlusPlus($1); }
+    | postfix-expression MINUSMINUS     { ops::unary_verify($1->get_type().kind,"--"); $$ = new ast::PrefixMinusMinus($1); }
     // | ( type-name ) { initializer-list }
     // | ( type-name ) { initializer-list , }
     ;
+
 
 
 argument-expression-list-opt : argument-expression-list | %empty ;

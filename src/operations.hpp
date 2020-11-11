@@ -9,6 +9,8 @@ namespace ops {
     PrimType unify_arith(PrimType l, PrimType r, const char* op);
     PrimType unify_comp(PrimType l, PrimType r, const char* op);
     PrimType unify_bitwise(PrimType l, PrimType r, const char* op);
+    PrimType unary_verify(PrimType u, const char* op);
+    PrimType btnot_verify(PrimType u, const char* op);
 };
 
 #endif /* OPERATIONS_H */
