@@ -19,6 +19,7 @@ customs=$(patsubst custom/%.cpp,bin/custom/%,$(src_custom))
 all: exe
 
 test: exe
+	@ echo TESTING
 	./run_tests.sh
 
 format:
@@ -58,22 +59,22 @@ $(mains): $(objs)
 
 # Compila bibliotecas de src/ para build/
 build/%.o: src/%.cpp
-	mkdir -p build/ $(dir .dep/src/%)
+	@ mkdir -p build/ $(dir .dep/src/%)
 	$(cc) $(cflags) -o $@  -c $<
-	@$(cc) $(cflags) -MM -MT $@  $< > .dep/$<.d
+	@ $(cc) $(cflags) -MM -MT $@  $< > .dep/$<.d
 
 # Compila de main/ para para bin/
 bin/%: main/%.cpp $(objs)
-	@mkdir -p bin/ build/main/ $(dir ./.dep/main/%)
+	@ mkdir -p bin/ build/main/ $(dir ./.dep/main/%)
 	$(cc) $(cflags) -I "./src/" -c -o build/main/$*.o $<
 	$(cc) $(cflags) -I "./src/" -o $@ build/main/$*.o $(objs)
-	@$(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
+	@ $(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
 
 # Compila de main/ para para bin/
 bin/custom/%: custom/%.cpp
-	@mkdir -p bin/custom/ $(dir ./.dep/custom/%)
+	@ mkdir -p bin/custom/ $(dir ./.dep/custom/%)
 	$(cc) $(cflags) -I "./src/" -o $@ $<
-	@$(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
+	@ $(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
 
 # Inclui as listas de dependências
 include $(wildcard .dep/**/*)
