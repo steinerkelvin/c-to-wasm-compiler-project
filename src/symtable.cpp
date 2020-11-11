@@ -4,6 +4,14 @@
 #include <string>
 #include <vector>
 
+using sbtb::NameRef;
+using sbtb::NameRow;
+using sbtb::TagRef;
+using sbtb::TagRow;
+using sbtb::TypeRef;
+using sbtb::TypeRow;
+using types::Type;
+
 struct Scope {
     using IdMap = std::map<std::string, SymId>;
 
@@ -11,34 +19,37 @@ struct Scope {
     IdMap types_map;
     IdMap names_map;
 
-    std::vector<void*> tags;
-    std::vector<void*> types;
-    std::vector<void*> names;
+    std::vector<TagRow> tags;
+    std::vector<TypeRow> types;
+    std::vector<NameRow> names;
 
     Scope(const ScopeId id, const std::optional<ScopeId> parent)
         : id(id), parent(parent){};
 
-    SymId add_tag(const std::string& name)
+    SymId add_tag(const std::string& name, const Type& type)
     {
         assert(tags_map.find(name) == tags_map.end());
         const SymId idx = tags.size();
-        tags.push_back(NULL);
+        TagRow row = {{name, type}};
+        tags.push_back(row);
         tags_map[name] = idx;
         return idx;
     }
-    SymId add_type(const std::string& name)
+    SymId add_type(const std::string& name, const Type& type)
     {
         assert(types_map.find(name) == types_map.end());
         const SymId idx = types.size();
-        types.push_back(NULL);
+        TypeRow row = {{name, type}};
+        types.push_back(row);
         types_map[name] = idx;
         return idx;
     }
-    SymId add_name(const std::string& name)
+    SymId add_name(const std::string& name, const Type& type)
     {
         assert(names_map.find(name) == names_map.end());
         const SymId idx = names.size();
-        names.push_back(NULL);
+        NameRow row = {{name, type}};
+        names.push_back(row);
         names_map[name] = idx;
         return idx;
     }
@@ -79,73 +90,98 @@ void close_scope()
     scope_stack.pop_back();
 }
 
-SymRef insert_tag(const char* namep)
+TagRow& TagRef::get()
 {
-    assert(scope_stack.size() > 0);
-    const ScopeId scope_id = *(scope_stack.end() - 1);
-    Scope& scope = scopes[scope_id];
-    const SymId sym_id = scope.add_tag(std::string(namep));
-    return SymRef{scope_id, sym_id};
+    assert(scopes.size() > this->scope_id);
+    Scope& scope = scopes[this->scope_id];
+    assert(scope.tags.size() > this->sym_id);
+    return scope.tags[this->sym_id];
+}
+TypeRow& TypeRef::get()
+{
+    assert(scopes.size() > this->scope_id);
+    Scope& scope = scopes[this->scope_id];
+    assert(scope.types.size() > this->sym_id);
+    return scope.types[this->sym_id];
+}
+NameRow& NameRef::get()
+{
+    assert(scopes.size() > this->scope_id);
+    Scope& scope = scopes[this->scope_id];
+    assert(scope.names.size() > this->sym_id);
+    return scope.names[this->sym_id];
 }
 
-SymRef insert_type(const char* namep)
+TagRef insert_tag(const std::string& name, const Type& type)
 {
     assert(scope_stack.size() > 0);
     const ScopeId scope_id = *(scope_stack.end() - 1);
     Scope& scope = scopes[scope_id];
-    const SymId sym_id = scope.add_type(std::string(namep));
-    return SymRef{scope_id, sym_id};
+    const SymId sym_id = scope.add_tag(name, type);
+    return TagRef{{scope_id, sym_id}};
 }
 
-SymRef insert_name(const char* namep)
+TypeRef insert_typename(const std::string& name, const Type& type)
 {
     assert(scope_stack.size() > 0);
     const ScopeId scope_id = *(scope_stack.end() - 1);
     Scope& scope = scopes[scope_id];
-    const SymId sym_id = scope.add_name(std::string(namep));
-    return SymRef{scope_id, sym_id};
+    const SymId sym_id = scope.add_type(name, type);
+    return TypeRef{{scope_id, sym_id}};
 }
 
-std::optional<SymRef> lookup_tag(const std::string& name)
+NameRef insert_name(const std::string& name, const Type& type)
 {
     assert(scope_stack.size() > 0);
     const ScopeId scope_id = *(scope_stack.end() - 1);
     Scope& scope = scopes[scope_id];
-    const auto& map = scope.tags_map;
-    const auto& it = map.find(name);
-    if (it != map.end()) {
-        return {};
+    const SymId sym_id = scope.add_name(name, type);
+    return NameRef{{scope_id, sym_id}};
+}
+
+std::optional<TagRef> lookup_tag(const std::string& name)
+{
+    assert(scope_stack.size() > 0);
+    for (const auto scope_id : scope_stack) {
+        Scope& scope = scopes[scope_id];
+        const auto& map = scope.tags_map;
+        const auto& it = map.find(name);
+        if (it != map.end()) {
+            const SymId sym_id = it->second;
+            return {(TagRef){{scope_id, sym_id}}};
+        }
     }
-    const SymId sym_id = it->second;
-    return {(SymRef){scope_id, sym_id}};
+    return {};
 }
 
-std::optional<SymRef> lookup_type(const std::string& name)
+std::optional<TypeRef> lookup_type(const std::string& name)
 {
     assert(scope_stack.size() > 0);
-    const ScopeId scope_id = *(scope_stack.end() - 1);
-    Scope& scope = scopes[scope_id];
-    const auto& map = scope.types_map;
-    const auto& it = map.find(name);
-    if (it == map.end()) {
-        return {};
+    for (const auto scope_id : scope_stack) {
+        Scope& scope = scopes[scope_id];
+        const auto& map = scope.types_map;
+        const auto& it = map.find(name);
+        if (it != map.end()) {
+            const SymId sym_id = it->second;
+            return {(TypeRef){{scope_id, sym_id}}};
+        }
     }
-    const SymId sym_id = it->second;
-    return {(SymRef){scope_id, sym_id}};
+    return {};
 }
 
-std::optional<SymRef> lookup_name(const std::string& name)
+std::optional<NameRef> lookup_name(const std::string& name)
 {
     assert(scope_stack.size() > 0);
-    const ScopeId scope_id = *(scope_stack.end() - 1);
-    Scope& scope = scopes[scope_id];
-    const auto& map = scope.names_map;
-    const auto& it = map.find(name);
-    if (it == map.end()) {
-        return {};
+    for (const auto scope_id : scope_stack) {
+        Scope& scope = scopes[scope_id];
+        const auto& map = scope.names_map;
+        const auto& it = map.find(name);
+        if (it != map.end()) {
+            const SymId sym_id = it->second;
+            return {(NameRef){{scope_id, sym_id}}};
+        }
     }
-    const SymId sym_id = it->second;
-    return {(SymRef){scope_id, sym_id}};
+    return {};
 }
 
 bool is_typename(const char* namep)

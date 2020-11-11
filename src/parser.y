@@ -602,7 +602,12 @@ argument-expression-list
     ;
 
 primary-expression 
-    : ID            { $$ = new ast::Variable(*$1); delete $1; }
+    : ID[name] {
+            auto ref = pars::get_var(*($name));
+            $$ = new ast::Variable(*$1);
+            $$->set_type(ref.get().type);
+            delete $1;
+        }
     | INT_VAL       { $$ = new ast::IntegerValue($1); }
     | REAL_VAL      { $$ = new ast::FloatingValue($1); }
     | CHAR_VAL      { $$ = new ast::CharValue($1); }

@@ -1,17 +1,39 @@
 #if !defined(SYMTABLE_H)
 #define SYMTABLE_H
+
 #include <cstddef>
 #include <optional>
 #include <string>
 
+#include "types.hpp"
+
 using ScopeId = size_t;
 using SymId = size_t;
+
+namespace sbtb {
+
+struct Row {
+    std::string name;
+    types::Type type;
+};
+
+struct TagRow : Row {};
+struct TypeRow : Row {};
+struct NameRow : Row {};
+
 struct SymRef {
     ScopeId scope_id;
     SymId sym_id;
 };
-
-namespace sbtb {
+struct TagRef : SymRef {
+    TagRow& get();
+};
+struct TypeRef : SymRef {
+    TypeRow& get();
+};
+struct NameRef : SymRef {
+    NameRow& get();
+};
 
 /** Inicializa a tabela de símbolos */
 ScopeId init();
@@ -30,13 +52,17 @@ void close_scope();
  * último escopo.
  */
 
-SymRef insert_tag(const char* namep);
-SymRef insert_type(const char* namep);
-SymRef insert_name(const char* namep);
+TagRef insert_tag(const std::string& namep, const types::Type& type);
+TypeRef insert_typename(const std::string& namep, const types::Type& type);
+NameRef insert_name(const std::string& namep, const types::Type& type);
 
-std::optional<SymRef> lookup_tag(const std::string& name);
-std::optional<SymRef> lookup_type(const std::string& name);
-std::optional<SymRef> lookup_name(const std::string& name);
+TagRow& get(const TagRef& ref);
+TypeRow& get(const TypeRef& ref);
+NameRow& get(const NameRef& ref);
+
+std::optional<TagRef> lookup_tag(const std::string& name);
+std::optional<TypeRef> lookup_type(const std::string& name);
+std::optional<NameRef> lookup_name(const std::string& name);
 
 /* Verifica se um nome de tipo está em escopo (em qualquer nível) */
 bool is_typename(const char* name);

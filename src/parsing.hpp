@@ -2,20 +2,22 @@
 #define PARSING_H
 
 #include "generated_parser.hpp"
+#include "symtable.hpp"
 
 // Tipo definido pelo Bison que é retornado pelo scanner
 typedef enum yytokentype yytoken_kind_t;
 
-// Estrutura para armazenar informações de um token, incluindo o lexema
-typedef struct token {
-    yytoken_kind_t type;
-    char* lexeme;
-    union {
-        size_t str_id;
-    };
-} Token;
 
-// Macros para o scanner para tratar um token
+namespace pars {
+
+sbtb::NameRef get_var(const std::string& name);
+
+} // namespace pars
+
+
+
+/* Macros para tratamento de tokens no scanner */
+
 #if defined(DUMP_TOKENS)
 
 // Estas apenas imprimem o tipo do token seguido do lexema.

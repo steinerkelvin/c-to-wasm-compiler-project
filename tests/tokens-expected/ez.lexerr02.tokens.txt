@@ -4,6 +4,9 @@ ID : main
 LPAR : (
 RPAR : )
 LCB : {
+INT : int
+ID : x
+SEMI : ;
 ID : x
 ASSIGN : =
 INT_VAL : 4

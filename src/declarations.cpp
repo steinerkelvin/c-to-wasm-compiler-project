@@ -124,13 +124,13 @@ void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
                 std::cerr << *decl << std::endl;
                 assert(0);  // TODO
             }
-            sbtb::insert_type(decl->c_str());
+            sbtb::insert_typename(decl->c_str(), the_type);
         } else {
             if (sbtb::lookup_name(*decl)) {
                 std::cerr << *decl << std::endl;
                 assert(0);  // TODO
             }
-            sbtb::insert_name(decl->c_str());
+            sbtb::insert_name(decl->c_str(), the_type);
         }
     }
 }
