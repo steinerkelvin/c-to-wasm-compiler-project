@@ -81,8 +81,12 @@ struct TypedNode : Node {
     void set_type(types::Type t) { this->type = t; };
     void set_type(types::PrimType k) { this->type = types::Type{k}; };
 
+    virtual void write_data_repr(std::ostream& stream) const {
+        stream << " [" << this->type << "]";
+    }
+
   protected:
-    types::Type type;
+    types::Type type = types::Type{types::PrimType::VOID};
 };
 
 struct Expr : TypedNode {};
@@ -92,8 +96,9 @@ struct Value : Expr {};
 template <typename T>
 struct BaseValue : Expr {
     BaseValue(T value) { this->value = value; };
-    virtual void write_repr(std::ostream& stream) const
+    virtual void write_data_repr(std::ostream& stream) const
     {
+        this->Expr::write_data_repr(stream);
         stream << " ";
         stream << this->value;
     };
@@ -104,27 +109,35 @@ struct BaseValue : Expr {
 
 struct IntegerValue : BaseValue<long long> {
     DECLARE_LABEL(IntegerValue);
-    IntegerValue(long long value) : BaseValue<long long>(value){};
+    IntegerValue(long long value) : BaseValue<long long>(value){
+        type = types::Type{types::PrimType::INTEGER};
+    };
 };
 struct FloatingValue : BaseValue<double> {
     DECLARE_LABEL(FloatingValue);
-    FloatingValue(double value) : BaseValue<double>(value){};
+    FloatingValue(double value) : BaseValue<double>(value){
+        type = types::Type{types::PrimType::REAL};
+    };
 };
 struct CharValue : BaseValue<char> {
     DECLARE_LABEL(CharValue);
-    CharValue(char value) : BaseValue<char>(value){};
+    CharValue(char value) : BaseValue<char>(value){
+        type = types::Type{types::PrimType::CHAR};
+    };
 };
 struct StringValue : BaseValue<size_t> {
     DECLARE_LABEL(StringValue);
-    StringValue(size_t value) : BaseValue<size_t>(value){};
+    StringValue(size_t value) : BaseValue<size_t>(value){
+        type = types::Type{types::PrimType::VOID};  // TODO
+    };
 };
 
 struct Variable : Expr {
-    std::string get_name() { return this->name; };
-    Variable(std::string& name) { this->name = name; };
+    Variable(sbtb::NameRef& ref) { this->ref = ref; };
+    const std::string& get_name() { return this->ref.get().name; };
 
   protected:
-    std::string name;
+    sbtb::NameRef ref;
 };
 
 struct UnOp : SingleNodeBase<Expr> {
