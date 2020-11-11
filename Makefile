@@ -4,6 +4,7 @@ cflags=-Wall -g
 parser_files = src/generated_parser.cpp src/generated_parser.hpp src/generated_parser.output
 scanner_files = src/scanner.cpp
 generated_files = $(parser_files) $(scanner_files)
+generated_headers = src/generated_parser.hpp
 
 # Arquivos de bibliotecas
 src_lib=$(wildcard src/*.cpp)
@@ -54,7 +55,7 @@ $(scanner_files): src/scanner.l src/generated_parser.hpp
 	cd src/; flex "scanner.l"
 
 
-$(objs) $(customs): $(generated_files)
+$(objs) $(customs): $(generated_headers)
 $(mains): $(objs)
 
 # Compila bibliotecas de src/ para build/
