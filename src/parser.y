@@ -414,7 +414,7 @@ goto-stmt
     ;      
 
 compound-stmt
-    : LCB {$<ScopeId>$ = open_scope();}[scope] block-list-opt[block] {close_scope();} RCB
+    : LCB {$<ScopeId>$ = sbtb::open_scope();}[scope] block-list-opt[block] {sbtb::close_scope();} RCB
         { $$ = $block; $$->set_scope($<ScopeId>scope); }
     ;
 block-list-opt

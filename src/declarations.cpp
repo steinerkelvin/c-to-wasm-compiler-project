@@ -120,17 +120,17 @@ void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 
     for (auto const& decl : decls) {
         if (is_typedef) {
-            if (lookup_type(*decl).has_value()) {
+            if (sbtb::lookup_type(*decl)) {
                 std::cerr << *decl << std::endl;
-                assert(0);
+                assert(0);  // TODO
             }
-            insert_type(decl->c_str());
+            sbtb::insert_type(decl->c_str());
         } else {
-            if (lookup_name(*decl).has_value()) {
+            if (sbtb::lookup_name(*decl)) {
                 std::cerr << *decl << std::endl;
-                assert(0);
+                assert(0);  // TODO
             }
-            insert_name(decl->c_str());
+            sbtb::insert_name(decl->c_str());
         }
     }
 }

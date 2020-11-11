@@ -9,7 +9,7 @@
 int main(void) {
     // yydebug = 1;
 
-    sbtb_init();
+    sbtb::init();
 
     if (yyparse() == 0) {
         fprintf(stderr, "PARSE SUCCESSFUL\n");

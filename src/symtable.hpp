@@ -11,8 +11,10 @@ struct SymRef {
     SymId sym_id;
 };
 
+namespace sbtb {
+
 /** Inicializa a tabela de símbolos */
-ScopeId sbtb_init();
+ScopeId init();
 
 /**
  * Cria um novo espopo para nomes. Os nomes serão acidionados no último escopo
@@ -38,5 +40,7 @@ std::optional<SymRef> lookup_name(const std::string& name);
 
 /* Verifica se um nome de tipo está em escopo (em qualquer nível) */
 bool is_typename(const char* name);
+
+} // namespace sbtb
 
 #endif // SYMTABLE_H

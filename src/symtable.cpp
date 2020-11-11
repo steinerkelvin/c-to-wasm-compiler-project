@@ -51,7 +51,9 @@ struct Scope {
 static std::vector<Scope> scopes;
 static std::vector<ScopeId> scope_stack;
 
-ScopeId sbtb_init()
+namespace sbtb {
+
+ScopeId init()
 {
     assert(scope_stack.size() == 0);
     const size_t idx = scopes.size();
@@ -159,3 +161,5 @@ bool is_typename(const char* namep)
     }
     return false;
 }
+
+} // namespace sbtb
