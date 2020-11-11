@@ -78,6 +78,7 @@ struct MultiNodeBase : R {
 struct TypedNode : Node {
     virtual bool is_typed() const { return true; }
     types::Type get_type() const { return this->type; };
+    void set_type(types::PrimType t) { this->type.kind = t; };
 
   protected:
     types::Type type;

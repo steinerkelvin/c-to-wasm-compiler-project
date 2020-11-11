@@ -8,6 +8,7 @@ namespace ops {
     void PrimType_error(const char* op, PrimType t1, PrimType t2);
     PrimType unify_arith(PrimType l, PrimType r, const char* op);
     PrimType unify_comp(PrimType l, PrimType r, const char* op);
+    PrimType unify_bitwise(PrimType l, PrimType r, const char* op);
 };
 
 #endif /* OPERATIONS_H */

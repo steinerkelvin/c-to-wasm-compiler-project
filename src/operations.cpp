@@ -31,13 +31,28 @@ PrimType unify_arith(PrimType l, PrimType r, const char* op)
 
 static const PrimType comp[4][4] = {
     /* void */ {VOID, VOID, VOID, VOID},
-    /* chad */ {VOID, INTEGER, INTEGER, INTEGER},
-    /* intd */ {VOID, INTEGER, INTEGER, INTEGER},
-    /* read */ {VOID, INTEGER, INTEGER, INTEGER}};
+    /* char */ {VOID, INTEGER, INTEGER, INTEGER},
+    /* int  */ {VOID, INTEGER, INTEGER, INTEGER},
+    /* real */ {VOID, INTEGER, INTEGER, INTEGER}};
 
 PrimType unify_comp(PrimType l, PrimType r, const char* op)
 {
     PrimType t = comp[l][r];
+    if (t == VOID)
+        type_error(op, l, r);
+    return t;
+}
+
+static const PrimType bitwise[4][4] = {
+    /* void */ {VOID, VOID, VOID, VOID},
+    /* char */ {VOID, INTEGER, INTEGER, VOID},
+    /* int  */ {VOID, INTEGER, INTEGER, VOID},
+    /* real */ {VOID, VOID, VOID, VOID}
+};
+
+PrimType unify_bitwise(PrimType l, PrimType r, const char* op)
+{
+    PrimType t = bitwise[l][r];
     if (t == VOID)
         type_error(op, l, r);
     return t;
