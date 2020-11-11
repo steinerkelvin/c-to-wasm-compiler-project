@@ -24,6 +24,7 @@
 #include "symtable.hpp"
 #include "ast.hpp"
 #include "global.hpp"
+#include "operations.hpp"
 
 int yylex(void);
 void yyerror(char const *s);
@@ -477,7 +478,7 @@ comma-expression
     | expression COMMA assignment-expression
     ;
 
-assignment-expression 
+assignment-expression //TODO verificar os tipos antes e depois da igualdade e ver as possibilidades de widening
     : conditional-expression
     | unary-expression assignment-operator assignment-expression  { $$ = $3; }
     ;
@@ -504,45 +505,45 @@ conditional-expression
     ;
 
 or-expression
-    : and-expression
-    | or-expression OR and-expression
+    : and-expression    
+    | or-expression OR and-expression     { unify_comp($1->get_type(), $3->get_type(), "||");}
     ;
 
 and-expression
     : bit-or-expression
-    | and-expression AND bit-or-expression
+    | and-expression AND bit-or-expression      { unify_comp($1->get_type(), $3->get_type(), "&&");}
     ;
 
-bit-or-expression
+bit-or-expression   //TODO
     : bit-xor-expression
     | bit-or-expression BTOR bit-xor-expression
     ;
 
-bit-xor-expression
+bit-xor-expression //TODO
     : bit-and-expression
     | bit-xor-expression BTXOR bit-and-expression
     ;
 
-bit-and-expression
+bit-and-expression //TODO
     : equality-expression
     | bit-and-expression AMPER equality-expression
     ;
 
 equality-expression
     : relational-expression
-    | equality-expression EQ  relational-expression
-    | equality-expression NEQ relational-expression
+    | equality-expression EQ  relational-expression     { unify_comp($1->get_type(), $3->get_type(), "==");}
+    | equality-expression NEQ relational-expression     { unify_comp($1->get_type(), $3->get_type(), "!=");}
     ;
 
 relational-expression
     : shift-expression
-    | relational-expression LT shift-expression
-    | relational-expression GT shift-expression
-    | relational-expression LET shift-expression
-    | relational-expression GET shift-expression
+    | relational-expression LT shift-expression     { unify_comp($1->get_type(), $3->get_type(), "<");}
+    | relational-expression GT shift-expression     { unify_comp($1->get_type(), $3->get_type(), ">");}
+    | relational-expression LET shift-expression    { unify_comp($1->get_type(), $3->get_type(), "<=");}
+    | relational-expression GET shift-expression    { unify_comp($1->get_type(), $3->get_type(), ">=");}
     ;
 
-shift-expression
+shift-expression //TODO 
     : additive-expression
     | shift-expression LEFT  additive-expression
     | shift-expression RIGHT additive-expression
@@ -550,15 +551,15 @@ shift-expression
 
 additive-expression
     : multiplicative-expression
-    | additive-expression PLUS  multiplicative-expression   { $$ = new ast::Plus($1, $3); }
-    | additive-expression MINUS multiplicative-expression   { $$ = new ast::Minus($1, $3); }
+    | additive-expression PLUS  multiplicative-expression   { unify_arith($1->get_type(), $3->get_type(), "+"); $$ = new ast::Plus($1, $3); }
+    | additive-expression MINUS multiplicative-expression   { unify_arith($1->get_type(), $3->get_type(), "-"); $$ = new ast::Minus($1, $3); }
     ;
 
 multiplicative-expression
     : cast-expression
-    | multiplicative-expression STAR cast-expression    { $$ = new ast::Times($1, $3); }
-    | multiplicative-expression OVER cast-expression    { $$ = new ast::Over($1, $3); }
-    | multiplicative-expression PERC cast-expression
+    | multiplicative-expression STAR cast-expression    { unify_arith($1->get_type(), $3->get_type(), "*"); $$ = new ast::Times($1, $3); }
+    | multiplicative-expression OVER cast-expression    { unify_arith($1->get_type(), $3->get_type(), "/"); $$ = new ast::Over($1, $3); }
+    | multiplicative-expression PERC cast-expression    { unify_arith($1->get_type(), $3->get_type(), "%"); }
     ;
 
 cast-expression
@@ -566,7 +567,7 @@ cast-expression
     | LPAR type-name RPAR cast-expression[value]        { $$ = $value; }
     ;
 
-unary-expression
+unary-expression //TODO
     : postfix-expression
     | PLUSPLUS   unary-expression   { $$ = new ast::PrefixPlusPlus($2); }
     | MINUSMINUS unary-expression   { $$ = new ast::PrefixMinusMinus($2); }
@@ -581,7 +582,7 @@ unary-expression
     // | _Alignof LPAR type-name RPAR
     ;
 
-postfix-expression
+postfix-expression //TODO 
     : primary-expression
     | postfix-expression LB expression RB       // %prec LB
     | postfix-expression LPAR argument-expression-list-opt RPAR
