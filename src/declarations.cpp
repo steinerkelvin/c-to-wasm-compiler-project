@@ -18,25 +18,25 @@ void error_simple_type_spec(const char *const kind_name)
 void handle_simple_type_spec(
     std::optional<types::Type>& result_type, const types::SimpleTypeSpec* spec)
 {
-    using types::PrimitiveType;
+    using types::PrimType;
     using types::SimpleTypeSpec;
     using types::Type;
     assert(spec);
 
     switch (spec->kind) {
         case SimpleTypeSpec::VOID:
-            if (result_type && result_type->kind != PrimitiveType::VOID) {
+            if (result_type && result_type->kind != PrimType::VOID) {
                 error_simple_type_spec("void");
             } else {
-                result_type = Type{PrimitiveType::VOID};
+                result_type = Type{PrimType::VOID};
             }
             break;
         case SimpleTypeSpec::CHAR:
-            if (result_type && result_type->kind != PrimitiveType::CHAR) {
+            if (result_type && result_type->kind != PrimType::CHAR) {
                 error_simple_type_spec("char");
                 exit(1);
             } else {
-                result_type = Type{PrimitiveType::CHAR};
+                result_type = Type{PrimType::CHAR};
             }
             break;
         case SimpleTypeSpec::SHORT:
@@ -44,20 +44,20 @@ void handle_simple_type_spec(
         case SimpleTypeSpec::LONG:
         case SimpleTypeSpec::SIGNED:
         case SimpleTypeSpec::UNSIGNED:
-            if (result_type && result_type->kind != PrimitiveType::INTEGER) {
+            if (result_type && result_type->kind != PrimType::INTEGER) {
                 error_simple_type_spec("integer");
                 exit(1);
             } else {
-                result_type = Type{PrimitiveType::INTEGER};
+                result_type = Type{PrimType::INTEGER};
             }
             break;
         case SimpleTypeSpec::FLOAT:
         case SimpleTypeSpec::DOUBLE:
-            if (result_type && result_type->kind != PrimitiveType::REAL) {
+            if (result_type && result_type->kind != PrimType::REAL) {
                 error_simple_type_spec("floating");
                 exit(1);
             } else {
-                result_type = Type{PrimitiveType::REAL};
+                result_type = Type{PrimType::REAL};
             }
             break;
         default:

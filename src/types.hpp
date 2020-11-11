@@ -8,7 +8,7 @@
 
 namespace types {
 
-enum class PrimitiveType {
+enum PrimType {
     VOID,
     CHAR,
     INTEGER,
@@ -16,8 +16,10 @@ enum class PrimitiveType {
 };
 
 struct Type {
-    PrimitiveType kind;
+    PrimType kind;
 };
+
+const char * get_prim_text(PrimType kind);
 
 // Estruturas para representar especificadores e qualificadores em declarações
 

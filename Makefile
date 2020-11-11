@@ -60,7 +60,7 @@ $(mains): $(objs)
 build/%.o: src/%.cpp
 	mkdir -p build/ $(dir .dep/src/%)
 	$(cc) $(cflags) -o $@  -c $<
-	$(cc) $(cflags) -MM -MT $@  $< > .dep/$<.d
+	@$(cc) $(cflags) -MM -MT $@  $< > .dep/$<.d
 
 # Compila de main/ para para bin/
 bin/%: main/%.cpp $(objs)

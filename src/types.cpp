@@ -1,21 +1,42 @@
 #include "types.hpp"
 
-using namespace types;
+namespace types {
+
+const char* get_prim_text(PrimType kind)
+{
+    switch (kind) {
+        case VOID:
+            return "void";
+            break;
+        case CHAR:
+            return "char";
+            break;
+        case INTEGER:
+            return "integer";
+            break;
+        case REAL:
+            return "real";
+            break;
+    }
+    abort();
+}
+
+} // namespace types
 
 std::ostream& operator<<(std::ostream& stream, const types::Type& type)
 {
-    using types::PrimitiveType;
+    using types::PrimType;
     switch (type.kind) {
-        case PrimitiveType::VOID:
+        case PrimType::VOID:
             stream << "void";
             break;
-        case PrimitiveType::CHAR:
+        case PrimType::CHAR:
             stream << "char";
             break;
-        case PrimitiveType::INTEGER:
+        case PrimType::INTEGER:
             stream << "integer";
             break;
-        case PrimitiveType::REAL:
+        case PrimType::REAL:
             stream << "real";
             break;
         default:

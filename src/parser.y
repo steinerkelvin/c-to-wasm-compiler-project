@@ -506,12 +506,12 @@ conditional-expression
 
 or-expression
     : and-expression    
-    | or-expression OR and-expression     { unify_comp($1->get_type(), $3->get_type(), "||");}
+    | or-expression OR and-expression       { ops::unify_comp($1->get_type().kind, $3->get_type().kind, "||");}
     ;
 
 and-expression
     : bit-or-expression
-    | and-expression AND bit-or-expression      { unify_comp($1->get_type(), $3->get_type(), "&&");}
+    | and-expression AND bit-or-expression  { ops::unify_comp($1->get_type().kind, $3->get_type().kind, "&&");}
     ;
 
 bit-or-expression   //TODO
@@ -531,16 +531,16 @@ bit-and-expression //TODO
 
 equality-expression
     : relational-expression
-    | equality-expression EQ  relational-expression     { unify_comp($1->get_type(), $3->get_type(), "==");}
-    | equality-expression NEQ relational-expression     { unify_comp($1->get_type(), $3->get_type(), "!=");}
+    | equality-expression EQ  relational-expression     { ops::unify_comp($1->get_type().kind, $3->get_type().kind, "==");}
+    | equality-expression NEQ relational-expression     { ops::unify_comp($1->get_type().kind, $3->get_type().kind, "!=");}
     ;
 
 relational-expression
     : shift-expression
-    | relational-expression LT shift-expression     { unify_comp($1->get_type(), $3->get_type(), "<");}
-    | relational-expression GT shift-expression     { unify_comp($1->get_type(), $3->get_type(), ">");}
-    | relational-expression LET shift-expression    { unify_comp($1->get_type(), $3->get_type(), "<=");}
-    | relational-expression GET shift-expression    { unify_comp($1->get_type(), $3->get_type(), ">=");}
+    | relational-expression LT shift-expression     { ops::unify_comp($1->get_type().kind, $3->get_type().kind, "<");}
+    | relational-expression GT shift-expression     { ops::unify_comp($1->get_type().kind, $3->get_type().kind, ">");}
+    | relational-expression LET shift-expression    { ops::unify_comp($1->get_type().kind, $3->get_type().kind, "<=");}
+    | relational-expression GET shift-expression    { ops::unify_comp($1->get_type().kind, $3->get_type().kind, ">=");}
     ;
 
 shift-expression //TODO 
@@ -551,15 +551,15 @@ shift-expression //TODO
 
 additive-expression
     : multiplicative-expression
-    | additive-expression PLUS  multiplicative-expression   { unify_arith($1->get_type(), $3->get_type(), "+"); $$ = new ast::Plus($1, $3); }
-    | additive-expression MINUS multiplicative-expression   { unify_arith($1->get_type(), $3->get_type(), "-"); $$ = new ast::Minus($1, $3); }
+    | additive-expression PLUS  multiplicative-expression   { ops::unify_arith($1->get_type().kind, $3->get_type().kind, "+"); $$ = new ast::Plus($1, $3); }
+    | additive-expression MINUS multiplicative-expression   { ops::unify_arith($1->get_type().kind, $3->get_type().kind, "-"); $$ = new ast::Minus($1, $3); }
     ;
 
 multiplicative-expression
     : cast-expression
-    | multiplicative-expression STAR cast-expression    { unify_arith($1->get_type(), $3->get_type(), "*"); $$ = new ast::Times($1, $3); }
-    | multiplicative-expression OVER cast-expression    { unify_arith($1->get_type(), $3->get_type(), "/"); $$ = new ast::Over($1, $3); }
-    | multiplicative-expression PERC cast-expression    { unify_arith($1->get_type(), $3->get_type(), "%"); }
+    | multiplicative-expression STAR cast-expression    { ops::unify_arith($1->get_type().kind, $3->get_type().kind, "*"); $$ = new ast::Times($1, $3); }
+    | multiplicative-expression OVER cast-expression    { ops::unify_arith($1->get_type().kind, $3->get_type().kind, "/"); $$ = new ast::Over($1, $3); }
+    | multiplicative-expression PERC cast-expression    { ops::unify_arith($1->get_type().kind, $3->get_type().kind, "%"); }
     ;
 
 cast-expression
