@@ -18,7 +18,7 @@ static void type_error(const char* op, const PrimType t1, const PrimType t2)
 static void type_error_unary(const char* op, const PrimType t1)
 {
     printf(
-        "SEMANTIC ERROR (0): incompatible type for operator '%s', LHS is '%s'.\n",
+        "SEMANTIC ERROR (0): incompatible type for operator '%s', operand is '%s'.\n",
         op,
         get_prim_text(t1));
     exit(EXIT_FAILURE);
@@ -85,6 +85,20 @@ PrimType btnot_verify(PrimType u, const char* op)
     if (t == VOID)
         type_error_unary(op, u);
     return t;
+}
+
+PrimType assign_verify(PrimType l, PrimType r, const char* op){
+	if(l == VOID){
+		printf("SEMANTIC ERROR (0): incompatible type for operator '%s', LHS is 'void'.\n",
+        op);
+    	exit(EXIT_FAILURE);
+    }
+    if(r == VOID){
+    	printf("SEMANTIC ERROR (0): incompatible type for operator '%s', RHS is 'void'.\n",
+        op);
+    	exit(EXIT_FAILURE);
+    }	
+    else return l;
 }
 
 } // namespace ops

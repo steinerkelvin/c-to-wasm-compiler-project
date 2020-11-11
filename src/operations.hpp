@@ -11,6 +11,7 @@ namespace ops {
     PrimType unify_bitwise(PrimType l, PrimType r, const char* op);
     PrimType unary_verify(PrimType u, const char* op);
     PrimType btnot_verify(PrimType u, const char* op);
+    PrimType assign_verify(PrimType l, PrimType r, const char* op);
 };
 
 #endif /* OPERATIONS_H */
