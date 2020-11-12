@@ -77,17 +77,18 @@ struct MultiNodeBase : R {
 
 struct TypedNode : Node {
     virtual bool is_typed() const { return true; }
-    types::PrimType get_type() const { return this->type; };
-    void set_type(types::PrimType t) { this->type = t; };
-    void set_type(types::PrimKind k) { this->type = types::PrimType{k}; };
+    types::Type* get_type() const { return this->type; };
+
+    void set_type(types::Type* t) { this->type = t; };
+    void set_type(types::PrimKind k) { this->type = new types::PrimType{k}; };
 
     virtual void write_data_repr(std::ostream& stream) const
     {
-        stream << " [" << this->type << "]";
+        stream << " [" << *(this->type) << "]";
     }
 
   protected:
-    types::PrimType type = types::PrimType{types::PrimKind::VOID};
+    types::Type *type = new types::PrimType{types::PrimKind::VOID};
 };
 
 struct Expr : TypedNode {};
@@ -113,32 +114,33 @@ struct IntegerValue : BaseValue<long long> {
     DECLARE_LABEL(IntegerValue);
     IntegerValue(long long value) : BaseValue<long long>(value)
     {
-        type = types::PrimType{types::PrimKind::INTEGER};
+        type = new types::PrimType{types::PrimKind::INTEGER};
     };
 };
 struct FloatingValue : BaseValue<double> {
     DECLARE_LABEL(FloatingValue);
     FloatingValue(double value) : BaseValue<double>(value)
     {
-        type = types::PrimType{types::PrimKind::REAL};
+        type = new types::PrimType{types::PrimKind::REAL};
     };
 };
 struct CharValue : BaseValue<char> {
     DECLARE_LABEL(CharValue);
     CharValue(char value) : BaseValue<char>(value)
     {
-        type = types::PrimType{types::PrimKind::CHAR};
+        type = new types::PrimType{types::PrimKind::CHAR};
     };
 };
 struct StringValue : BaseValue<size_t> {
     DECLARE_LABEL(StringValue);
     StringValue(size_t value) : BaseValue<size_t>(value)
     {
-        type = types::PrimType{types::PrimKind::VOID}; // TODO
+        type = new types::PrimType{types::PrimKind::VOID}; // TODO
     };
 };
 
 struct Variable : Expr {
+    DECLARE_LABEL(Variable);
     Variable(sbtb::NameRef& ref) { this->ref = ref; };
     const std::string& get_name() { return this->ref.get().name; };
 

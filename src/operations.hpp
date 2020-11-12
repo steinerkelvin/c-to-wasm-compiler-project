@@ -4,14 +4,13 @@
 #include "types.hpp"
 
 namespace ops {
-    using types::PrimKind;
-    void PrimType_error(const char* op, PrimKind t1, PrimKind t2);
-    PrimKind unify_arith(PrimKind l, PrimKind r, const char* op);
-    PrimKind unify_comp(PrimKind l, PrimKind r, const char* op);
-    PrimKind unify_bitwise(PrimKind l, PrimKind r, const char* op);
-    PrimKind unary_verify(PrimKind u, const char* op);
-    PrimKind btnot_verify(PrimKind u, const char* op);
-    PrimKind assign_verify(PrimKind l, PrimKind r, const char* op);
+    using types::Type;
+    Type* unify_arith(const Type* l, const Type* r, const char* op);
+    Type* unify_comp(const Type* l, const Type* r, const char* op);
+    Type* unify_bitwise(const Type* l, const Type* r, const char* op);
+    Type* unary_verify(const Type* u, const char* op);
+    Type* btnot_verify(const Type* u, const char* op);
+    Type* assign_verify(const Type* l, const Type* r, const char* op);
 };
 
 #endif /* OPERATIONS_H */

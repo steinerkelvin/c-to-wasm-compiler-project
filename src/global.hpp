@@ -6,6 +6,6 @@
 
 extern ast::Expr* last_expr;
 extern ast::Program* root;
-extern types::PrimKind res_type;
+extern types::Type* res_type;
 
 #endif /* GLOBAL_H */

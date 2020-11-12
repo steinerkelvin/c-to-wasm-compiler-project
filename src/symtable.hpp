@@ -14,7 +14,7 @@ namespace sbtb {
 
 struct Row {
     std::string name;
-    types::PrimType type;
+    types::Type* type;
 };
 
 struct TagRow : Row {};
@@ -52,9 +52,9 @@ void close_scope();
  * último escopo.
  */
 
-TagRef insert_tag(const std::string& namep, const types::PrimType& type);
-TypeRef insert_typename(const std::string& namep, const types::PrimType& type);
-NameRef insert_name(const std::string& namep, const types::PrimType& type);
+TagRef insert_tag(const std::string& namep, types::Type* type);
+TypeRef insert_typename(const std::string& namep, types::Type* type);
+NameRef insert_name(const std::string& namep, types::Type* type);
 
 TagRow& get(const TagRef& ref);
 TypeRow& get(const TypeRef& ref);

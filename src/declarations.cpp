@@ -132,21 +132,19 @@ void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
             }
         }
 
-        // std::cerr << *type << std::endl;
-
-        const std::string& name = decl->name;
+        const std::string name = decl->name;
         if (is_typedef) {
             if (sbtb::lookup_type(name)) {
                 std::cerr << name << std::endl;
                 assert(0); // TODO
             }
-            sbtb::insert_typename(name.c_str(), base_type);
+            sbtb::insert_typename(name.c_str(), type);
         } else {
             if (sbtb::lookup_name(name)) {
                 std::cerr << name << std::endl;
                 assert(0); // TODO
             }
-            sbtb::insert_name(name.c_str(), base_type);
+            sbtb::insert_name(name.c_str(), type);
         }
     }
 }

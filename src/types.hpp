@@ -10,43 +10,56 @@
 namespace types {
 
 struct Type {
+    virtual std::ostream& write_repr(std::ostream& stream) const
+    {
+        return stream << "void";
+    };
     virtual bool is_void() { return true; }
     virtual bool is_pointer() { return false; }
     virtual bool is_pointable() { return false; }
 };
 
-// Representa tipos primitivos
+// Enumeração de tipos primitivos
 enum PrimKind {
     VOID, // Mover esse void para fora daqui? vai dar uma trabalheira :(
     CHAR,
     INTEGER,
     REAL,
 };
+
+// Retorna string que representa um tipo primitivo
+const char* get_prim_text(PrimKind kind);
+
+// Representa tipos primitivos
 struct PrimType : Type {
     PrimKind kind;
     PrimType(const PrimType& type) = default;
     PrimType(PrimKind kind) : kind(kind){};
     virtual bool is_void() { return this->kind == VOID; }
-};
-
-// Representa um ponteiro
-struct Pointer : Type {
-    // Tipo base, de um elemento do vetor
-    Type* base;
-    // Tamanho do vetor
-    size_t size;
-
-    Pointer(Type* base, size_t size) : base(base), size(size){};
+    virtual std::ostream& write_repr(std::ostream& stream) const;
 };
 
 // Representa tipo de vetor
 struct Vector : Type {
     // Tipo base, de um elemento do vetor
     Type* base;
+    // Tamanho do vetor
+    size_t size;
+
+    Vector(Type* base, size_t size) : base(base), size(size){};
+    virtual std::ostream& write_repr(std::ostream& stream) const {
+        return this->base->write_repr(stream) << "[" << size << "]";
+    }
+};
+
+// Representa tipo de um ponteiro
+struct Pointer : Type {
+    // Tipo base o elemento apontado pelo ponteiro
+    Type* base;
     // Número de indireções / "profundidade" do ponteiro
     size_t n;
 
-    Vector(Type* base, size_t n) : base(base), n(n) { assert(n > 0); };
+    Pointer(Type* base, size_t n) : base(base), n(n) { assert(n > 0); };
 };
 
 struct Function : Type {
@@ -55,8 +68,6 @@ struct Function : Type {
     Function(Type* rettype, const std::vector<Type*>& parameters)
         : return_type(rettype), parameters(parameters){};
 };
-
-const char* get_prim_text(PrimKind kind);
 
 // Estruturas para representar especificadores e qualificadores em declarações
 
@@ -109,6 +120,6 @@ struct TypeQualOrTypeSpecList : std::vector<TypeQualOrTypeSpecPointer> {
 
 }; // namespace types
 
-std::ostream& operator<<(std::ostream& stream, const types::PrimType& type);
+std::ostream& operator<<(std::ostream& stream, const types::Type& type);
 
 #endif /* TYPES_H */

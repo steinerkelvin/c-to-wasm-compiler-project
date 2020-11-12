@@ -1,26 +1,27 @@
 #include "operations.hpp"
 #include <cstdio>
+#include <iostream>
 
 namespace ops {
 using namespace types;
+using types::PrimKind;
+using types::PrimType;
+using types::Type;
 
-static void type_error(const char* op, const PrimKind t1, const PrimKind t2)
+static void type_error(const char* op, const Type* t1, const Type* t2)
 {
-    printf(
-        "SEMANTIC ERROR (0): incompatible types for operator '%s', LHS is '%s' "
-        "and RHS is '%s'.\n",
-        op,
-        get_prim_text(t1),
-        get_prim_text(t2));
+    std::cerr << "SEMANTIC ERROR (0): ";
+    std::cerr << "incompatible types for operator \'" << op << "\', ";
+    std::cerr << "LHS is \'" << (*t1) << "\' and RHS is \'" << (*t2) << "\'."
+              << std::endl;
     exit(EXIT_FAILURE);
 }
 
-static void type_error_unary(const char* op, const PrimKind t1)
+static void type_error_unary(const char* op, const Type* t1)
 {
-    printf(
-        "SEMANTIC ERROR (0): incompatible type for operator '%s', operand is '%s'.\n",
-        op,
-        get_prim_text(t1));
+    std::cerr << "SEMANTIC ERROR (0): ";
+    std::cerr << "incompatible type for operator \'" << op << "\', ";
+    std::cerr << "operand is \'" << (*t1) << "\'." << std::endl;
     exit(EXIT_FAILURE);
 }
 
@@ -30,12 +31,19 @@ static const PrimKind arith[4][4] = {
     /* int 	*/ {VOID, INTEGER, INTEGER, REAL},
     /* real	*/ {VOID, VOID, REAL, REAL}};
 
-PrimKind unify_arith(PrimKind l, PrimKind r, const char* op)
+Type* unify_arith(const Type* l, const Type* r, const char* op)
 {
-    PrimKind t = arith[l][r];
-    if (t == VOID)
+    const PrimType* pl = dynamic_cast<const PrimType*>(l);
+    const PrimType* pr = dynamic_cast<const PrimType*>(r);
+    if (!pl || !pr) {
         type_error(op, l, r);
-    return t;
+    }
+    PrimKind kl = pl->kind;
+    PrimKind kr = pr->kind;
+    PrimKind result = arith[kl][kr];
+    if (result == PrimKind::VOID)
+        type_error(op, l, r);
+    return new PrimType(result);
 }
 
 static const PrimKind comp[4][4] = {
@@ -44,61 +52,95 @@ static const PrimKind comp[4][4] = {
     /* int  */ {VOID, INTEGER, INTEGER, INTEGER},
     /* real */ {VOID, INTEGER, INTEGER, INTEGER}};
 
-PrimKind unify_comp(PrimKind l, PrimKind r, const char* op)
+Type* unify_comp(const Type* l, const Type* r, const char* op)
 {
-    PrimKind t = comp[l][r];
-    if (t == VOID)
+    const PrimType* pl = dynamic_cast<const PrimType*>(l);
+    const PrimType* pr = dynamic_cast<const PrimType*>(r);
+    if (!pl || !pr) {
         type_error(op, l, r);
-    return t;
+    }
+    PrimKind kl = pl->kind;
+    PrimKind kr = pr->kind;
+    PrimKind result = comp[kl][kr];
+    if (result == PrimKind::VOID)
+        type_error(op, l, r);
+    return new PrimType(result);
 }
 
 static const PrimKind bitwise[4][4] = {
     /* void */ {VOID, VOID, VOID, VOID},
     /* char */ {VOID, INTEGER, INTEGER, VOID},
     /* int  */ {VOID, INTEGER, INTEGER, VOID},
-    /* real */ {VOID, VOID, VOID, VOID}
-};
+    /* real */ {VOID, VOID, VOID, VOID}};
 
-PrimKind unify_bitwise(PrimKind l, PrimKind r, const char* op)
+Type* unify_bitwise(const Type* l, const Type* r, const char* op)
 {
-    PrimKind t = bitwise[l][r];
-    if (t == VOID)
+    const PrimType* pl = dynamic_cast<const PrimType*>(l);
+    const PrimType* pr = dynamic_cast<const PrimType*>(r);
+    if (!pl || !pr) {
         type_error(op, l, r);
-    return t;
+    }
+    PrimKind kl = pl->kind;
+    PrimKind kr = pr->kind;
+    PrimKind result = bitwise[kl][kr];
+    if (result == PrimKind::VOID)
+        type_error(op, l, r);
+    return new PrimType(result);
 }
 
 static const PrimKind unary[4] = {VOID, INTEGER, INTEGER, INTEGER};
 
-PrimKind unary_verify(PrimKind u, const char* op)
+Type* unary_verify(const Type* u, const char* op)
 {
-    PrimKind t = unary[u];
-    if (t == VOID)
+    const PrimType* prim = dynamic_cast<const PrimType*>(u);
+    if (!prim) {
         type_error_unary(op, u);
-    return t;
+    }
+    PrimKind k = prim->kind;
+    PrimKind result = unary[k];
+    if (result == PrimKind::VOID) {
+        type_error_unary(op, u);
+    }
+    return new PrimType(result);
 }
 
 static const PrimKind btnot[4] = {VOID, INTEGER, INTEGER, VOID};
 
-PrimKind btnot_verify(PrimKind u, const char* op)
+Type* btnot_verify(const Type* u, const char* op)
 {
-    PrimKind t = btnot[u];
-    if (t == VOID)
+    const PrimType* prim = dynamic_cast<const PrimType*>(u);
+    if (!prim) {
         type_error_unary(op, u);
-    return t;
+    }
+    PrimKind k = prim->kind;
+    PrimKind result = btnot[k];
+    if (result == PrimKind::VOID)
+        type_error_unary(op, u);
+    return new PrimType(result);
 }
 
-PrimKind assign_verify(PrimKind l, PrimKind r, const char* op){
-	if(l == VOID){
-		printf("SEMANTIC ERROR (0): incompatible type for operator '%s', LHS is 'void'.\n",
-        op);
-    	exit(EXIT_FAILURE);
+Type* assign_verify(const Type* l, const Type* r, const char* op)
+{
+    const PrimType* pl = dynamic_cast<const PrimType*>(l);
+    const PrimType* pr = dynamic_cast<const PrimType*>(r);
+    if (!pl || !pr) {
+        type_error(op, l, r);
     }
-    if(r == VOID){
-    	printf("SEMANTIC ERROR (0): incompatible type for operator '%s', RHS is 'void'.\n",
-        op);
-    	exit(EXIT_FAILURE);
-    }	
-    else return l;
+    PrimKind kl = pl->kind;
+    PrimKind kr = pr->kind;
+    if (kl == PrimKind::VOID) {
+        std::cerr << "SEMANTIC ERROR (0): ";
+        std::cerr << "incompatible type for operator '%s', ";
+        std::cerr << "LHS is \'" << (*l) << "\'." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    if (kr == PrimKind::VOID) {
+        std::cerr << "SEMANTIC ERROR (0): ";
+        std::cerr << "incompatible type for operator '%s', ";
+        std::cerr << "RHS is \'" << (*r) << "\'." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    return new Type(*r);
 }
 
 } // namespace ops
