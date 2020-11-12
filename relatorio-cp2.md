@@ -26,4 +26,5 @@ implementação:
 bastando usar na implementação as representações correnpondentes com maior
 quantidade de bits.
 
-
+Também decidimos limitar o suporte a vetores apenas a vetores de tamanho
+conhecido em tempo de compilação.

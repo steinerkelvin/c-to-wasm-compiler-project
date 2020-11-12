@@ -143,4 +143,36 @@ Type* assign_verify(const Type* l, const Type* r, const char* op)
     return new Type(*r);
 }
 
+Expr* index_access(Expr* value, Expr* index)
+{
+    using types::Vector;
+    using ast::IntegerValue;
+
+    const IntegerValue* int_index_node =
+        dynamic_cast<const IntegerValue*>(index);
+    if (!int_index_node) {
+        std::cerr << "SEMANTIC ERROR (0): ";
+        std::cerr << "index must be an integer value, ";
+        std::cerr << "got " << *index << " instead." << std::endl;
+        abort();
+    }
+
+    const Type *value_type = value->get_type();
+    assert(value_type);
+    const Vector* value_type_vector = dynamic_cast<const Vector*>(value_type);
+    // TODO pointer
+    if (!value_type_vector) {
+        std::cerr << "SEMANTIC ERROR (0): ";
+        std::cerr << "accessed value must be of array type, ";
+        std::cerr << "got \'" << *value_type << "\' instead." << std::endl;
+        abort();
+    }
+
+    Type *base_type = value_type_vector->get_base();
+    ast::IndexAccess *new_node = new ast::IndexAccess(index, value);
+    new_node->set_type(base_type);
+
+    return new_node;
+}
+
 } // namespace ops

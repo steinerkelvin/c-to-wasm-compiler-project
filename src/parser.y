@@ -583,8 +583,8 @@ unary-expression
 
 postfix-expression 
     : primary-expression
-    | postfix-expression LB expression RB       // %prec LB
-    | postfix-expression LPAR argument-expression-list-opt RPAR
+    | postfix-expression[value] LB expression[index] RB   { $$ = ops::index_access($value, $index); }
+    | postfix-expression LPAR argument-expression-list-opt RPAR     // TODO
     | postfix-expression DOT   ID
     | postfix-expression ARROW ID
     | postfix-expression PLUSPLUS       { ops::unary_verify($1->get_type(),"++"); $$ = new ast::PrefixPlusPlus($1); }

@@ -6,10 +6,11 @@ int test() {
 
 int main()
 {    
-    int vec[4];
-    vec;
-
     int x = 1.5;
+
+    int vec[4];
+    vec[4];
+
     if (x) {
         0 * 1 + 0 * (-2.4);
     }

@@ -39,27 +39,35 @@ struct PrimType : Type {
     virtual std::ostream& write_repr(std::ostream& stream) const;
 };
 
-// Representa tipo de vetor
-struct Vector : Type {
-    // Tipo base, de um elemento do vetor
+// Tipo que "contém" um outro tipo base
+struct ContainerType : Type {
+    ContainerType(Type* base) : base(base){};
+    Type* get_base() const { return this->base; }
+
+  protected:
+    // Tipo base
     Type* base;
+};
+
+// Representa tipo de vetor
+struct Vector : ContainerType {
     // Tamanho do vetor
     size_t size;
-
-    Vector(Type* base, size_t size) : base(base), size(size){};
-    virtual std::ostream& write_repr(std::ostream& stream) const {
+    Vector(Type* base, size_t size) : ContainerType(base), size(size){};
+    virtual std::ostream& write_repr(std::ostream& stream) const
+    {
         return this->base->write_repr(stream) << "[" << size << "]";
     }
 };
 
 // Representa tipo de um ponteiro
-struct Pointer : Type {
-    // Tipo base o elemento apontado pelo ponteiro
-    Type* base;
+struct Pointer : ContainerType {
     // Número de indireções / "profundidade" do ponteiro
     size_t n;
-
-    Pointer(Type* base, size_t n) : base(base), n(n) { assert(n > 0); };
+    Pointer(Type* base, size_t n) : ContainerType(base), n(n)
+    {
+        assert(n > 0);
+    };
 };
 
 struct Function : Type {

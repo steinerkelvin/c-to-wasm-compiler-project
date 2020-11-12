@@ -11,6 +11,7 @@
 #include "symtable.hpp"
 #include "types.hpp"
 
+// TODO refatorar para template?
 #define DECLARE_LABEL_STR(TEXT)                                                \
     virtual const char* const get_label() const { return (TEXT); };
 #define DECLARE_LABEL(NAME) DECLARE_LABEL_STR(#NAME)
@@ -210,6 +211,11 @@ struct Times : BinOp {
 };
 struct Over : BinOp {
     DECLARE_LABEL_STR("/");
+    using BinOp::BinOp;
+};
+
+struct IndexAccess : BinOp {
+    DECLARE_LABEL_STR("[]");
     using BinOp::BinOp;
 };
 
