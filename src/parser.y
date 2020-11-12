@@ -45,9 +45,11 @@ void yyerror(char const *s);
 %type <decl::DeclarationSpec*> declaration-specifier
 %type <decl::StorageClassSpec*> storage-class-specifier
 %type <decl::InitDeclarators*> init-declarator-list
-%type <std::string*> init-declarator
-%type <std::string*> declarator
-%type <std::string*> direct-declarator
+%type <decl::Declarator*> init-declarator
+%type <decl::Declarator*> declarator
+%type <size_t> pointer
+%type <decl::Declarator*> direct-declarator
+%type <ast::Expr*> initializer
 
 %type <ast::Statement*> stmt
 %type <ast::Block*> compound-stmt block-list-opt
@@ -250,39 +252,39 @@ type-qualifier
 //     | "_Alignas" LPAR constant-expression RPAR
 //     ;
 
+// TODO
+
 init-declarator-list
-    : init-declarator-list[list] COMMA init-declarator[dec]
-        { $$ = $list; $$->add($dec); }
-        // { $$ = $list;     ; slist_push(&($$), $dec); }
-    | init-declarator[dec]
+    : init-declarator[dec]
         { $$ = new decl::InitDeclarators(); $$->add($dec); }
-        // { $$ = slist_new(); slist_push(&($$), $dec); }
+    | init-declarator-list[list] COMMA init-declarator[dec]
+        { $$ = $list; $$->add($dec); }
     ;
 init-declarator 
-    : declarator ASSIGN initializer
+    : declarator ASSIGN initializer { $$->set_init($3); }
     | declarator
     ;
 
 declarator 
-    : pointer direct-declarator     { $$ = $2; }
+    : pointer direct-declarator     { $$ = $2; $$->set_pointer($1); }
     | direct-declarator
     ;
 
 pointer
-    : pointer STAR type-qualifier-list-opt
-    | STAR type-qualifier-list-opt
+    : pointer STAR type-qualifier-list-opt  { $$++; }
+    | STAR type-qualifier-list-opt          { $$ = 1; }
     ;
 
 direct-declarator
-    : ID
+    : ID                    { $$ = new decl::Declarator(*$1); delete $1; }
     | LPAR declarator RPAR  { $$ = $2; }
     | direct-declarator LB type-qualifier-list-opt                              RB
-    | direct-declarator LB type-qualifier-list-opt        assignment-expression RB
-    | direct-declarator LB type-qualifier-list STATIC     assignment-expression RB
-    | direct-declarator LB STATIC type-qualifier-list-opt assignment-expression RB
+    | direct-declarator LB type-qualifier-list-opt        assignment-expression[exp] RB  { $$->add_vec($exp); }
+    | direct-declarator LB type-qualifier-list STATIC     assignment-expression[exp] RB  { $$->add_vec($exp); }
+    | direct-declarator LB STATIC type-qualifier-list-opt assignment-expression[exp] RB  { $$->add_vec($exp); }
     | direct-declarator LB type-qualifier-list-opt STAR                         RB
-    | direct-declarator LPAR parameter-type-list RPAR
-    | direct-declarator LPAR identifier-list-opt RPAR
+    | direct-declarator LPAR parameter-type-list RPAR       {  }
+    | direct-declarator LPAR identifier-list-opt RPAR       {  }
     ;
 
 identifier-list-opt
@@ -348,7 +350,7 @@ direct-abstract-declarator
 
 initializer
     : assignment-expression
-    | LCB initializer-list trailing-comma RCB
+    | LCB initializer-list trailing-comma RCB   { $$ = new ast::Expr(); }
     ;
 
 initializer-list

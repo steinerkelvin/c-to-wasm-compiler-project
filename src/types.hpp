@@ -10,7 +10,6 @@
 namespace types {
 
 struct Type {
-    virtual ~Type(){};
     virtual bool is_void() { return true; }
     virtual bool is_pointer() { return false; }
     virtual bool is_pointable() { return false; }
@@ -25,38 +24,36 @@ enum PrimKind {
 };
 struct PrimType : Type {
     PrimKind kind;
+    PrimType(const PrimType& type) = default;
     PrimType(PrimKind kind) : kind(kind){};
     virtual bool is_void() { return this->kind == VOID; }
 };
 
 // Representa um ponteiro
-struct Vector : Type {
+struct Pointer : Type {
     // Tipo base, de um elemento do vetor
-    Type base_type;
+    Type* base;
     // Tamanho do vetor
     size_t size;
 
-    Vector(Type base_type, size_t size) : base_type(base_type), size(size){};
+    Pointer(Type* base, size_t size) : base(base), size(size){};
 };
 
 // Representa tipo de vetor
-struct Pointer : Type {
+struct Vector : Type {
     // Tipo base, de um elemento do vetor
-    Type base_type;
+    Type* base;
     // Número de indireções / "profundidade" do ponteiro
     size_t n;
 
-    Pointer(Type base_type, size_t n) : base_type(base_type), n(n)
-    {
-        assert(n > 0);
-    };
+    Vector(Type* base, size_t n) : base(base), n(n) { assert(n > 0); };
 };
 
 struct Function : Type {
-    Type return_type;
-    std::vector<Type> parameters;
-    Function(const Type rettype, const std::vector<Type>& parameters)
-        : return_type(rettype), parameters(parameters) {};
+    Type* return_type;
+    std::vector<Type*> parameters;
+    Function(Type* rettype, const std::vector<Type*>& parameters)
+        : return_type(rettype), parameters(parameters){};
 };
 
 const char* get_prim_text(PrimKind kind);

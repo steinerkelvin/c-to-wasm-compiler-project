@@ -81,7 +81,8 @@ struct TypedNode : Node {
     void set_type(types::PrimType t) { this->type = t; };
     void set_type(types::PrimKind k) { this->type = types::PrimType{k}; };
 
-    virtual void write_data_repr(std::ostream& stream) const {
+    virtual void write_data_repr(std::ostream& stream) const
+    {
         stream << " [" << this->type << "]";
     }
 
@@ -102,6 +103,7 @@ struct BaseValue : Expr {
         stream << " ";
         stream << this->value;
     };
+    T get_value() const { return this->value; }
 
   protected:
     T value;
@@ -109,26 +111,30 @@ struct BaseValue : Expr {
 
 struct IntegerValue : BaseValue<long long> {
     DECLARE_LABEL(IntegerValue);
-    IntegerValue(long long value) : BaseValue<long long>(value){
+    IntegerValue(long long value) : BaseValue<long long>(value)
+    {
         type = types::PrimType{types::PrimKind::INTEGER};
     };
 };
 struct FloatingValue : BaseValue<double> {
     DECLARE_LABEL(FloatingValue);
-    FloatingValue(double value) : BaseValue<double>(value){
+    FloatingValue(double value) : BaseValue<double>(value)
+    {
         type = types::PrimType{types::PrimKind::REAL};
     };
 };
 struct CharValue : BaseValue<char> {
     DECLARE_LABEL(CharValue);
-    CharValue(char value) : BaseValue<char>(value){
+    CharValue(char value) : BaseValue<char>(value)
+    {
         type = types::PrimType{types::PrimKind::CHAR};
     };
 };
 struct StringValue : BaseValue<size_t> {
     DECLARE_LABEL(StringValue);
-    StringValue(size_t value) : BaseValue<size_t>(value){
-        type = types::PrimType{types::PrimKind::VOID};  // TODO
+    StringValue(size_t value) : BaseValue<size_t>(value)
+    {
+        type = types::PrimType{types::PrimKind::VOID}; // TODO
     };
 };
 
