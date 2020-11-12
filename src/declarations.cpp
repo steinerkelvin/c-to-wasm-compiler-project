@@ -8,7 +8,7 @@
 
 using namespace decl;
 
-void error_simple_type_spec(const char *const kind_name)
+void error_simple_type_spec(const char* const kind_name)
 {
     fprintf(stderr, "SEMANTIC ERROR (%d): ", 0); // TODO
     fprintf(stderr, "%s type specifier not valid here\n", kind_name);
@@ -16,11 +16,12 @@ void error_simple_type_spec(const char *const kind_name)
 }
 
 void handle_simple_type_spec(
-    std::optional<types::PrimType>& result_type, const types::SimpleTypeSpec* spec)
+    std::optional<types::PrimType>& result_type,
+    const types::SimpleTypeSpec* spec)
 {
     using types::PrimKind;
-    using types::SimpleTypeSpec;
     using types::PrimType;
+    using types::SimpleTypeSpec;
     assert(spec);
 
     switch (spec->kind) {
@@ -67,8 +68,8 @@ void handle_simple_type_spec(
 
 types::PrimType make_type(const types::TypeQualOrTypeSpecList& pspecs)
 {
-    using types::SimpleTypeSpec;
     using types::PrimType;
+    using types::SimpleTypeSpec;
     using types::TypeSpec;
 
     std::optional<PrimType> result_type;
@@ -115,22 +116,37 @@ void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
         }
     }
 
-    types::PrimType the_type = make_type(typedecl_specs);
-    // std::cerr << the_type << std::endl;
+    types::PrimType base_type = make_type(typedecl_specs);
+    // std::cerr << base_type << std::endl;
 
-    for (auto const& decl : decls) {
+    for (auto& decl : decls) {
+        types::Type *type = new types::PrimType(base_type);
+
+        for (auto vec_size_expr : decl->vec_sizes) {
+            auto value_node = dynamic_cast<ast::IntegerValue*>(vec_size_expr);
+            if (value_node) {
+                size_t vec_size = value_node->get_value();
+                type = new types::Vector(type, vec_size);
+            } else {
+                abort();
+            }
+        }
+
+        // std::cerr << *type << std::endl;
+
+        const std::string& name = decl->name;
         if (is_typedef) {
-            if (sbtb::lookup_type(*decl)) {
-                std::cerr << *decl << std::endl;
-                assert(0);  // TODO
+            if (sbtb::lookup_type(name)) {
+                std::cerr << name << std::endl;
+                assert(0); // TODO
             }
-            sbtb::insert_typename(decl->c_str(), the_type);
+            sbtb::insert_typename(name.c_str(), base_type);
         } else {
-            if (sbtb::lookup_name(*decl)) {
-                std::cerr << *decl << std::endl;
-                assert(0);  // TODO
+            if (sbtb::lookup_name(name)) {
+                std::cerr << name << std::endl;
+                assert(0); // TODO
             }
-            sbtb::insert_name(decl->c_str(), the_type);
+            sbtb::insert_name(name.c_str(), base_type);
         }
     }
 }
