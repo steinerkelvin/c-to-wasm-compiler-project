@@ -427,7 +427,7 @@ block-item
     ;
 
 if-stmt 
-    : IF LPAR expression RPAR stmt[body]            { $$ = $body; }
+    : IF LPAR expression[expr] RPAR stmt[body]            { $$ = new ast::IfStmt($expr,$body); }
     | IF LPAR expression RPAR stmt[body] ELSE stmt  { $$ = $body; }
     ;
 
@@ -449,11 +449,11 @@ default-stmt
     ;
 
 while-stmt
-    : WHILE LPAR expression RPAR stmt[body]         { $$ = $body; }
+    : WHILE LPAR expression[expr] RPAR stmt[body]         { $$ = new ast::WhileStmt($expr,$body); }
     ;
 
 do-while-stmt
-    : DO stmt[body] WHILE LPAR expression RPAR SEMI   { $$ = $body; }
+    : DO stmt[body] WHILE LPAR expression[expr] RPAR SEMI   { $$ = new ast::DoWhileStmt($expr,$body); }
     ;
 
 for-stmt

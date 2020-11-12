@@ -209,6 +209,54 @@ struct Statement : Node {
     DECLARE_LABEL(Statement);
 };
 
+struct IfStmt : Statement{
+    DECLARE_LABEL(IfStmt);
+    IfStmt(Expr* expr, Statement* stmt){
+        this->expr = expr;
+        this->stmt = stmt;
+    }
+    virtual const std::vector<Node*> get_children() const
+    {
+        return std::vector<Node*>{this->expr, this->stmt};
+    }
+
+protected:
+    Expr* expr;
+    Statement* stmt;
+};
+
+struct WhileStmt : Statement{
+    DECLARE_LABEL(WhileStmt);
+    WhileStmt(Expr* expr, Statement* stmt){
+        this->expr = expr;
+        this->stmt = stmt;
+    }
+    virtual const std::vector<Node*> get_children() const
+    {
+        return std::vector<Node*>{this->expr, this->stmt};
+    }    
+
+protected:
+    Expr* expr;
+    Statement* stmt;        
+};
+
+struct DoWhileStmt : Statement{
+    DECLARE_LABEL(DoWhileStmt);
+    DoWhileStmt(Expr* expr, Statement* stmt){
+        this->expr = expr;
+        this->stmt = stmt;
+    }
+    virtual const std::vector<Node*> get_children() const
+    {
+        return std::vector<Node*>{this->stmt, this->expr};
+    }    
+
+protected:
+    Expr* expr;
+    Statement* stmt;        
+};
+
 struct Block : MultiNodeBase<Statement> {
     DECLARE_LABEL(Block);
     std::optional<ScopeId> scope_id;
