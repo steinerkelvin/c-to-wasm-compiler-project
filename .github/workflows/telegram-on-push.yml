@@ -13,4 +13,4 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_TO }}
           token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: "${{ github.event.action }} by ${{ github.actor }} \n ${{ join(github.event.push.commits.*.message, '\n') }}"
+          message: "push by ${{ github.actor }} \n ${{ join(github.event.commits.*.message, '\n') }}"
