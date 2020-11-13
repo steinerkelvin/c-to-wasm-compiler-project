@@ -3,7 +3,9 @@ name: Notify by Telegram on Pull
 on: push
 
 jobs:
-  telegram_message_notify:
+  telegram_notify:
+    name: Notify on Telegram
+    runs-on: ubuntu-latest
     steps:
       -
         name: Telegram Message Notify
