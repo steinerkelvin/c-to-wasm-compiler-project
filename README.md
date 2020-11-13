@@ -23,5 +23,5 @@ Hopefully, a C to WebAssemply compiler.
 
 - Make: `4.3-3` (Arch); `4.1` (Ubuntu Bionic)
 - Flex: `2.6.4-3` (Arch); `2.6.4-3` (Ubuntu Bionic)
-- Bison: `3.6.4-1` (Arch); `3.0.4` (Ubuntu Bionic)
-- Clang: `10.0.1-1` (Arch); `6.0.0-1` (Ubuntu Bionic)
+- Bison: `3.7.2-1` (Arch); `3.0.4` (Ubuntu Bionic)
+- Clang: `11.0.0-1` (Arch); `6.0.0-1` (Ubuntu Bionic)

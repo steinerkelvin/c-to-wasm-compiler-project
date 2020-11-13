@@ -38,6 +38,13 @@ clean:
 	rm -f -r ./build
 	cd src/; rm -f *.output $(parser_files) $(scanner_files)
 
+show-versions:
+	make --version ; echo
+	flex --version ; echo
+	bison --version ; echo
+	clang --version ; echo
+
+
 flex: $(scanner_files)
 
 bison: $(parser_files)
