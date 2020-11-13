@@ -8,7 +8,7 @@ namespace pars
             return *pos;
         } else {
             fprintf(stderr, "SEMANTIC ERROR (%d): ", 0); // TODO
-            fprintf(stderr, "variable '%s' not declared", name.c_str());
+            fprintf(stderr, "variable '%s' not declared.\n", name.c_str());
             exit(1);
         }
     }
