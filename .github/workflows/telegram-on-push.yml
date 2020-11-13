@@ -1,0 +1,14 @@
+name: Notify by Telegram on Pull
+
+on: push
+
+jobs:
+  telegram_message_notify:
+    steps:
+      -
+        name: Telegram Message Notify
+        uses: appleboy/telegram-action@v0.1.0
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: ${{ github.event }} by ${{ github.actor }}
