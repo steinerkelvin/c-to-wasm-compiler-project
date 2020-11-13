@@ -3,20 +3,28 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <functional>
 #include <ostream>
 #include <variant>
 #include <vector>
+
+// Forward declaration
+// TODO refatorar?
+namespace ast {
+    struct Expr;
+};
+std::ostream& operator<<(std::ostream& stream, const ast::Expr& node);
 
 namespace types {
 
 struct Type {
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
-        return stream << "void";
+        return stream << "NOT IMPLEMENTED";
     };
-    virtual bool is_void() { return true; }
-    virtual bool is_pointer() { return false; }
-    virtual bool is_pointable() { return false; }
+    // virtual bool is_void() { return true; }
+    // virtual bool is_pointer() { return false; }
+    // virtual bool is_pointable() { return false; }
 };
 
 // Enumeração de tipos primitivos
@@ -35,13 +43,18 @@ struct PrimType : Type {
     PrimKind kind;
     PrimType(const PrimType& type) = default;
     PrimType(PrimKind kind) : kind(kind){};
-    virtual bool is_void() { return this->kind == VOID; }
+    // virtual bool is_void() { return this->kind == VOID; }
     virtual std::ostream& write_repr(std::ostream& stream) const;
 };
 
-// Tipo que "contém" um outro tipo base
+// Representa um tipo que "contém" um outro tipo base
+// e.g. vetor, ponteiro, etc
 struct ContainerType : Type {
+    // Tipo de uma função que recebe um tipo base e constrói um ContainerType
+    using Builder = std::function<ContainerType*(Type*)>;
+
     ContainerType(Type* base) : base(base){};
+    // Retorna o tipo base desse tipo composto
     Type* get_base() const { return this->base; }
 
   protected:
@@ -49,14 +62,24 @@ struct ContainerType : Type {
     Type* base;
 };
 
-// Representa tipo de vetor
+// Representa tipo de um vetor
 struct Vector : ContainerType {
     // Tamanho do vetor
     size_t size;
+
     Vector(Type* base, size_t size) : ContainerType(base), size(size){};
+
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
         return this->base->write_repr(stream) << "[" << size << "]";
+    }
+
+    // Retorna um "construtor" para o tipo Vetor a partir de um tipo base
+    static ContainerType::Builder builder(size_t size)
+    {
+        return [size](Type* base) -> ContainerType* {
+            return new Vector(base, size);
+        };
     }
 };
 
@@ -64,20 +87,48 @@ struct Vector : ContainerType {
 struct Pointer : ContainerType {
     // Número de indireções / "profundidade" do ponteiro
     size_t n;
+
     Pointer(Type* base, size_t n) : ContainerType(base), n(n)
     {
         assert(n > 0);
     };
+
+    virtual std::ostream& write_repr(std::ostream& stream) const
+    {
+        return stream << "(*";
+        this->base->write_repr(stream);
+        stream << ")";
+        return stream;
+    }
+
+    // Retorna um "construtor" para o tipo Vetor a partir de um tipo base
+    static ContainerType::Builder builder(size_t size)
+    {
+        return [size](Type* base) -> ContainerType* {
+            return new Pointer(base, size);
+        };
+    }
 };
 
-struct Function : Type {
-    Type* return_type;
+struct Function : ContainerType {
+    // O tipo de uma função deriva de ContainerType contendo um "tipo base"
+    // sendo seu valor de retorno
     std::vector<Type*> parameters;
     Function(Type* rettype, const std::vector<Type*>& parameters)
-        : return_type(rettype), parameters(parameters){};
+        : ContainerType(rettype), parameters(parameters){};
+
+    // Retorna um "construtor" para o tipo Function a partir de um tipo base
+    static ContainerType::Builder builder(const std::vector<Type*> parameters)
+    {
+        return [parameters](Type* rettype) -> ContainerType* {
+            return new Function(rettype, parameters);
+        };
+    }
 };
 
+//
 // Estruturas para representar especificadores e qualificadores em declarações
+//
 
 struct TypeQualifier {
     enum TypeQualifierKind {

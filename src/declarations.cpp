@@ -91,6 +91,22 @@ types::PrimType make_type(const types::TypeQualOrTypeSpecList& pspecs)
     return *result_type;
 }
 
+types::ContainerType::Builder decl::vector_type_builder(ast::Expr* size_expr)
+{
+    assert(size_expr);
+    using ast::IntegerValue;
+    const IntegerValue* size_int_node =
+        dynamic_cast<const IntegerValue*>(size_expr);
+    if (!size_int_node) {
+        std::cerr << "SEMANTIC ERROR (0): ";
+        std::cerr << "vector size must be an integer literal value, ";
+        std::cerr << "got \'" << (*size_expr) << "\' instead." << std::endl;
+        exit(1);
+    }
+    size_t size = size_int_node->get_value();
+    return types::Vector::builder(size);
+}
+
 void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 {
     using types::TypeQualOrTypeSpecList;
@@ -120,16 +136,25 @@ void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
     // std::cerr << base_type << std::endl;
 
     for (auto& decl : decls) {
-        types::Type *type = new types::PrimType(base_type);
+        types::Type* type = new types::PrimType(base_type);
 
-        for (auto vec_size_expr : decl->vec_sizes) {
-            auto value_node = dynamic_cast<ast::IntegerValue*>(vec_size_expr);
-            if (value_node) {
-                size_t vec_size = value_node->get_value();
-                type = new types::Vector(type, vec_size);
-            } else {
-                abort();
-            }
+        // for (auto vec_size_expr : decl->vec_sizes) {
+        //     auto value_node =
+        //     dynamic_cast<ast::IntegerValue*>(vec_size_expr); if (value_node)
+        //     {
+        //         size_t vec_size = value_node->get_value();
+        //         type = new types::Vector(type, vec_size);
+        //     } else {
+        //         abort();
+        //     }
+        // }
+
+        // Constrói o tipo final com todos os construtores que foram empilhados
+        // na construção do declarador
+        while (decl->builders.size() > 0) {
+            auto builder = *(decl->builders.end() - 1);
+            decl->builders.pop_back();
+            type = builder(type);
         }
 
         const std::string name = decl->name;

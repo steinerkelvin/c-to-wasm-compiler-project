@@ -8,6 +8,7 @@
 #include "types.hpp"
 
 namespace decl {
+using types::ContainerType;
 
 struct DeclarationSpec {
     /** Força a classe a ser polimórfica */
@@ -41,14 +42,22 @@ struct DeclarationSpecs : std::vector<DeclarationSpec*> {
 
 struct AbstractDeclarator {
     size_t pointer = 0;
-    std::vector<ast::Expr*> vec_sizes;
-    void set_pointer(size_t n) { this->pointer = n; }
-    void add_vec(ast::Expr* size_exp) { this->vec_sizes.push_back(size_exp); }
+
+    std::vector<ContainerType::Builder> builders;
+
+    // std::vector<ast::Expr*> vec_sizes;
+    // void set_pointer(size_t n) { this->pointer = n; }
+    // void add_vec(ast::Expr* size_exp) { this->vec_sizes.push_back(size_exp); }
+
+    void add(ContainerType::Builder builder) {
+        builders.push_back(builder);
+    }
 };
 
 struct Declarator : AbstractDeclarator {
     const std::string name;
     std::optional<ast::Expr*> init_expr;
+
     Declarator(const std::string& name) : name(name) {}
     void set_init(ast::Expr* init_expr) { this->init_expr = init_expr; };
 };
@@ -57,6 +66,12 @@ struct InitDeclarators : std::vector<Declarator*> {
     void add(Declarator* init) { this->push_back(init); }
 };
 
+// Retorna um construtor de tipo de vetor resolvendo a expressão `size_expr`
+// para literal de inteiro, imprimindo erro e abortando em caso de falha
+types::ContainerType::Builder vector_type_builder(ast::Expr* size_expr);
+
+// Consome especificadores de declaração e declaradores, registrando
+// adequadamente os nomes no último escopo aberto
 void declare(const DeclarationSpecs& specs, const InitDeclarators& decls);
 
 }; // namespace decl

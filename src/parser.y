@@ -266,7 +266,7 @@ init-declarator
     ;
 
 declarator 
-    : pointer direct-declarator     { $$ = $2; $$->set_pointer($1); }
+    : pointer direct-declarator     { $$ = $2; $$->add(types::Pointer::builder($1)); }
     | direct-declarator
     ;
 
@@ -279,12 +279,12 @@ direct-declarator
     : ID                    { $$ = new decl::Declarator(*$1); delete $1; }
     | LPAR declarator RPAR  { $$ = $2; }
     | direct-declarator LB type-qualifier-list-opt                              RB
-    | direct-declarator LB type-qualifier-list-opt        assignment-expression[exp] RB  { $$->add_vec($exp); }
-    | direct-declarator LB type-qualifier-list STATIC     assignment-expression[exp] RB  { $$->add_vec($exp); }
-    | direct-declarator LB STATIC type-qualifier-list-opt assignment-expression[exp] RB  { $$->add_vec($exp); }
-    | direct-declarator LB type-qualifier-list-opt STAR                         RB
+    | direct-declarator LB type-qualifier-list-opt        assignment-expression[exp] RB { $$->add(decl::vector_type_builder($exp)); }
+    | direct-declarator LB type-qualifier-list STATIC     assignment-expression[exp] RB { $$->add(decl::vector_type_builder($exp)); }
+    | direct-declarator LB STATIC type-qualifier-list-opt assignment-expression[exp] RB { $$->add(decl::vector_type_builder($exp)); }
+    // | direct-declarator LB type-qualifier-list-opt STAR                         RB
+    | direct-declarator LPAR identifier-list-opt RPAR   // TODO remover?
     | direct-declarator LPAR parameter-type-list RPAR       {  }
-    | direct-declarator LPAR identifier-list-opt RPAR       {  }
     ;
 
 identifier-list-opt

@@ -150,6 +150,7 @@ Expr* index_access(Expr* value, Expr* index)
 
     const IntegerValue* int_index_node =
         dynamic_cast<const IntegerValue*>(index);
+    // TODO aceitar qualquer expressão com tipo inteiro
     if (!int_index_node) {
         std::cerr << "SEMANTIC ERROR (0): ";
         std::cerr << "index must be an integer value, ";

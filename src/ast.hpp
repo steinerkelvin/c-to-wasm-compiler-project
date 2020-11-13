@@ -85,7 +85,7 @@ struct TypedNode : Node {
 
     virtual void write_data_repr(std::ostream& stream) const
     {
-        stream << " [" << *(this->type) << "]";
+        stream << " \"[" << *(this->type) << "]\"";
     }
 
   protected:
