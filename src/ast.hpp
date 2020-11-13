@@ -112,28 +112,28 @@ struct BaseValue : Expr {
 };
 
 struct IntegerValue : BaseValue<long long> {
-    DECLARE_LABEL(IntegerValue);
+    DECLARE_LABEL_STR("Integer");
     IntegerValue(long long value) : BaseValue<long long>(value)
     {
         type = new types::PrimType{types::PrimKind::INTEGER};
     };
 };
 struct FloatingValue : BaseValue<double> {
-    DECLARE_LABEL(FloatingValue);
+    DECLARE_LABEL_STR("Real");
     FloatingValue(double value) : BaseValue<double>(value)
     {
         type = new types::PrimType{types::PrimKind::REAL};
     };
 };
 struct CharValue : BaseValue<char> {
-    DECLARE_LABEL(CharValue);
+    DECLARE_LABEL_STR("Char");
     CharValue(char value) : BaseValue<char>(value)
     {
         type = new types::PrimType{types::PrimKind::CHAR};
     };
 };
 struct StringValue : BaseValue<size_t> {
-    DECLARE_LABEL(StringValue);
+    DECLARE_LABEL_STR("String");
     StringValue(size_t value) : BaseValue<size_t>(value)
     {
         type = new types::PrimType{types::PrimKind::VOID}; // TODO
@@ -141,7 +141,7 @@ struct StringValue : BaseValue<size_t> {
 };
 
 struct Variable : Expr {
-    DECLARE_LABEL(Variable);
+    DECLARE_LABEL_STR("Var");
     Variable(sbtb::NameRef& ref) { this->ref = ref; };
     const std::string& get_name() { return this->ref.get().name; };
 
@@ -215,7 +215,7 @@ struct Over : BinOp {
 };
 
 struct IndexAccess : BinOp {
-    DECLARE_LABEL_STR("[]");
+    DECLARE_LABEL_STR("v[x]");
     using BinOp::BinOp;
 };
 

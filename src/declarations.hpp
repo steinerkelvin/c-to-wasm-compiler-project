@@ -45,10 +45,6 @@ struct AbstractDeclarator {
 
     std::vector<ContainerType::Builder> builders;
 
-    // std::vector<ast::Expr*> vec_sizes;
-    // void set_pointer(size_t n) { this->pointer = n; }
-    // void add_vec(ast::Expr* size_exp) { this->vec_sizes.push_back(size_exp); }
-
     void add(ContainerType::Builder builder) {
         builders.push_back(builder);
     }

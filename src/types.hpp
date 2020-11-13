@@ -11,7 +11,7 @@
 // Forward declaration
 // TODO refatorar?
 namespace ast {
-    struct Expr;
+struct Expr;
 };
 std::ostream& operator<<(std::ostream& stream, const ast::Expr& node);
 
@@ -90,12 +90,16 @@ struct Pointer : ContainerType {
 
     Pointer(Type* base, size_t n) : ContainerType(base), n(n)
     {
+        assert(base);
         assert(n > 0);
     };
 
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
-        return stream << "(*";
+        stream << "(";
+        for (size_t i = 0; i < this->n; i++) {
+            stream << "*";
+        }
         this->base->write_repr(stream);
         stream << ")";
         return stream;
