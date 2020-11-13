@@ -57,7 +57,7 @@ def render_node(node, i = 0):
                 value = value[0]
             label.append(value)
     label = list(map(str, label))
-    label_txt = " ".join(label);
+    label_txt = "\n".join(label);
     print(f'node{my_id}[label="{label_txt}"];')
     return my_id, i
 
