@@ -1,17 +1,21 @@
 # Relatório CP2 — Grupo DOPE
 
-Para esta etapa, decidimos começar parte da implementação da AST para ter uma
-noção melhor de como deveriam ser as estruturas das tabelas de símbolos.
+Para esta etapa, decidimos começar parte da implementação da AST para adquirir
+uma noção melhor de como deveriam ser as estruturas das tabelas de símbolos.
 
-Devido a meu desgosto com soluções com pouca segurança de tipo, optei por tentar
-implementar uma AST com os nós tipados adequadamente. Isso acabou resultando em
-uma hierarquia interessante de classes para representear os nós da AST.
+Devido a meu profundo desgosto com soluções com pouca _type-safety_, optei por
+tentar implementar uma AST com os nós tipados adequadamente. Isso acabou por
+resultar em uma hierarquia interessante de classes para representear os nós da
+AST.
 
 ![Hierarquia de classes da AST](./docs/inherit_graph_1.png)
 
-Isso facilita a manipulação dos nós através de polimorfismo, uma vez que, por
-exemplo, os nós envolvidos em operações com expressões tem o tipo `Expr` e por
-tanto tem uma representação de tipo associada.
+Entendemos que isso facilitará a manipulação dos nós da AST, uma vez que, por
+exemplo, todos os nós envolvidos em operações com expressões tem o tipo `Expr` e
+portanto tem uma estrutura em comum e sabe-se que um método como `get_type()`
+pode ser chamado para obter o tipo da expressão.
+
+## Tipos
 
 Decidimos resumir os tipos primitivos a apenas 4 possibilidades de
 implementação:
@@ -26,5 +30,73 @@ implementação:
 bastando usar na implementação as representações correnpondentes com maior
 quantidade de bits.
 
-Também decidimos limitar o suporte a vetores apenas a vetores de tamanho
-conhecido em tempo de compilação.
+Também decidimos limitar o suporte a apenas vetores de tamanho conhecido em
+tempo de compilação.
+
+### Notação em declarações
+
+Tivemos certa dificuldade para compreender como exatamente funciona a notação
+das declarações em C. Como que cada parte contribui para o tipo resultante que
+será associado ao símbolo sendo declarado. Considere o exemplo:
+
+```c
+int *vec[4][8];
+```
+
+A sintaxe de cada "declarador" pode ser construída iniciando-se com um
+identificador — `vec` no exemplo — que pode ser concatenado à direita com
+`[<x>]` para formar um declarador de tipo de vetor, com `<x>` sendo o tamanho do
+vetor; ou `(<params>)`, para um tipo de função, com `<params>` sendo os tipos
+dos parametros. Um declarador também pode ser concatenado à esquerda com um
+asterisco `*` para torná-lo um declarador de tipo de "ponteiro para", sendo que
+este tem precedência menor que os concatenados a direita. Naturalmente, um
+declarador pode ser rodeado de parênteses para sobrepor essa precedência. Assim,
+a expressão acima resolve sintáticamente para:
+
+```c
+int *((vec[4])[8]);
+```
+
+O que pode fazer um incauto imaginar que o que está sendo declarado nessa linha
+é um ponteiro, visto que o `*` está mais por fora que os `[]` dos vetores.
+Porém, não é que está acontecendo. Ocorre que em C as declarações foram
+projetadas para [imitar a sintaxe][bad-pointers] da expressão em que o símbolo
+sendo declarado será usado.
+
+Ou seja, em:
+
+```c
+int x = *vec[3][7];
+int x = *((vec[3])[7]);
+```
+
+partindo de `vec`:
+
+- selecionamos a quarta posição do vetor: `vec[3]`;
+- então a oitava posição do vetor resultante `vec[3][7]`;
+- e por fim derreferenciamos o ponteiro para acessar o valor de tipo `int` no
+  endereço que será atribuido à variável `x`: `*vec[3][7]`;
+
+Observe que navegando "de dentro para fora" na expressão nós desconstruimos os
+tipos compostos até chegar no tipo base. Isso é o contrário do que queremos
+fazer na declaração: a partir do tipo base, construir os tipos compostos.
+
+Portanto, em nossa implementação escolhemos empilhar as "partes" dos declaradoes
+e então desempilhá-lhas para construir o tipo na ordem inversa em que acontecem
+as reduções no parser. Empilhando o nosso exemplo da esqueda para direita temos:
+
+    vec => [4] [8] * int
+
+Lendo da esquerda para direita temos:
+
+    vetor de tamanho 4 de (vetor de tamanho 8 de (ponteiro para int))
+
+Portanto desempilhando da direita para esquerda podemos construir o tipo:
+
+    Vetor(4; Vetor(8; Ponteiro(int)))
+
+[bad-pointers]: https://www.quora.com/C-programming-language/Why-doesnt-C-use-better-notation-for-pointers
+[c-del]: https://eigenstate.org/notes/c-decl
+[spiral]: http://c-faq.com/decl/spiral.anderson.html
+[so1]: https://stackoverflow.com/a/13592908/1967121
+[so2]: https://stackoverflow.com/a/21300975/1967121
