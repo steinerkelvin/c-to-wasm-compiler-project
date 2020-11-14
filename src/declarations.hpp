@@ -42,10 +42,9 @@ struct DeclarationSpecs : std::vector<DeclarationSpec*> {
 };
 
 struct AbstractDeclarator {
-    size_t pointer = 0;
-
     std::vector<ContainerType::Builder> builders;
 
+    virtual ~AbstractDeclarator() = default;
     void add(ContainerType::Builder builder) { builders.push_back(builder); }
 };
 
@@ -85,6 +84,11 @@ struct ParameterDecls : std::vector<ParameterDecl*> {
 // Retorna um construtor de tipo de vetor resolvendo a expressão `size_expr`
 // para literal de inteiro, imprimindo erro e abortando em caso de falha
 types::ContainerType::Builder vector_type_builder(ast::Expr* size_expr);
+
+// Retorna um construtor de tipo de função a partir de uma lista de
+// declaradores de parâmetros `param_decls`
+types::ContainerType::Builder
+function_type_builder(decl::ParameterDecls* param_decls);
 
 // Consome especificadores de declaração e declaradores, registrando
 // adequadamente os nomes no último escopo aberto

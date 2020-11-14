@@ -107,6 +107,96 @@ types::ContainerType::Builder decl::vector_type_builder(ast::Expr* size_expr)
     return types::Vector::builder(size);
 }
 
+types::ContainerType::Builder
+decl::function_type_builder(decl::ParameterDecls* param_decls)
+{
+    using ast::IntegerValue;
+    using types::Type;
+    using types::TypeQualOrTypeSpecList;
+    using types::TypeQualOrTypeSpecPointer;
+
+    std::vector<std::pair<std::optional<std::string>, Type*>> parameters;
+
+    // Caso não haja parâmetros declarados
+    if (!param_decls) {
+        return types::Function::builder(parameters);
+    }
+
+    // Varre os declaradores de parâmetro
+    for (auto& param_decl : *param_decls) {
+        const DeclarationSpecs* decl_specs = param_decl->first;
+        assert(decl_specs);
+
+        // Lista onde serão armazenados os especificadores de tipo que estão
+        // entre os especificadores de declaração do parâmetro
+        TypeQualOrTypeSpecList typedecl_specs;
+
+        for (const auto& pspec : *decl_specs) {
+            // Trata especificadores de storage
+            StorageClassSpec* stor_spec =
+                dynamic_cast<StorageClassSpec*>(pspec);
+            if (stor_spec != NULL) {
+                switch (stor_spec->kind) {
+                    case StorageClassSpec::Kind::REGISTER:
+                        std::cerr << "NOT IMPLEMENTED ERROR (" << 0 << "): ";
+                        std::cerr << "'register' storage-class specifier is "
+                                     "not implemented."
+                                  << std::endl;
+                        exit(1);
+                        break;
+                    default:
+                        std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+                        std::cerr
+                            << "The only storage-class specifier that shall "
+                               "occur in a parameter declaration is 'register'."
+                            << std::endl;
+                        exit(1);
+                }
+            }
+            // Trata especificadores de tipo, armazenando na lista acima
+            TypeDeclSpec* typedecl_spec = dynamic_cast<TypeDeclSpec*>(pspec);
+            if (typedecl_spec != NULL) {
+                TypeQualOrTypeSpecPointer it = typedecl_spec->get();
+                typedecl_specs.push_back(it);
+            }
+        }
+
+        // Consome os especificadores de tipo para construir o tipo base
+        types::PrimType base_type = make_type(typedecl_specs);
+
+        AbstractDeclarator* abs_declarator = *param_decl->second;
+        assert(abs_declarator);
+
+        // Constrói o tipo final com todos os construtores que foram
+        // empilhados na redução do declarador
+        types::Type* type = new types::PrimType(base_type);
+
+        while (!abs_declarator->builders.empty()) {
+            auto builder = *(abs_declarator->builders.end() - 1);
+            abs_declarator->builders.pop_back();
+            type = builder(type);
+        }
+
+        // Trata o nome do parâmetro
+        std::optional<std::string> name;
+        Declarator* declarator = dynamic_cast<Declarator*>(abs_declarator);
+        if (declarator) {
+            name = declarator->name;
+        }
+
+        parameters.push_back({name, type});
+    }
+
+    return types::Function::builder(parameters);
+}
+
+void define_function()
+{
+    std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+    std::cerr << "function parameter must have an identifier." << std::endl;
+    exit(1);
+}
+
 void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 {
     using types::TypeQualOrTypeSpecList;
@@ -133,25 +223,13 @@ void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
     }
 
     types::PrimType base_type = make_type(typedecl_specs);
-    // std::cerr << base_type << std::endl;
 
     for (auto& decl : decls) {
         types::Type* type = new types::PrimType(base_type);
 
-        // for (auto vec_size_expr : decl->vec_sizes) {
-        //     auto value_node =
-        //     dynamic_cast<ast::IntegerValue*>(vec_size_expr); if (value_node)
-        //     {
-        //         size_t vec_size = value_node->get_value();
-        //         type = new types::Vector(type, vec_size);
-        //     } else {
-        //         abort();
-        //     }
-        // }
-
         // Constrói o tipo final com todos os construtores que foram empilhados
-        // na construção do declarador
-        while (decl->builders.size() > 0) {
+        // na redução do declarador
+        while (!decl->builders.empty()) {
             auto builder = *(decl->builders.end() - 1);
             decl->builders.pop_back();
             type = builder(type);

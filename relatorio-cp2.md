@@ -101,3 +101,19 @@ Portanto desempilhando da direita para esquerda podemos construir o tipo:
 [spiral]: http://c-faq.com/decl/spiral.anderson.html
 [so1]: https://stackoverflow.com/a/13592908/1967121
 [so2]: https://stackoverflow.com/a/21300975/1967121
+
+## Comportamento curioso nas ações do Bison
+
+Notamos que em algumas ações do nosso parser foi acidentalmente omitida a
+atribuição `$$ = $1` onde ela deveria ser necessária, mas o código funcionava
+perfeitamente. Note que o Bison fornece uma ação padrão `{ $$ = $1; }`, mas não
+é esse o caso. Nós havíamos defindo ações para essas regras, que modificavam
+`$$`, porém sem antes atribuir `$$ = $1`. Chegamos à conclusão que isso se deve
+a essas regras serem reduzidas exatamente na mesma posição da pilha do parser
+onde antes é reduzida a regra que define o valor inicial `$$ = …;`. Por exemplo:
+
+```
+program
+    : %empty                { $$ = new ast::Program(); }
+    | program program-part  { $$->add($2); }
+```

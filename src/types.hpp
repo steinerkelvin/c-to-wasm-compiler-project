@@ -8,6 +8,8 @@
 #include <variant>
 #include <vector>
 
+#include "util.hpp"
+
 // Forward declaration
 // TODO refatorar?
 namespace ast {
@@ -20,7 +22,7 @@ namespace types {
 struct Type {
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
-        return stream << "NOT IMPLEMENTED";
+        return stream << "NOT_IMPLEMENTED";
     };
     // virtual bool is_void() { return true; }
     // virtual bool is_pointer() { return false; }
@@ -71,7 +73,9 @@ struct Vector : ContainerType {
 
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
-        return this->base->write_repr(stream) << "[" << size << "]";
+        stream << "[" << size << "]";
+        this->base->write_repr(stream);
+        return stream;
     }
 
     // Retorna um "construtor" para o tipo Vetor a partir de um tipo base
@@ -96,12 +100,12 @@ struct Pointer : ContainerType {
 
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
-        stream << "(";
+        // stream << "(";
         for (size_t i = 0; i < this->n; i++) {
             stream << "*";
         }
+        // stream << ")";
         this->base->write_repr(stream);
-        stream << ")";
         return stream;
     }
 
@@ -114,15 +118,38 @@ struct Pointer : ContainerType {
     }
 };
 
+// O tipo de uma função deriva de ContainerType contendo um "tipo base"
+// sendo seu valor de retorno
 struct Function : ContainerType {
-    // O tipo de uma função deriva de ContainerType contendo um "tipo base"
-    // sendo seu valor de retorno
-    std::vector<Type*> parameters;
-    Function(Type* rettype, const std::vector<Type*>& parameters)
+    using Parameters =
+        std::vector<std::pair<std::optional<std::string>, Type*>>;
+
+    Parameters parameters;
+    Function(Type* rettype, const Parameters& parameters)
         : ContainerType(rettype), parameters(parameters){};
 
+    virtual std::ostream& write_repr(std::ostream& stream) const
+    {
+        stream << "(";
+
+        Once first;
+        for (auto [name, type] : parameters) {
+            if(!first) {
+                stream << ", ";
+            }
+            type->write_repr(stream);
+            if (name) {
+                stream << " " << *name;
+            }
+        }
+
+        stream << ")";
+        this->base->write_repr(stream);
+        return stream;
+    }
+
     // Retorna um "construtor" para o tipo Function a partir de um tipo base
-    static ContainerType::Builder builder(const std::vector<Type*> parameters)
+    static ContainerType::Builder builder(const Parameters& parameters)
     {
         return [parameters](Type* rettype) -> ContainerType* {
             return new Function(rettype, parameters);

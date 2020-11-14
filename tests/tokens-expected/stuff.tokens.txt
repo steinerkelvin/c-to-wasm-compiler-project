@@ -70,8 +70,10 @@ SEMI : ;
 INT : int
 ID : test5
 LPAR : (
+INT : int
 ID : a
 COMMA : ,
+INT : int
 ID : b
 RPAR : )
 LCB : {

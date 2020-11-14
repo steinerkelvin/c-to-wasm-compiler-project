@@ -49,9 +49,9 @@ void yyerror(char const *s);
 %type <decl::Declarator*> declarator
 %type <size_t> pointer
 %type <decl::Declarator*> direct-declarator
-%type <decl::ParameterDecls*> parameter-list
+%type <decl::ParameterDecls*> parameter-type-list parameter-list
 %type <decl::ParameterDecl*> parameter-declaration
-%type <decl::AbstractDeclarator*> abstract-declarator-opt // abstract-declarator direct-abstract-declarator
+%type <decl::AbstractDeclarator*> abstract-declarator-opt abstract-declarator direct-abstract-declarator
 %type <ast::Expr*> initializer
 
 %type <ast::Statement*> stmt
@@ -207,8 +207,8 @@ struct-declaration
 specifier-qualifier-list
     : type-specifier    { $$ = new types::TypeQualOrTypeSpecList(); $$->add($1); }
     | type-qualifier    { $$ = new types::TypeQualOrTypeSpecList(); $$->add($1); }
-    | specifier-qualifier-list type-specifier       { $$->add($2); }
-    | specifier-qualifier-list type-qualifier       { $$->add($2); }
+    | specifier-qualifier-list type-specifier       { $$ = $1; $$->add($2); }
+    | specifier-qualifier-list type-qualifier       { $$ = $1; $$->add($2); }
     ;
 
 struct-declarator-list
@@ -264,15 +264,16 @@ init-declarator-list
         { $$ = $list; $$->add($dec); }
     ;
 init-declarator 
-    : declarator ASSIGN initializer { $$->set_init($3); }
+    : declarator ASSIGN initializer { $$ = $1; $$->set_init($3); }
     | declarator
     ;
 
-declarator 
+declarator
     : pointer direct-declarator     { $$ = $2; $$->add(types::Pointer::builder($1)); }
     | direct-declarator
     ;
 
+// Apenas conta o número de estrelinhas
 pointer
     : pointer STAR type-qualifier-list-opt  { $$++; }
     | STAR type-qualifier-list-opt          { $$ = 1; }
@@ -281,20 +282,21 @@ pointer
 direct-declarator
     : ID                    { $$ = new decl::Declarator(*$1); delete $1; }
     | LPAR declarator RPAR  { $$ = $2; }
-    | direct-declarator LB type-qualifier-list-opt                              RB
-    | direct-declarator LB type-qualifier-list-opt        assignment-expression[exp] RB { $$->add(decl::vector_type_builder($exp)); }
-    | direct-declarator LB type-qualifier-list STATIC     assignment-expression[exp] RB { $$->add(decl::vector_type_builder($exp)); }
-    | direct-declarator LB STATIC type-qualifier-list-opt assignment-expression[exp] RB { $$->add(decl::vector_type_builder($exp)); }
-    // | direct-declarator LB type-qualifier-list-opt STAR                         RB
-    | direct-declarator LPAR identifier-list-opt RPAR   // TODO remover?
-    | direct-declarator LPAR parameter-type-list RPAR       {  }
+    | direct-declarator LB type-qualifier-list-opt        assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
+    // | direct-declarator LB type-qualifier-list-opt                                   RB
+    // | direct-declarator LB type-qualifier-list STATIC     assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
+    // | direct-declarator LB STATIC type-qualifier-list-opt assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
+    // | direct-declarator LB type-qualifier-list-opt STAR                              RB
+    // | direct-declarator LPAR identifier-list-opt RPAR
+    | direct-declarator LPAR                     RPAR       { $$ = $1; $$->add(decl::function_type_builder(NULL)); }
+    | direct-declarator LPAR parameter-type-list RPAR       { $$ = $1; $$->add(decl::function_type_builder($3)); delete $3; }
     ;
 
-identifier-list-opt
-    : identifier-list-opt COMMA ID
-    | ID
-    | %empty
-    ;
+// identifier-list-opt
+//     : identifier-list-opt COMMA ID
+//     | ID
+//     | %empty
+//     ;
 
 type-qualifier-list-opt
     : type-qualifier-list
@@ -307,7 +309,7 @@ type-qualifier-list
 
 parameter-type-list
     : parameter-list
-    // | parameter-list COMMA ELLIPSIS
+    | parameter-list COMMA ELLIPSIS     { fprintf(stderr, "NOT IMPLEMENTED ERROR (%d): variadic functions not implemented.\n", yylineno); exit(1); }
     ;
 
 parameter-list
@@ -323,35 +325,35 @@ parameter-declaration
 type-name : specifier-qualifier-list abstract-declarator-opt ;
 
 abstract-declarator-opt
-    : abstract-declarator   { $$ = NULL; }  // TODO
-    | %empty                { $$ = NULL; }
+    : %empty                { $$ = new decl::AbstractDeclarator(); }
+    | abstract-declarator
     ;
 abstract-declarator
-    : pointer
-    | pointer direct-abstract-declarator
+    : pointer                               { $$ = new decl::AbstractDeclarator(); $$->add(types::Pointer::builder($1)); }
+    | pointer direct-abstract-declarator    { $$ = $2;                             $$->add(types::Pointer::builder($1)); }
     | direct-abstract-declarator
     ;
 
 direct-abstract-declarator
-    : LPAR abstract-declarator RPAR
-    |                            LB type-qualifier-list-opt assignment-expression RB
-    | direct-abstract-declarator LB type-qualifier-list-opt assignment-expression RB
-    |                            LB type-qualifier-list-opt                       RB
-    | direct-abstract-declarator LB type-qualifier-list-opt                       RB
-    |                            LB STATIC type-qualifier-list-opt assignment-expression RB
-    | direct-abstract-declarator LB STATIC type-qualifier-list-opt assignment-expression RB
-    |                            LB type-qualifier-list STATIC     assignment-expression RB
-    | direct-abstract-declarator LB type-qualifier-list STATIC     assignment-expression RB
+    : LPAR abstract-declarator RPAR     { $$ = $2; }
+    |                            LB type-qualifier-list-opt assignment-expression[exp] RB   { $$ = new decl::AbstractDeclarator(); $$->add(decl::vector_type_builder($exp)); }
+    | direct-abstract-declarator LB type-qualifier-list-opt assignment-expression[exp] RB   { $$ = $1;                             $$->add(decl::vector_type_builder($exp)); }
+    // |                            LB type-qualifier-list-opt                            RB
+    // | direct-abstract-declarator LB type-qualifier-list-opt                            RB
+    // |                            LB STATIC type-qualifier-list-opt assignment-expression RB
+    // | direct-abstract-declarator LB STATIC type-qualifier-list-opt assignment-expression RB
+    // |                            LB type-qualifier-list STATIC     assignment-expression RB
+    // | direct-abstract-declarator LB type-qualifier-list STATIC     assignment-expression RB
     // |                            LB STAR RB                  // Conflito (mas sinceramente, me parece inútil)
     // | direct-abstract-declarator LB STAR RB                  // Conflito (mas sinceramente, me parece inútil)
-    |                            LPAR parameter-type-list RPAR
-    | direct-abstract-declarator LPAR parameter-type-list RPAR
-    |                            LPAR                     RPAR
-    | direct-abstract-declarator LPAR                     RPAR
+    |                            LPAR                             RPAR      { $$ = new decl::AbstractDeclarator(); $$->add(decl::function_type_builder(NULL)); }
+    | direct-abstract-declarator LPAR                             RPAR      { $$ = $1;                             $$->add(decl::function_type_builder(NULL)); }
+    |                            LPAR parameter-type-list[params] RPAR      { $$ = new decl::AbstractDeclarator(); $$->add(decl::function_type_builder($params)); delete $params; }
+    | direct-abstract-declarator LPAR parameter-type-list[params] RPAR      { $$ = $1;                             $$->add(decl::function_type_builder($params)); delete $params; }
     ;
 
 
-initializer
+initializer     // TODO assignment
     : assignment-expression
     | LCB initializer-list trailing-comma RCB   { $$ = new ast::Expr(); }
     ;
@@ -432,7 +434,7 @@ block-item
     ;
 
 if-stmt 
-    : IF LPAR expression[expr] RPAR stmt[body]            { $$ = new ast::IfStmt($expr,$body); }
+    : IF LPAR expression[expr] RPAR stmt[body]      { $$ = new ast::IfStmt($expr,$body); }
     | IF LPAR expression RPAR stmt[body] ELSE stmt  { $$ = $body; }
     ;
 
