@@ -1,6 +1,7 @@
 #if !defined(DECLARATIONS_H)
 #define DECLARATIONS_H
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -45,9 +46,7 @@ struct AbstractDeclarator {
 
     std::vector<ContainerType::Builder> builders;
 
-    void add(ContainerType::Builder builder) {
-        builders.push_back(builder);
-    }
+    void add(ContainerType::Builder builder) { builders.push_back(builder); }
 };
 
 struct Declarator : AbstractDeclarator {
@@ -62,6 +61,27 @@ struct InitDeclarators : std::vector<Declarator*> {
     void add(Declarator* init) { this->push_back(init); }
 };
 
+struct ParameterDecl
+    : std::pair<DeclarationSpecs*, std::optional<AbstractDeclarator*>> {
+
+    using std::pair<DeclarationSpecs*, std::optional<AbstractDeclarator*>>::
+        pair;
+
+    static ParameterDecl*
+    from(DeclarationSpecs* specs, AbstractDeclarator* decl)
+    {
+        if (decl != NULL) {
+            return new ParameterDecl(specs, decl);
+        } else {
+            return new ParameterDecl(specs, {});
+        }
+    }
+};
+
+struct ParameterDecls : std::vector<ParameterDecl*> {
+    void add(ParameterDecl* param_decl) { this->push_back(param_decl); }
+};
+
 // Retorna um construtor de tipo de vetor resolvendo a expressão `size_expr`
 // para literal de inteiro, imprimindo erro e abortando em caso de falha
 types::ContainerType::Builder vector_type_builder(ast::Expr* size_expr);
@@ -69,7 +89,6 @@ types::ContainerType::Builder vector_type_builder(ast::Expr* size_expr);
 // Consome especificadores de declaração e declaradores, registrando
 // adequadamente os nomes no último escopo aberto
 void declare(const DeclarationSpecs& specs, const InitDeclarators& decls);
-
 }; // namespace decl
 
 #endif /* DECLARATIONS_H */
