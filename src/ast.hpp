@@ -89,7 +89,7 @@ struct TypedNode : Node {
     }
 
   protected:
-    types::Type *type = new types::PrimType{types::PrimKind::VOID};
+    types::Type* type = new types::PrimType{types::PrimKind::VOID};
 };
 
 struct Expr : TypedNode {};
@@ -214,18 +214,35 @@ struct Over : BinOp {
     using BinOp::BinOp;
 };
 
+struct AddressOf : UnOp {
+    DECLARE_LABEL_STR("&x");
+    using UnOp::UnOp;
+};
+
 struct IndexAccess : BinOp {
     DECLARE_LABEL_STR("v[x]");
     using BinOp::BinOp;
+};
+
+struct Call : Expr {
+    DECLARE_LABEL_STR("f(x)");
+    Call(Expr* value, void* parameters) : value(value) { assert(value); }
+
+  protected:
+    Expr* value;
+    // TODO
 };
 
 struct Statement : Node {
     DECLARE_LABEL(Statement);
 };
 
-struct IfStmt : Statement{
+struct IfStmt : Statement {
     DECLARE_LABEL(IfStmt);
-    IfStmt(Expr* expr, Statement* stmt){
+    IfStmt(Expr* expr, Statement* stmt)
+    {
+        assert(expr);
+        assert(stmt);
         this->expr = expr;
         this->stmt = stmt;
     }
@@ -234,41 +251,47 @@ struct IfStmt : Statement{
         return std::vector<Node*>{this->expr, this->stmt};
     }
 
-protected:
+  protected:
     Expr* expr;
     Statement* stmt;
 };
 
-struct WhileStmt : Statement{
+struct WhileStmt : Statement {
     DECLARE_LABEL(WhileStmt);
-    WhileStmt(Expr* expr, Statement* stmt){
+    WhileStmt(Expr* expr, Statement* stmt)
+    {
+        assert(expr);
+        assert(stmt);
         this->expr = expr;
         this->stmt = stmt;
     }
     virtual const std::vector<Node*> get_children() const
     {
         return std::vector<Node*>{this->expr, this->stmt};
-    }    
+    }
 
-protected:
+  protected:
     Expr* expr;
-    Statement* stmt;        
+    Statement* stmt;
 };
 
-struct DoWhileStmt : Statement{
+struct DoWhileStmt : Statement {
     DECLARE_LABEL(DoWhileStmt);
-    DoWhileStmt(Expr* expr, Statement* stmt){
+    DoWhileStmt(Expr* expr, Statement* stmt)
+    {
+        assert(expr);
+        assert(stmt);
         this->expr = expr;
         this->stmt = stmt;
     }
     virtual const std::vector<Node*> get_children() const
     {
-        return std::vector<Node*>{this->stmt, this->expr};
-    }    
+        return std::vector<Node*>{this->expr, this->stmt};
+    }
 
-protected:
+  protected:
     Expr* expr;
-    Statement* stmt;        
+    Statement* stmt;
 };
 
 struct Block : MultiNodeBase<Statement> {

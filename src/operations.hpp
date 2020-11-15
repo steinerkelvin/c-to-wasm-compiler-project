@@ -16,6 +16,8 @@ namespace ops {
     Type* assign_verify(const Type* l, const Type* r, const char* op);
 
     Expr* index_access(Expr* value, Expr* index);
+    Expr* function_call(Expr* value, void* index);
+    Expr* address_of(Expr* value);
 };
 
 #endif /* OPERATIONS_H */

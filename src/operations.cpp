@@ -143,22 +143,72 @@ Type* assign_verify(const Type* l, const Type* r, const char* op)
     return new Type(*r);
 }
 
-Expr* index_access(Expr* value, Expr* index)
+Expr* address_of(Expr* value)
 {
-    using types::Vector;
-    using ast::IntegerValue;
+    Type* type = value->get_type();
+    types::Pointer* type_pointer = dynamic_cast<types::Pointer*>(type);
 
-    const IntegerValue* int_index_node =
-        dynamic_cast<const IntegerValue*>(index);
-    // TODO aceitar qualquer expressão com tipo inteiro
-    if (!int_index_node) {
-        std::cerr << "SEMANTIC ERROR (0): ";
-        std::cerr << "index must be an integer value, ";
-        std::cerr << "got " << *index << " instead." << std::endl;
-        abort();
+    // TODO check rvalue
+
+    types::Pointer* new_type;
+    // TODO refactor into types
+    if (type_pointer) {
+        new_type = new types::Pointer(*type_pointer);
+        new_type->n++;
+    } else {
+        new_type = new types::Pointer(type, 1);
     }
 
-    const Type *value_type = value->get_type();
+    Expr* new_node = new ast::AddressOf(value);
+    new_node->set_type(new_type);
+    return new_node;
+}
+
+Expr* derreference(Expr* value)
+{
+    Type* type = value->get_type();
+    assert(type);
+
+    // TODO refactor into types
+    types::Pointer* type_pointer = dynamic_cast<types::Pointer*>(type);
+    if (!type_pointer) {
+        std::cerr << "SEMANTIC ERROR (0): ";
+        std::cerr << "derreference value must be of pointer type, ";
+        std::cerr << "got \'" << *type << "\' instead." << std::endl;
+        exit(1);
+    }
+
+    Type* new_type;
+    if (type_pointer->n >= 2) {
+        types::Pointer* new_pointer_type = new types::Pointer(*type_pointer);
+        new_pointer_type->n--;
+        new_type = new_pointer_type;
+    } else {
+        new_type = type_pointer->get_base();
+    }
+
+    Expr* new_node = new ast::AddressOf(value);
+    new_node->set_type(new_type);
+    return new_node;
+}
+
+Expr* index_access(Expr* value, Expr* index)
+{
+    using ast::IntegerValue;
+    using types::Vector;
+
+    const types::Type* index_type = index->get_type();
+    const types::PrimType* index_type_prim =
+        dynamic_cast<const types::PrimType*>(index_type);
+    // TODO aceitar qualquer expressão com tipo inteiro
+    if (!index_type_prim || !(index_type_prim->kind == PrimKind::INTEGER)) {
+        std::cerr << "SEMANTIC ERROR (0): ";
+        std::cerr << "index must heave integer type, ";
+        std::cerr << "got " << *index << " instead." << std::endl;
+        exit(1);
+    }
+
+    const Type* value_type = value->get_type();
     assert(value_type);
     const Vector* value_type_vector = dynamic_cast<const Vector*>(value_type);
     // TODO pointer
@@ -166,13 +216,37 @@ Expr* index_access(Expr* value, Expr* index)
         std::cerr << "SEMANTIC ERROR (0): ";
         std::cerr << "accessed value must be of array type, ";
         std::cerr << "got \'" << *value_type << "\' instead." << std::endl;
-        abort();
+        exit(1);
     }
 
-    Type *base_type = value_type_vector->get_base();
-    ast::IndexAccess *new_node = new ast::IndexAccess(index, value);
+    Type* base_type = value_type_vector->get_base();
+    ast::IndexAccess* new_node = new ast::IndexAccess(index, value);
     new_node->set_type(base_type);
+    return new_node;
+}
 
+Expr* function_call(Expr* value, void* parameters)
+{
+    Type* value_type = value->get_type();
+
+    types::Pointer* value_type_pointer =
+        dynamic_cast<types::Pointer*>(value_type);
+    if (value_type_pointer && value_type_pointer->n == 1) {
+        value_type = value_type_pointer->get_base();
+    }
+
+    types::Function* value_type_func =
+        dynamic_cast<types::Function*>(value_type);
+    if (!value_type_func) {
+        std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+        std::cerr << "called value must be of function type, ";
+        std::cerr << "got \'" << *value_type << "\' instead." << std::endl;
+        exit(1);
+    }
+
+    Type* base_type = value_type_func->get_base();
+    ast::Call* new_node = new ast::Call(value, NULL); // TODO
+    new_node->set_type(base_type);
     return new_node;
 }
 

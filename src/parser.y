@@ -49,8 +49,8 @@ void yyerror(char const *s);
 %type <decl::Declarator*> declarator
 %type <size_t> pointer
 %type <decl::Declarator*> direct-declarator
-%type <decl::ParameterDecls*> parameter-type-list parameter-list
-%type <decl::ParameterDecl*> parameter-declaration
+%type <decl::AbstractParameterDecls*> parameter-type-list parameter-list
+%type <decl::AbstractParameterDecl*> parameter-declaration
 %type <decl::AbstractDeclarator*> abstract-declarator-opt abstract-declarator direct-abstract-declarator
 %type <ast::Expr*> initializer
 
@@ -283,7 +283,7 @@ direct-declarator
     : ID                    { $$ = new decl::Declarator(*$1); delete $1; }
     | LPAR declarator RPAR  { $$ = $2; }
     | direct-declarator LB type-qualifier-list-opt        assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
-    // | direct-declarator LB type-qualifier-list-opt                                   RB
+    | direct-declarator LB type-qualifier-list-opt                                   RB     { $$ = $1; $$->add(types::Pointer::builder(1)); }
     // | direct-declarator LB type-qualifier-list STATIC     assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
     // | direct-declarator LB STATIC type-qualifier-list-opt assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
     // | direct-declarator LB type-qualifier-list-opt STAR                              RB
@@ -313,12 +313,12 @@ parameter-type-list
     ;
 
 parameter-list
-    : parameter-declaration                         { $$ = new decl::ParameterDecls(); $$->add($1); }
+    : parameter-declaration                         { $$ = new decl::AbstractParameterDecls(); $$->add($1); }
     | parameter-list COMMA parameter-declaration    { $$ = $1; $$->add($3); }
     ;
 parameter-declaration
-    : declaration-specifiers declarator                 { $$ = new decl::ParameterDecl($1, $2); }
-    | declaration-specifiers abstract-declarator-opt    { $$ = decl::ParameterDecl::from($1, $2); }
+    : declaration-specifiers declarator                 { $$ = new decl::AbstractParameterDecl($1, $2); }
+    | declaration-specifiers abstract-declarator-opt    { $$ = decl::AbstractParameterDecl::from($1, $2); }
     ;
 
 
@@ -380,14 +380,30 @@ designator
 
 
 function-definition
-    : declaration-specifiers declarator declaration-list-opt compound-stmt[body]
-        { $$ = new ast::FunctionDefinition($body); }
+    :   declaration-specifiers[specs]
+        declarator[decl]
+        // declaration-list-opt     // obscure arcane syntax
+        LCB
+        <std::pair<sbtb::NameRef,ScopeId>*>{
+            // Declares the function in the outer scope,
+            // and opens a new scope
+            $$ = decl::declare_function($specs, $decl);
+        }[func_ref_scope]
+        block-list-opt[body]
+        { sbtb::close_scope(); }
+        RCB
+        {
+            auto [func_ref, scope_id] = *$func_ref_scope;
+            $body->set_scope(scope_id);
+            $$ = new ast::FunctionDefinition($body);
+            delete $func_ref_scope;
+        }
     ;
 
-declaration-list-opt
-    : declaration-list-opt declaration
-    | %empty
-    ;
+// declaration-list-opt
+//     : declaration-list-opt declaration
+//     | %empty
+//     ;
 
 
 stmt 
@@ -421,8 +437,12 @@ goto-stmt
     ;      
 
 compound-stmt
-    : LCB {$<ScopeId>$ = sbtb::open_scope();}[scope] block-list-opt[block] {sbtb::close_scope();} RCB
-        { $$ = $block; $$->set_scope($<ScopeId>scope); }
+    :   LCB
+        <ScopeId>{ $$ = sbtb::open_scope(); }[scopeid]
+        block-list-opt[block]
+        { sbtb::close_scope(); }
+        RCB
+            { $$ = $block; $$->set_scope($scopeid); }
     ;
 block-list-opt
     : %empty                        { $$ = new ast::Block(); }
@@ -434,8 +454,8 @@ block-item
     ;
 
 if-stmt 
-    : IF LPAR expression[expr] RPAR stmt[body]      { $$ = new ast::IfStmt($expr,$body); }
-    | IF LPAR expression RPAR stmt[body] ELSE stmt  { $$ = $body; }
+    : IF LPAR expression[expr] RPAR stmt[body]      { $$ = new ast::IfStmt($expr, $body); }
+    | IF LPAR expression RPAR stmt[body] ELSE stmt  { $$ = $body; }     // TODO
     ;
 
 return-stmt
@@ -575,21 +595,21 @@ unary-expression
     : postfix-expression
     | PLUSPLUS   unary-expression   { ops::unary_verify($2->get_type(),"++"); $$ = new ast::PrefixPlusPlus($2); }
     | MINUSMINUS unary-expression   { ops::unary_verify($2->get_type(),"--"); $$ = new ast::PrefixMinusMinus($2); }
-    | AMPER cast-expression         { $$ = $2; }
-    | STAR  cast-expression         { $$ = $2; }
+    | AMPER cast-expression         { $$ = ops::address_of($2); }
+    | STAR  cast-expression         { $$ = $2; }    // TODO
     | PLUS  cast-expression         { ops::unary_verify($2->get_type(),"+"); $$ = $2; }
     | MINUS cast-expression         { ops::unary_verify($2->get_type(),"-"); $$ = new ast::InvertSignal($2);}
     | BTNOT cast-expression         { ops::btnot_verify($2->get_type(),"~"); $$ = new ast::BitNot($2); }
     | NOT   cast-expression         { ops::unary_verify($2->get_type(),"!"); $$ = new ast::Not($2); }
-    | SIZEOF unary-expression       { $$ = $2; } 
+    | SIZEOF unary-expression       { assert(0); } 
     | SIZEOF LPAR type-name RPAR    { assert(0); }
     // | _Alignof LPAR type-name RPAR
     ;
 
 postfix-expression 
     : primary-expression
-    | postfix-expression[value] LB expression[index] RB   { $$ = ops::index_access($value, $index); }
-    | postfix-expression LPAR argument-expression-list-opt RPAR     // TODO
+    | postfix-expression[value] LB expression[index] RB                         { $$ = ops::index_access($value, $index); }
+    | postfix-expression[value] LPAR argument-expression-list-opt[args] RPAR    { $$ = ops::function_call($value, NULL); } // TODO
     | postfix-expression DOT   ID
     | postfix-expression ARROW ID
     | postfix-expression PLUSPLUS       { ops::unary_verify($1->get_type(),"++"); $$ = new ast::PrefixPlusPlus($1); }

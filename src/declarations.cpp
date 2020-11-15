@@ -108,7 +108,7 @@ types::ContainerType::Builder decl::vector_type_builder(ast::Expr* size_expr)
 }
 
 types::ContainerType::Builder
-decl::function_type_builder(decl::ParameterDecls* param_decls)
+decl::function_type_builder(decl::AbstractParameterDecls* param_decls)
 {
     using ast::IntegerValue;
     using types::Type;
@@ -190,13 +190,6 @@ decl::function_type_builder(decl::ParameterDecls* param_decls)
     return types::Function::builder(parameters);
 }
 
-void define_function()
-{
-    std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
-    std::cerr << "function parameter must have an identifier." << std::endl;
-    exit(1);
-}
-
 void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 {
     using types::TypeQualOrTypeSpecList;
@@ -237,17 +230,102 @@ void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 
         const std::string name = decl->name;
         if (is_typedef) {
-            if (sbtb::lookup_type(name)) {
-                std::cerr << name << std::endl;
+            if (sbtb::lookup_type(name, true)) {
+                std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+                std::cerr << "\'" << name << "\' already declared in this scope"
+                          << std::endl;
                 assert(0); // TODO
             }
             sbtb::insert_typename(name.c_str(), type);
         } else {
-            if (sbtb::lookup_name(name)) {
-                std::cerr << name << std::endl;
+            if (sbtb::lookup_name(name, true)) {
+                std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+                std::cerr << "\'" << name << "\' already declared in this scope"
+                          << std::endl;
                 assert(0); // TODO
             }
             sbtb::insert_name(name.c_str(), type);
         }
     }
+}
+
+// TODO nome mais legível para esse tipo de retorno
+std::pair<sbtb::NameRef, ScopeId>*
+decl::declare_function(const DeclarationSpecs* specs, Declarator* declarator)
+{
+    assert(specs);
+    assert(declarator);
+
+    using types::TypeQualOrTypeSpecList;
+    using types::TypeQualOrTypeSpecPointer;
+    TypeQualOrTypeSpecList typedecl_specs;
+
+    for (const auto& pspec : *specs) {
+        StorageClassSpec* stor_spec = dynamic_cast<StorageClassSpec*>(pspec);
+        if (stor_spec != NULL) {
+            switch (stor_spec->kind) {
+                case StorageClassSpec::Kind::STATIC:
+                    // TODO ?
+                    break;
+                default:
+                    std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+                    std::cerr << "only 'static' storage class is allowed on "
+                                 "function definitions."
+                              << std::endl;
+                    exit(1);
+            }
+        }
+        TypeDeclSpec* typedecl_spec = dynamic_cast<TypeDeclSpec*>(pspec);
+        if (typedecl_spec != NULL) {
+            TypeQualOrTypeSpecPointer it = typedecl_spec->get();
+            typedecl_specs.push_back(it);
+        }
+    }
+
+    types::Type* type = new types::PrimType(make_type(typedecl_specs));
+
+    while (!declarator->builders.empty()) {
+        auto builder = *(declarator->builders.end() - 1);
+        declarator->builders.pop_back();
+        type = builder(type);
+    }
+
+    types::Function* type_func = dynamic_cast<types::Function*>(type);
+    assert(type_func);
+
+    const std::string name = declarator->name;
+    if (sbtb::lookup_name(name, true)) {
+        // TODO allow defining already declared function
+        std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+        std::cerr << "\'" << name << "\' already declared in this scope."
+                  << std::endl;
+        exit(1);
+    }
+    sbtb::NameRef ref = sbtb::insert_name(name, type);
+
+    std::vector<std::pair<std::string, types::Type*>> concrete_parameters;
+    for (auto [param_name, param_type] : type_func->parameters) {
+        if (!param_name) {
+            std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+            std::cerr << "missing function parameter identifier." << std::endl;
+            exit(1);
+        }
+        concrete_parameters.push_back({*param_name, param_type});
+    }
+
+    ScopeId scope_id = sbtb::open_scope();
+
+    // Declare the functions parameters in the new scope
+    for (auto [param_name, param_type] : concrete_parameters) {
+        if (sbtb::lookup_name(param_name, true)) {
+            // TODO allow defining already declared function
+            std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+            std::cerr << "\'" << param_name << "\' already declared."
+                      << std::endl;
+            exit(1);
+        }
+        sbtb::insert_name(param_name, param_type);
+    }
+
+    return new std::pair<sbtb::NameRef, ScopeId>{ref, scope_id};
 }

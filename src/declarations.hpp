@@ -60,25 +60,25 @@ struct InitDeclarators : std::vector<Declarator*> {
     void add(Declarator* init) { this->push_back(init); }
 };
 
-struct ParameterDecl
+struct AbstractParameterDecl
     : std::pair<DeclarationSpecs*, std::optional<AbstractDeclarator*>> {
 
     using std::pair<DeclarationSpecs*, std::optional<AbstractDeclarator*>>::
         pair;
 
-    static ParameterDecl*
+    static AbstractParameterDecl*
     from(DeclarationSpecs* specs, AbstractDeclarator* decl)
     {
         if (decl != NULL) {
-            return new ParameterDecl(specs, decl);
+            return new AbstractParameterDecl(specs, decl);
         } else {
-            return new ParameterDecl(specs, {});
+            return new AbstractParameterDecl(specs, {});
         }
     }
 };
 
-struct ParameterDecls : std::vector<ParameterDecl*> {
-    void add(ParameterDecl* param_decl) { this->push_back(param_decl); }
+struct AbstractParameterDecls : std::vector<AbstractParameterDecl*> {
+    void add(AbstractParameterDecl* param_decl) { this->push_back(param_decl); }
 };
 
 // Retorna um construtor de tipo de vetor resolvendo a expressão `size_expr`
@@ -88,11 +88,15 @@ types::ContainerType::Builder vector_type_builder(ast::Expr* size_expr);
 // Retorna um construtor de tipo de função a partir de uma lista de
 // declaradores de parâmetros `param_decls`
 types::ContainerType::Builder
-function_type_builder(decl::ParameterDecls* param_decls);
+function_type_builder(decl::AbstractParameterDecls* param_decls);
 
 // Consome especificadores de declaração e declaradores, registrando
 // adequadamente os nomes no último escopo aberto
 void declare(const DeclarationSpecs& specs, const InitDeclarators& decls);
+
+std::pair<sbtb::NameRef, ScopeId>*
+declare_function(const DeclarationSpecs* specs, Declarator* declarator);
+
 }; // namespace decl
 
 #endif /* DECLARATIONS_H */

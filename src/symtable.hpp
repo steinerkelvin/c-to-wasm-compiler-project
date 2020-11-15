@@ -60,9 +60,9 @@ TagRow& get(const TagRef& ref);
 TypeRow& get(const TypeRef& ref);
 NameRow& get(const NameRef& ref);
 
-std::optional<TagRef> lookup_tag(const std::string& name);
-std::optional<TypeRef> lookup_type(const std::string& name);
-std::optional<NameRef> lookup_name(const std::string& name);
+std::optional<TagRef> lookup_tag(const std::string& name, bool last_scope = false);
+std::optional<TypeRef> lookup_type(const std::string& name, bool last_scope = false);
+std::optional<NameRef> lookup_name(const std::string& name, bool last_scope = false);
 
 /* Verifica se um nome de tipo está em escopo (em qualquer nível) */
 bool is_typename(const char* name);

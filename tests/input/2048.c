@@ -4,6 +4,8 @@
 #include <string.h>
 // #include <time.h>
 
+void printf(const char *);
+
 const char EMPTY_CELL[] = "        ";
 const char TABLE_WIDTH = 5 + 4 * 8;
 

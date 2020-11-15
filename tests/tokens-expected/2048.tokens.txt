@@ -1,3 +1,11 @@
+VOID : void
+ID : printf
+LPAR : (
+CONST : const
+CHAR : char
+STAR : *
+RPAR : )
+SEMI : ;
 CONST : const
 CHAR : char
 ID : EMPTY_CELL
