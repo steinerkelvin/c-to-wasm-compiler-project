@@ -11,15 +11,13 @@
 #include "symtable.hpp"
 #include "types.hpp"
 
-// TODO refatorar para template?
-#define DECLARE_LABEL_STR(TEXT)                                                \
+#define LABEL(TEXT)                                                            \
     virtual const char *const get_label() const { return (TEXT); };
-#define DECLARE_LABEL(NAME) DECLARE_LABEL_STR(#NAME)
 
 namespace ast {
 
 struct Node {
-    DECLARE_LABEL(Node);
+    LABEL("Node");
     virtual bool is_typed() const { return false; }
     virtual const std::vector<Node *> get_children() const
     {
@@ -49,7 +47,7 @@ using std::variant;
 
 // Root node of type R with single child of type T
 template <typename T, typename R = T>
-struct SingleNodeBase : R {
+struct SingleChildBase : R {
     virtual const std::vector<Node *> get_children() const
     {
         return std::vector<Node *>{this->child};
@@ -61,7 +59,7 @@ struct SingleNodeBase : R {
 
 // Root node of type R with multiple children of type T
 template <typename T, typename R = T>
-struct MultiNodeBase : R {
+struct MultiChildBase : R {
     virtual const std::vector<Node *> get_children() const
     {
         std::vector<Node *> result;
@@ -96,9 +94,13 @@ struct Expr : TypedNode {};
 
 struct Value : Expr {};
 
-template <typename T>
+template <typename T, types::PrimKind type_kind>
 struct BaseValue : Expr {
-    BaseValue(T value) { this->value = value; };
+    BaseValue(T value)
+    {
+        this->value = value;
+        this->type = new types::PrimType{type_kind};
+    };
     virtual void write_data_repr(std::ostream &stream) const
     {
         this->Expr::write_data_repr(stream);
@@ -111,121 +113,116 @@ struct BaseValue : Expr {
     T value;
 };
 
-struct IntegerValue : BaseValue<long long> {
-    DECLARE_LABEL_STR("Integer");
-    IntegerValue(long long value) : BaseValue<long long>(value)
-    {
-        type = new types::PrimType{types::PrimKind::INTEGER};
-    };
+struct IntegerValue : BaseValue<long long, types::PrimKind::INTEGER> {
+    LABEL("Integer");
+    IntegerValue(long long value)
+        : BaseValue<long long, types::PrimKind::INTEGER>(value)
+    {}
 };
-struct FloatingValue : BaseValue<double> {
-    DECLARE_LABEL_STR("Real");
-    FloatingValue(double value) : BaseValue<double>(value)
-    {
-        type = new types::PrimType{types::PrimKind::REAL};
-    };
+struct FloatingValue : BaseValue<double, types::PrimKind::REAL> {
+    LABEL("Real");
+    FloatingValue(double value)
+        : BaseValue<double, types::PrimKind::REAL>(value)
+    {}
 };
-struct CharValue : BaseValue<char> {
-    DECLARE_LABEL_STR("Char");
-    CharValue(char value) : BaseValue<char>(value)
-    {
-        type = new types::PrimType{types::PrimKind::CHAR};
-    };
+struct CharValue : BaseValue<char, types::PrimKind::CHAR> {
+    LABEL("Char");
+    CharValue(char value) : BaseValue<char, types::PrimKind::CHAR>(value) {}
 };
-struct StringValue : BaseValue<size_t> {
-    DECLARE_LABEL_STR("String");
-    StringValue(size_t value) : BaseValue<size_t>(value)
-    {
-        type = new types::PrimType{types::PrimKind::VOID}; // TODO
-    };
+struct StringValue : BaseValue<size_t, types::PrimKind::VOID> {
+    LABEL("String");
+    StringValue(size_t value) : BaseValue<size_t, types::PrimKind::VOID>(value)
+    {}
 };
 
 struct Variable : Expr {
-    DECLARE_LABEL_STR("Var");
-    Variable(sbtb::NameRef &ref) { this->ref = ref; };
-    const std::string &get_name() { return this->ref.get().name; };
+    LABEL("Var");
+    Variable(sbtb::NameRef &ref) : ref(ref){};
+    const std::string &get_name() const { return this->ref.get().name; };
 
   protected:
-    sbtb::NameRef ref;
+    const sbtb::NameRef ref;
 };
 
-struct UnOp : SingleNodeBase<Expr> {
+// Unary operator
+struct UnOp : SingleChildBase<Expr> {
     UnOp(Expr *child)
     {
         assert(child != NULL);
-        this->type = child->get_type();
         this->child = child;
+        this->type = child->get_type();
     }
 };
 
-struct BinOp : MultiNodeBase<Expr> {
+// Binary operator
+struct BinOp : MultiChildBase<Expr> {
     BinOp(Expr *left, Expr *right)
     {
         assert(left != NULL);
         assert(right != NULL);
         this->children = std::vector<Expr *>{left, right};
-        this->type = left->get_type(); // TODO
     }
 };
 
 struct Not : UnOp {
-    DECLARE_LABEL_STR("!");
+    LABEL("!");
     using UnOp::UnOp;
 };
+
 struct BitNot : UnOp {
-    DECLARE_LABEL_STR("~");
+    LABEL("~");
     using UnOp::UnOp;
 };
 struct InvertSignal : UnOp {
-    DECLARE_LABEL_STR("-");
+    LABEL("-");
     using UnOp::UnOp;
 };
 struct PosfixPlusPlus : UnOp {
-    DECLARE_LABEL_STR("++");
+    LABEL("++");
     using UnOp::UnOp;
 };
 struct PosfixMinusMinus : UnOp {
-    DECLARE_LABEL_STR("--");
+    LABEL("--");
     using UnOp::UnOp;
 };
 struct PrefixPlusPlus : UnOp {
-    DECLARE_LABEL_STR("p++");
+    LABEL("p++");
     using UnOp::UnOp;
 };
 struct PrefixMinusMinus : UnOp {
-    DECLARE_LABEL_STR("p--");
+    LABEL("p--");
     using UnOp::UnOp;
 };
 
 struct Plus : BinOp {
-    DECLARE_LABEL_STR("+");
+    LABEL("+");
     using BinOp::BinOp;
 };
 struct Minus : BinOp {
-    DECLARE_LABEL_STR("-");
+    LABEL("-");
     using BinOp::BinOp;
 };
 struct Times : BinOp {
-    DECLARE_LABEL_STR("*");
+    LABEL("*");
     using BinOp::BinOp;
 };
 struct Over : BinOp {
-    DECLARE_LABEL_STR("/");
+    LABEL("/");
     using BinOp::BinOp;
 };
 
 struct AddressOf : UnOp {
-    DECLARE_LABEL_STR("&x");
+    LABEL("&x");
     using UnOp::UnOp;
 };
 
 struct IndexAccess : BinOp {
-    DECLARE_LABEL_STR("v[x]");
+    LABEL("v[x]");
     using BinOp::BinOp;
 };
 
 struct Call : Expr {
-    DECLARE_LABEL_STR("f(x)");
+    LABEL("f(x)");
     Call(Expr *value, void *parameters) : value(value) { assert(value); }
 
   protected:
@@ -234,11 +231,11 @@ struct Call : Expr {
 };
 
 struct Statement : Node {
-    DECLARE_LABEL(Statement);
+    LABEL("Statement");
 };
 
 struct IfStmt : Statement {
-    DECLARE_LABEL(IfStmt);
+    LABEL("IfStmt");
     IfStmt(Expr *expr, Statement *stmt)
     {
         assert(expr);
@@ -257,7 +254,7 @@ struct IfStmt : Statement {
 };
 
 struct WhileStmt : Statement {
-    DECLARE_LABEL(WhileStmt);
+    LABEL("WhileStmt");
     WhileStmt(Expr *expr, Statement *stmt)
     {
         assert(expr);
@@ -276,7 +273,7 @@ struct WhileStmt : Statement {
 };
 
 struct DoWhileStmt : Statement {
-    DECLARE_LABEL(DoWhileStmt);
+    LABEL("DoWhileStmt");
     DoWhileStmt(Expr *expr, Statement *stmt)
     {
         assert(expr);
@@ -294,8 +291,8 @@ struct DoWhileStmt : Statement {
     Statement *stmt;
 };
 
-struct Block : MultiNodeBase<Statement> {
-    DECLARE_LABEL(Block);
+struct Block : MultiChildBase<Statement> {
+    LABEL("Block");
     std::optional<ScopeId> scope_id;
 
     void add(Statement *stmt)
@@ -313,8 +310,8 @@ struct Block : MultiNodeBase<Statement> {
     }
 };
 
-struct ExpressionStmt : SingleNodeBase<Expr, Statement> {
-    DECLARE_LABEL(ExpressionStmt);
+struct ExpressionStmt : SingleChildBase<Expr, Statement> {
+    LABEL("ExpressionStmt");
     ExpressionStmt(Expr *value)
     {
         assert(value);
@@ -323,12 +320,12 @@ struct ExpressionStmt : SingleNodeBase<Expr, Statement> {
 };
 
 struct Declaration : Node {
-    DECLARE_LABEL(Declaration);
+    LABEL("Declaration");
     string name;
 };
 
 struct FunctionDefinition : Declaration {
-    DECLARE_LABEL(FunctionDefinition);
+    LABEL("FunctionDefinition");
     FunctionDefinition(Block *body)
     {
         assert(body);
@@ -343,8 +340,8 @@ struct FunctionDefinition : Declaration {
     Block *body;
 };
 
-struct Program : MultiNodeBase<Declaration, Node> {
-    DECLARE_LABEL(Program);
+struct Program : MultiChildBase<Declaration, Node> {
+    LABEL("Program");
     void add(Declaration *decl)
     {
         assert(decl);

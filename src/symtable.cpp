@@ -90,21 +90,21 @@ void close_scope()
     scope_stack.pop_back();
 }
 
-TagRow &TagRef::get()
+TagRow &TagRef::get() const
 {
     assert(scopes.size() > this->scope_id);
     Scope &scope = scopes[this->scope_id];
     assert(scope.tags.size() > this->sym_id);
     return scope.tags[this->sym_id];
 }
-TypeRow &TypeRef::get()
+TypeRow &TypeRef::get() const
 {
     assert(scopes.size() > this->scope_id);
     Scope &scope = scopes[this->scope_id];
     assert(scope.types.size() > this->sym_id);
     return scope.types[this->sym_id];
 }
-NameRow &NameRef::get()
+NameRow &NameRef::get() const
 {
     assert(scopes.size() > this->scope_id);
     Scope &scope = scopes[this->scope_id];

@@ -1,5 +1,5 @@
-cc=clang++ -std=c++17
-cflags=-Wall -g
+CXX=clang++
+CXXFLAGS=-std=c++17 -Wall -g
 
 parser_files = src/generated_parser.cpp src/generated_parser.hpp src/generated_parser.output
 scanner_files = src/scanner.cpp
@@ -20,8 +20,8 @@ customs=$(patsubst custom/%.cpp,bin/custom/%,$(src_custom))
 all: exe
 
 test: exe
-	@ echo; echo TESTING
-	./run_tests.sh
+	@ echo; echo TESTING; echo
+	@ ./run_tests.sh
 
 format:
 	clang-format -i src/**.cpp src/**.hpp
@@ -59,7 +59,7 @@ exe: $(mains) $(customs)
 
 # bin/dump-tokens: src/scanner.cpp custom/dump-tokens.cpp
 # 	mkdir -p ./bin
-# 	$(cc) $(cflags) -o "$@" $^ $(cflags) -D DUMP_TOKENS
+# 	$(CXX) $(CXXFLAGS) -o "$@" $^ -D DUMP_TOKENS
 
 $(parser_files): src/parser.y
 	cd src/; bison -v "parser.y"
@@ -74,21 +74,21 @@ $(mains): $(objs)
 # Compila bibliotecas de src/ para build/
 build/%.o: src/%.cpp
 	@ mkdir -p build/ $(dir .dep/src/%)
-	$(cc) $(cflags) -o $@  -c $<
-	@ $(cc) $(cflags) -MM -MT $@  $< > .dep/$<.d
+	$(CXX) $(CXXFLAGS) -o $@  -c $<
+	@ $(CXX) $(CXXFLAGS) -MM -MT $@  $< > .dep/$<.d
 
 # Compila de main/ para para bin/
 bin/%: main/%.cpp $(objs)
 	@ mkdir -p bin/ build/main/ $(dir ./.dep/main/%)
-	$(cc) $(cflags) -I "./src/" -c -o build/main/$*.o $<
-	$(cc) $(cflags) -I "./src/" -o $@ build/main/$*.o $(objs)
-	@ $(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
+	$(CXX) $(CXXFLAGS) -I "./src/" -c -o build/main/$*.o $<
+	$(CXX) $(CXXFLAGS) -I "./src/" -o $@ build/main/$*.o $(objs)
+	@ $(CXX) $(CXXFLAGS) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
 
 # Compila de main/ para para bin/
 bin/custom/%: custom/%.cpp
 	@ mkdir -p bin/custom/ $(dir ./.dep/custom/%)
-	$(cc) $(cflags) -I "./src/" -o $@ $<
-	@ $(cc) $(cflags) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
+	$(CXX) $(CXXFLAGS) -I "./src/" -o $@ $<
+	@ $(CXX) $(CXXFLAGS) -I "./src/" -MM -MT $@ $<  > .dep/$<.d
 
 # Inclui as listas de dependências
 include $(wildcard .dep/**/*)

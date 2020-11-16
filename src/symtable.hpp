@@ -26,13 +26,13 @@ struct SymRef {
     SymId sym_id;
 };
 struct TagRef : SymRef {
-    TagRow &get();
+    TagRow &get() const;
 };
 struct TypeRef : SymRef {
-    TypeRow &get();
+    TypeRow &get() const;
 };
 struct NameRef : SymRef {
-    NameRow &get();
+    NameRow &get() const;
 };
 
 /** Inicializa a tabela de símbolos */
