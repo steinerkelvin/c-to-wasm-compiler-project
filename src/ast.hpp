@@ -13,7 +13,7 @@
 
 // TODO refatorar para template?
 #define DECLARE_LABEL_STR(TEXT)                                                \
-    virtual const char* const get_label() const { return (TEXT); };
+    virtual const char *const get_label() const { return (TEXT); };
 #define DECLARE_LABEL(NAME) DECLARE_LABEL_STR(#NAME)
 
 namespace ast {
@@ -21,16 +21,16 @@ namespace ast {
 struct Node {
     DECLARE_LABEL(Node);
     virtual bool is_typed() const { return false; }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node *> get_children() const
     {
-        return std::vector<Node*>();
+        return std::vector<Node *>();
     }
-    virtual void write_data_repr(std::ostream& stream) const {}
-    virtual void write_repr(std::ostream& stream) const
+    virtual void write_data_repr(std::ostream &stream) const {}
+    virtual void write_repr(std::ostream &stream) const
     {
         stream << "(" << this->get_label();
         this->write_data_repr(stream);
-        for (auto const& child : this->get_children()) {
+        for (auto const &child : this->get_children()) {
             stream << " ";
             child->write_repr(stream);
         }
@@ -39,7 +39,7 @@ struct Node {
 };
 }; // namespace ast
 
-std::ostream& operator<<(std::ostream& stream, const ast::Node& node);
+std::ostream &operator<<(std::ostream &stream, const ast::Node &node);
 
 namespace ast {
 using std::string;
@@ -50,21 +50,21 @@ using std::variant;
 // Root node of type R with single child of type T
 template <typename T, typename R = T>
 struct SingleNodeBase : R {
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node *> get_children() const
     {
-        return std::vector<Node*>{this->child};
+        return std::vector<Node *>{this->child};
     }
 
   protected:
-    T* child;
+    T *child;
 };
 
 // Root node of type R with multiple children of type T
 template <typename T, typename R = T>
 struct MultiNodeBase : R {
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node *> get_children() const
     {
-        std::vector<Node*> result;
+        std::vector<Node *> result;
         std::copy(
             this->children.cbegin(),
             this->children.cend(),
@@ -73,23 +73,23 @@ struct MultiNodeBase : R {
     }
 
   protected:
-    std::vector<T*> children;
+    std::vector<T *> children;
 };
 
 struct TypedNode : Node {
     virtual bool is_typed() const { return true; }
-    types::Type* get_type() const { return this->type; };
+    types::Type *get_type() const { return this->type; };
 
-    void set_type(types::Type* t) { this->type = t; };
+    void set_type(types::Type *t) { this->type = t; };
     void set_type(types::PrimKind k) { this->type = new types::PrimType{k}; };
 
-    virtual void write_data_repr(std::ostream& stream) const
+    virtual void write_data_repr(std::ostream &stream) const
     {
         stream << " \"[" << *(this->type) << "]\"";
     }
 
   protected:
-    types::Type* type = new types::PrimType{types::PrimKind::VOID};
+    types::Type *type = new types::PrimType{types::PrimKind::VOID};
 };
 
 struct Expr : TypedNode {};
@@ -99,7 +99,7 @@ struct Value : Expr {};
 template <typename T>
 struct BaseValue : Expr {
     BaseValue(T value) { this->value = value; };
-    virtual void write_data_repr(std::ostream& stream) const
+    virtual void write_data_repr(std::ostream &stream) const
     {
         this->Expr::write_data_repr(stream);
         stream << " ";
@@ -142,15 +142,15 @@ struct StringValue : BaseValue<size_t> {
 
 struct Variable : Expr {
     DECLARE_LABEL_STR("Var");
-    Variable(sbtb::NameRef& ref) { this->ref = ref; };
-    const std::string& get_name() { return this->ref.get().name; };
+    Variable(sbtb::NameRef &ref) { this->ref = ref; };
+    const std::string &get_name() { return this->ref.get().name; };
 
   protected:
     sbtb::NameRef ref;
 };
 
 struct UnOp : SingleNodeBase<Expr> {
-    UnOp(Expr* child)
+    UnOp(Expr *child)
     {
         assert(child != NULL);
         this->type = child->get_type();
@@ -159,11 +159,11 @@ struct UnOp : SingleNodeBase<Expr> {
 };
 
 struct BinOp : MultiNodeBase<Expr> {
-    BinOp(Expr* left, Expr* right)
+    BinOp(Expr *left, Expr *right)
     {
         assert(left != NULL);
         assert(right != NULL);
-        this->children = std::vector<Expr*>{left, right};
+        this->children = std::vector<Expr *>{left, right};
         this->type = left->get_type(); // TODO
     }
 };
@@ -226,10 +226,10 @@ struct IndexAccess : BinOp {
 
 struct Call : Expr {
     DECLARE_LABEL_STR("f(x)");
-    Call(Expr* value, void* parameters) : value(value) { assert(value); }
+    Call(Expr *value, void *parameters) : value(value) { assert(value); }
 
   protected:
-    Expr* value;
+    Expr *value;
     // TODO
 };
 
@@ -239,66 +239,66 @@ struct Statement : Node {
 
 struct IfStmt : Statement {
     DECLARE_LABEL(IfStmt);
-    IfStmt(Expr* expr, Statement* stmt)
+    IfStmt(Expr *expr, Statement *stmt)
     {
         assert(expr);
         assert(stmt);
         this->expr = expr;
         this->stmt = stmt;
     }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node *> get_children() const
     {
-        return std::vector<Node*>{this->expr, this->stmt};
+        return std::vector<Node *>{this->expr, this->stmt};
     }
 
   protected:
-    Expr* expr;
-    Statement* stmt;
+    Expr *expr;
+    Statement *stmt;
 };
 
 struct WhileStmt : Statement {
     DECLARE_LABEL(WhileStmt);
-    WhileStmt(Expr* expr, Statement* stmt)
+    WhileStmt(Expr *expr, Statement *stmt)
     {
         assert(expr);
         assert(stmt);
         this->expr = expr;
         this->stmt = stmt;
     }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node *> get_children() const
     {
-        return std::vector<Node*>{this->expr, this->stmt};
+        return std::vector<Node *>{this->expr, this->stmt};
     }
 
   protected:
-    Expr* expr;
-    Statement* stmt;
+    Expr *expr;
+    Statement *stmt;
 };
 
 struct DoWhileStmt : Statement {
     DECLARE_LABEL(DoWhileStmt);
-    DoWhileStmt(Expr* expr, Statement* stmt)
+    DoWhileStmt(Expr *expr, Statement *stmt)
     {
         assert(expr);
         assert(stmt);
         this->expr = expr;
         this->stmt = stmt;
     }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node *> get_children() const
     {
-        return std::vector<Node*>{this->expr, this->stmt};
+        return std::vector<Node *>{this->expr, this->stmt};
     }
 
   protected:
-    Expr* expr;
-    Statement* stmt;
+    Expr *expr;
+    Statement *stmt;
 };
 
 struct Block : MultiNodeBase<Statement> {
     DECLARE_LABEL(Block);
     std::optional<ScopeId> scope_id;
 
-    void add(Statement* stmt)
+    void add(Statement *stmt)
     {
         // assert(stmt);  // TODO
         if (stmt)
@@ -306,7 +306,7 @@ struct Block : MultiNodeBase<Statement> {
     };
     void set_scope(const ScopeId scope_id) { this->scope_id = scope_id; }
 
-    virtual void write_data_repr(std::ostream& stream) const
+    virtual void write_data_repr(std::ostream &stream) const
     {
         if (this->scope_id)
             stream << " " << this->scope_id.value();
@@ -315,7 +315,7 @@ struct Block : MultiNodeBase<Statement> {
 
 struct ExpressionStmt : SingleNodeBase<Expr, Statement> {
     DECLARE_LABEL(ExpressionStmt);
-    ExpressionStmt(Expr* value)
+    ExpressionStmt(Expr *value)
     {
         assert(value);
         this->child = value;
@@ -329,23 +329,23 @@ struct Declaration : Node {
 
 struct FunctionDefinition : Declaration {
     DECLARE_LABEL(FunctionDefinition);
-    FunctionDefinition(Block* body)
+    FunctionDefinition(Block *body)
     {
         assert(body);
         this->body = body;
     }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node *> get_children() const
     {
-        return std::vector<Node*>{this->body};
+        return std::vector<Node *>{this->body};
     }
 
   protected:
-    Block* body;
+    Block *body;
 };
 
 struct Program : MultiNodeBase<Declaration, Node> {
     DECLARE_LABEL(Program);
-    void add(Declaration* decl)
+    void add(Declaration *decl)
     {
         assert(decl);
         this->children.push_back(decl);

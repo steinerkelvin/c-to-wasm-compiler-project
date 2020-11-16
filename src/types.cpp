@@ -2,7 +2,7 @@
 
 namespace types {
 
-const char* get_prim_text(PrimKind kind)
+const char *get_prim_text(PrimKind kind)
 {
     switch (kind) {
         case VOID:
@@ -23,12 +23,12 @@ const char* get_prim_text(PrimKind kind)
 
 } // namespace types
 
-std::ostream& operator<<(std::ostream& stream, const types::Type& type)
+std::ostream &operator<<(std::ostream &stream, const types::Type &type)
 {
     return type.write_repr(stream);
 }
 
-std::ostream& types::PrimType::write_repr(std::ostream& stream) const
+std::ostream &types::PrimType::write_repr(std::ostream &stream) const
 {
     using types::PrimKind;
     switch (this->kind) {

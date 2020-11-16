@@ -11,9 +11,8 @@ struct Once {
         flag = false;
         return result;
     }
-    void reset() {
-        flag = true;
-    }
+    void reset() { flag = true; }
+
   protected:
     bool flag = true;
 };

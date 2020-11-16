@@ -11,11 +11,9 @@ extern int yylineno;
 
 namespace pars {
 
-sbtb::NameRef get_var(const std::string& name);
+sbtb::NameRef get_var(const std::string &name);
 
 } // namespace pars
-
-
 
 /* Macros para tratamento de tokens no scanner */
 
