@@ -48,6 +48,7 @@ using std::variant;
 // Root node of type R with single child of type T
 template <typename T, typename R = T>
 struct SingleChildBase : R {
+    SingleChildBase(T *child) : child(child) { assert(child); }
     virtual const std::vector<Node *> get_children() const
     {
         return std::vector<Node *>{this->child};
@@ -57,11 +58,36 @@ struct SingleChildBase : R {
     T *child;
 };
 
-// Root node of type R with multiple children of type T
-template <typename T, typename R = T>
-struct MultiChildBase : R {
+// Root node of type R with two children of types T1 and T2
+template <typename T1, typename T2, typename R>
+struct TwoChildrenBase : R {
+    TwoChildrenBase(T1 *left, T2 *right) : left(left), right(right)
+    {
+        assert(left);
+        assert(right);
+    }
     virtual const std::vector<Node *> get_children() const
     {
+        return std::vector<Node *>{this->left, this->right};
+    }
+
+  protected:
+    T1 *left;
+    T2 *right;
+};
+
+// Root node of type R with multiple children of type T
+template <typename T, typename R = T>
+struct MultiChildrenBase : R {
+    virtual void add(T *child)
+    {
+        assert(child);
+        this->children.push_back(child);
+    };
+
+    virtual const std::vector<Node *> get_children() const
+    {
+        // TODO descobrir se dá para usar um simples cast aqui?
         std::vector<Node *> result;
         std::copy(
             this->children.cbegin(),
@@ -91,6 +117,10 @@ struct TypedNode : Node {
 };
 
 struct Expr : TypedNode {};
+
+struct Exprs : MultiChildrenBase<Expr, Node> {
+    LABEL("");
+};
 
 struct Value : Expr {};
 
@@ -139,6 +169,11 @@ struct Variable : Expr {
     LABEL("Var");
     Variable(sbtb::NameRef &ref) : ref(ref){};
     const std::string &get_name() const { return this->ref.get().name; };
+    void write_data_repr(std::ostream &stream) const
+    {
+        stream << " \"" << this->get_name() << "\"";
+        this->Expr::write_data_repr(stream);
+    };
 
   protected:
     const sbtb::NameRef ref;
@@ -146,16 +181,14 @@ struct Variable : Expr {
 
 // Unary operator
 struct UnOp : SingleChildBase<Expr> {
-    UnOp(Expr *child)
+    UnOp(Expr *child) : SingleChildBase<Expr>(child)
     {
-        assert(child != NULL);
-        this->child = child;
         this->type = child->get_type();
     }
 };
 
 // Binary operator
-struct BinOp : MultiChildBase<Expr> {
+struct BinOp : MultiChildrenBase<Expr> {
     BinOp(Expr *left, Expr *right)
     {
         assert(left != NULL);
@@ -221,13 +254,9 @@ struct IndexAccess : BinOp {
     using BinOp::BinOp;
 };
 
-struct Call : Expr {
-    LABEL("f(x)");
-    Call(Expr *value, void *parameters) : value(value) { assert(value); }
-
-  protected:
-    Expr *value;
-    // TODO
+struct Call : TwoChildrenBase<Expr, Exprs, Expr> {
+    LABEL("\"f(x)\"");
+    using TwoChildrenBase<Expr, Exprs, Expr>::TwoChildrenBase;
 };
 
 struct Statement : Node {
@@ -291,13 +320,16 @@ struct DoWhileStmt : Statement {
     Statement *stmt;
 };
 
-struct Block : MultiChildBase<Statement> {
+struct Block : MultiChildrenBase<Statement> {
     LABEL("Block");
     std::optional<ScopeId> scope_id;
 
-    void add(Statement *stmt)
+    virtual void add(Statement *stmt)
     {
-        // assert(stmt);  // TODO
+        // TODO
+        // obs.: esse método inteiro pode ter removido em favor do método da
+        // super classe que tem o assert
+        // assert(stmt);
         if (stmt)
             this->children.push_back(stmt);
     };
@@ -312,11 +344,7 @@ struct Block : MultiChildBase<Statement> {
 
 struct ExpressionStmt : SingleChildBase<Expr, Statement> {
     LABEL("ExpressionStmt");
-    ExpressionStmt(Expr *value)
-    {
-        assert(value);
-        this->child = value;
-    };
+    using SingleChildBase<Expr, Statement>::SingleChildBase;
 };
 
 struct Declaration : Node {
@@ -340,7 +368,7 @@ struct FunctionDefinition : Declaration {
     Block *body;
 };
 
-struct Program : MultiChildBase<Declaration, Node> {
+struct Program : MultiChildrenBase<Declaration, Node> {
     LABEL("Program");
     void add(Declaration *decl)
     {

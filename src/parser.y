@@ -91,6 +91,7 @@ void yyerror(char const *s);
 %type <ast::Expr*> unary-expression
 %type <ast::Expr*> postfix-expression
 %type <ast::Expr*> primary-expression
+%type <ast::Exprs*> argument-expression-list-opt argument-expression-list
 
 %token TYPEDEF EXTERN STATIC AUTO REGISTER
 %token VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED
@@ -606,25 +607,32 @@ unary-expression
     // | _Alignof LPAR type-name RPAR
     ;
 
-postfix-expression 
+postfix-expression
     : primary-expression
-    | postfix-expression[value] LB expression[index] RB                         { $$ = ops::index_access($value, $index); }
-    | postfix-expression[value] LPAR argument-expression-list-opt[args] RPAR    { $$ = ops::function_call($value, NULL); } // TODO
+    | postfix-expression[value] LB expression[index] RB
+        { $$ = ops::index_access($value, $index); }
+    | postfix-expression[value] LPAR argument-expression-list-opt[args] RPAR
+        { $$ = ops::function_call($value, $args); }
     | postfix-expression DOT   ID
     | postfix-expression ARROW ID
-    | postfix-expression PLUSPLUS       { ops::unary_verify($1->get_type(),"++"); $$ = new ast::PrefixPlusPlus($1); }
-    | postfix-expression MINUSMINUS     { ops::unary_verify($1->get_type(),"--"); $$ = new ast::PrefixMinusMinus($1); }
+    | postfix-expression PLUSPLUS
+        { ops::unary_verify($1->get_type(),"++"); $$ = new ast::PrefixPlusPlus($1); }
+    | postfix-expression MINUSMINUS
+        { ops::unary_verify($1->get_type(),"--"); $$ = new ast::PrefixMinusMinus($1); }
     // | ( type-name ) { initializer-list }
     // | ( type-name ) { initializer-list , }
     ;
 
-
-
-argument-expression-list-opt : argument-expression-list | %empty ;
-argument-expression-list
-    : argument-expression-list COMMA assignment-expression
-    | assignment-expression
+argument-expression-list-opt
+    : %empty        { $$ = NULL; }
+    | argument-expression-list
     ;
+argument-expression-list
+    : assignment-expression     { $$ = new ast::Exprs(); $$->add($1); }
+    | argument-expression-list COMMA assignment-expression
+        { { $$ = $1; $$->add($3); } }
+    ;
+
 
 primary-expression
     : ID[name] {

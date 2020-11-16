@@ -225,8 +225,13 @@ Expr *index_access(Expr *value, Expr *index)
     return new_node;
 }
 
-Expr *function_call(Expr *value, void *parameters)
+Expr *function_call(Expr *value, ast::Exprs *parameters)
 {
+    assert(value);
+    if (!parameters) {
+        parameters = new ast::Exprs();
+    }
+
     Type *value_type = value->get_type();
 
     types::Pointer *value_type_pointer =
@@ -240,12 +245,13 @@ Expr *function_call(Expr *value, void *parameters)
     if (!value_type_func) {
         std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
         std::cerr << "called value must be of function type, ";
-        std::cerr << "got \'" << *value_type << "\' instead." << std::endl;
+        std::cerr << "got \'" << (*value_type) << "\' instead." << std::endl;
         exit(1);
     }
 
     Type *base_type = value_type_func->get_base();
-    ast::Call *new_node = new ast::Call(value, NULL); // TODO
+    // TODO checar tipos dos parâmetros
+    ast::Call *new_node = new ast::Call(value, parameters);
     new_node->set_type(base_type);
     return new_node;
 }
