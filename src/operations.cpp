@@ -152,30 +152,37 @@ static void assignment_type_error(const Type* target, const Type* source)
 }
 
 namespace prim_assigment {
-using ast::CoersionBuilder;
-using ast::bdI2R;
-using ast::bdR2I;
-using ast::bdI2C;
-using ast::bdC2I;
+    using ast::bdC2I;
+    using ast::bdI2C;
+    using ast::bdI2R;
+    using ast::bdR2I;
+    using ast::bdC2R;
+    using ast::bdR2C;
+    using ast::CoersionBuilder;
 
-const auto &error = std::nullopt;
-const CoersionBuilder rsame = [](Expr* x) { return x; };
+    const auto& error = std::nullopt;
+    const CoersionBuilder rsame = [](Expr* x) { return x; };
 
-static std::optional<CoersionBuilder> prim_assigment_matrix[4][4] = {
-    /*           void   char    int   real */
-    /* void */ {error, error, error, error},
-    /* char */ {error, rsame, bdI2C, {}},
-    /* int  */ {error, bdC2I, rsame, bdR2I},
-    /* real */ {error, {}, bdI2R, rsame}};
-
+    static std::optional<CoersionBuilder> matrix[4][4] = {
+        /*           void   char    int   real */
+        /* void */ {error, error, error, error},
+        /* char */ {error, rsame, bdI2C, bdR2C},
+        /* int  */ {error, bdC2I, rsame, bdR2I},
+        /* real */ {error, bdC2R, bdI2R, rsame}};
 } // namespace prim_assigment
 
 Expr* check_prim_assignment(PrimType* target_type, Expr* source_node)
 {
     PrimType* source_type = dynamic_cast<PrimType*>(source_node->get_type());
     assert(source_type);
-    auto k1 = source_type->kind;
+    auto k1 = target_type->kind;
     auto k2 = source_type->kind;
+    auto func = prim_assigment::matrix[k1][k2];
+    if (!func) {
+        assignment_type_error(target_type, source_type);
+    }
+    Expr* new_node = (*func)(source_node);
+    return new_node;
 }
 
 Expr* check_assignment(Type* target_type, Expr* source_node)
@@ -192,12 +199,8 @@ Expr* check_assignment(Type* target_type, Expr* source_node)
     // If target type is primitive type
     if (auto tg_prim = dynamic_cast<PrimType*>(target_type)) {
         if (auto src_prim = dynamic_cast<PrimType*>(source_type)) {
-            // if (!target_type->is_compatible_with(source_type)) {
-            //     assignment_type_error(target_type, source_type);
-            // }
-            check_prim_assignment(tg_prim, source_node);
-            // TODO
-            return source_node;
+            auto new_node = check_prim_assignment(tg_prim, source_node);
+            return new_node;
         }
         // If target type is pointer
     } else if (auto tg_pt = dynamic_cast<Pointer*>(target_type)) {
@@ -346,8 +349,7 @@ Expr* function_call(Expr* value, ast::Exprs* args_node)
     for (size_t i = 0; i < type_parameters.size(); ++i) {
         auto tpparam = type_parameters[i];
         auto [n1, t1] = tpparam;
-
-        // args[i] = check_assignment(t1, args[i]);
+        args[i] = check_assignment(t1, args[i]);
     }
 
     Type* base_type = value_type_func->get_base();

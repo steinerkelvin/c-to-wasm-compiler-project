@@ -223,6 +223,9 @@ struct C2I : Coersion {
 };
 extern const CoersionBuilder bdC2I;
 
+extern const CoersionBuilder bdC2R;
+extern const CoersionBuilder bdR2C;
+
 // function to pointer
 struct F2P : Coersion {
     using Coersion::Coersion;
