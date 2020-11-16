@@ -119,10 +119,10 @@ Type* btnot_verify(const Type* u, const char* op)
     return new PrimType(result);
 }
 
-Type* assign_verify(const Type* l, const Type* r, const char* op)
+Type* assign_verify(Type* l, Type* r, const char* op)
 {
-    const PrimType* pl = dynamic_cast<const PrimType*>(l);
-    const PrimType* pr = dynamic_cast<const PrimType*>(r);
+    PrimType* pl = dynamic_cast<PrimType*>(l);
+    PrimType* pr = dynamic_cast<PrimType*>(r);
     if (!pl || !pr) {
         type_error(op, l, r);
     }
@@ -140,7 +140,90 @@ Type* assign_verify(const Type* l, const Type* r, const char* op)
         std::cerr << "RHS is \'" << (*r) << "\'." << std::endl;
         exit(EXIT_FAILURE);
     }
-    return new Type(*r);
+    return r;
+}
+
+static void assignment_type_error(const Type* target, const Type* source)
+{
+    std::cerr << "SEMANTIC ERROR (0): ";
+    std::cerr << "type \'" << (*source) << "\' cannot be assigned to type \'"
+              << (*target) << "\'." << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+namespace prim_assigment {
+using ast::CoersionBuilder;
+using ast::bdI2R;
+using ast::bdR2I;
+using ast::bdI2C;
+using ast::bdC2I;
+
+const auto &error = std::nullopt;
+const CoersionBuilder rsame = [](Expr* x) { return x; };
+
+static std::optional<CoersionBuilder> prim_assigment_matrix[4][4] = {
+    /*           void   char    int   real */
+    /* void */ {error, error, error, error},
+    /* char */ {error, rsame, bdI2C, {}},
+    /* int  */ {error, bdC2I, rsame, bdR2I},
+    /* real */ {error, {}, bdI2R, rsame}};
+
+} // namespace prim_assigment
+
+Expr* check_prim_assignment(PrimType* target_type, Expr* source_node)
+{
+    PrimType* source_type = dynamic_cast<PrimType*>(source_node->get_type());
+    assert(source_type);
+    auto k1 = source_type->kind;
+    auto k2 = source_type->kind;
+}
+
+Expr* check_assignment(Type* target_type, Expr* source_node)
+{
+    assert(target_type);
+    assert(source_node);
+    using types::Function;
+    using types::Pointer;
+    using types::PrimType;
+    using types::Type;
+    using types::Vector;
+    types::Type* source_type = source_node->get_type();
+
+    // If target type is primitive type
+    if (auto tg_prim = dynamic_cast<PrimType*>(target_type)) {
+        if (auto src_prim = dynamic_cast<PrimType*>(source_type)) {
+            // if (!target_type->is_compatible_with(source_type)) {
+            //     assignment_type_error(target_type, source_type);
+            // }
+            check_prim_assignment(tg_prim, source_node);
+            // TODO
+            return source_node;
+        }
+        // If target type is pointer
+    } else if (auto tg_pt = dynamic_cast<Pointer*>(target_type)) {
+        // If source type can be converted to pointer implicitly
+        if (auto src_pt = source_type->to_pointer_implicit()) {
+            auto tg_base = tg_pt->get_base();
+            if (!tg_base->is_compatible_with(source_type)) {
+                assignment_type_error(target_type, source_type);
+            }
+            // If source type is pointer already
+            if (dynamic_cast<Pointer*>(source_type)) {
+                return source_node;
+                // If source type is function, add coersion node
+            } else if (dynamic_cast<Function*>(source_type)) {
+                auto new_node = new ast::F2P(source_node);
+                new_node->set_type(*src_pt);
+                return new_node;
+                // If source type is vector, add coersion node
+            } else if (dynamic_cast<Vector*>(source_type)) {
+                auto new_node = new ast::F2P(source_node);
+                new_node->set_type(*src_pt);
+                return new_node;
+            }
+        }
+    }
+    assignment_type_error(target_type, source_type);
 }
 
 Expr* address_of(Expr* value)
@@ -225,18 +308,20 @@ Expr* index_access(Expr* value, Expr* index)
     return new_node;
 }
 
-Expr* function_call(Expr* value, ast::Exprs* parameters)
+Expr* function_call(Expr* value, ast::Exprs* args_node)
 {
     assert(value);
-    if (!parameters) {
-        parameters = new ast::Exprs();
+    if (!args_node) {
+        args_node = new ast::Exprs();
     }
+    auto& args = args_node->children;
 
     Type* value_type = value->get_type();
 
     types::Pointer* value_type_pointer =
         dynamic_cast<types::Pointer*>(value_type);
     if (value_type_pointer && value_type_pointer->n == 1) {
+        // TODO derreference instead
         value_type = value_type_pointer->get_base();
     }
 
@@ -246,12 +331,27 @@ Expr* function_call(Expr* value, ast::Exprs* parameters)
         std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
         std::cerr << "called value must be of function type, ";
         std::cerr << "got \'" << (*value_type) << "\' instead." << std::endl;
-        exit(1);
+        exit(EXIT_FAILURE);
+    }
+
+    auto type_parameters = value_type_func->parameters;
+    if (type_parameters.size() != args.size()) {
+        std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+        std::cerr << "wrong number of arguments, "
+                  << "expected " << type_parameters.size() << ", "
+                  << "got " << args.size() << " instead." << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    for (size_t i = 0; i < type_parameters.size(); ++i) {
+        auto tpparam = type_parameters[i];
+        auto [n1, t1] = tpparam;
+
+        // args[i] = check_assignment(t1, args[i]);
     }
 
     Type* base_type = value_type_func->get_base();
-    // TODO checar tipos dos parâmetros
-    ast::Call* new_node = new ast::Call(value, parameters);
+    ast::Call* new_node = new ast::Call(value, args_node);
     new_node->set_type(base_type);
     return new_node;
 }

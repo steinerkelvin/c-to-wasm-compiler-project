@@ -23,14 +23,17 @@ std::ostream& operator<<(std::ostream& stream, const ast::Expr& node);
 
 namespace types {
 
+struct Pointer;
 struct Type {
+    virtual ~Type() = default;
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
         return stream << "NOT_IMPLEMENTED";
     };
-    // virtual bool is_void() { return true; }
-    // virtual bool is_pointer() { return false; }
-    // virtual bool is_pointable() { return false; }
+    // Converts to pointer type when implicitly conversion is possible
+    virtual std::optional<Pointer*> to_pointer_implicit() { return {}; };
+    // Checks with this type is compatible with another one
+    virtual bool is_compatible_with(const Type* other) = 0;
 };
 
 // Enumeração de tipos primitivos
@@ -49,7 +52,7 @@ struct PrimType : Type {
     PrimKind kind;
     PrimType(const PrimType& type) = default;
     PrimType(PrimKind kind) : kind(kind){};
-    // virtual bool is_void() { return this->kind == VOID; }
+    virtual bool is_compatible_with(const Type* other);
     virtual std::ostream& write_repr(std::ostream& stream) const;
 };
 
@@ -58,7 +61,6 @@ struct PrimType : Type {
 struct ContainerType : Type {
     // Tipo de uma função que recebe um tipo base e constrói um ContainerType
     using Builder = std::function<ContainerType*(Type*)>;
-
     ContainerType(Type* base) : base(base){};
     // Retorna o tipo base desse tipo composto
     Type* get_base() const { return this->base; }
@@ -74,6 +76,9 @@ struct Vector : ContainerType {
     size_t size;
 
     Vector(Type* base, size_t size) : ContainerType(base), size(size){};
+
+    virtual std::optional<Pointer*> to_pointer_implicit();
+    virtual bool is_compatible_with(const Type *other);
 
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
@@ -101,6 +106,9 @@ struct Pointer : ContainerType {
         assert(base);
         assert(n > 0);
     };
+
+    virtual std::optional<Pointer*> to_pointer_implicit();
+    virtual bool is_compatible_with(const Type *other);
 
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
@@ -131,6 +139,9 @@ struct Function : ContainerType {
     Parameters parameters;
     Function(Type* rettype, const Parameters& parameters)
         : ContainerType(rettype), parameters(parameters){};
+
+    virtual std::optional<Pointer*> to_pointer_implicit();
+    virtual bool is_compatible_with(const Type *other);
 
     virtual std::ostream& write_repr(std::ostream& stream) const
     {

@@ -23,7 +23,7 @@ namespace ast {
 struct Node {
     LABEL("Node");
     virtual bool is_typed() const { return false; }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node*> get_children_nodes() const
     {
         return std::vector<Node*>();
     }
@@ -32,7 +32,7 @@ struct Node {
     {
         stream << "(" << this->get_label();
         this->write_data_repr(stream);
-        for (auto const& child : this->get_children()) {
+        for (auto const& child : this->get_children_nodes()) {
             stream << " ";
             child->write_repr(stream);
         }
@@ -53,7 +53,7 @@ using std::variant;
 template <typename T, typename R = T>
 struct SingleChildBase : R {
     SingleChildBase(T* child) : child(child) { assert(child); }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node*> get_children_nodes() const
     {
         return std::vector<Node*>{this->child};
     }
@@ -70,7 +70,7 @@ struct TwoChildrenBase : R {
         assert(left);
         assert(right);
     }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node*> get_children_nodes() const
     {
         return std::vector<Node*>{this->left, this->right};
     }
@@ -89,24 +89,29 @@ struct MultiChildrenBase : R {
         this->children.push_back(child);
     };
 
-    virtual const std::vector<Node*> get_children() const
+    std::vector<T*>& get_children() { return this->children; }
+
+    virtual const std::vector<Node*> get_children_nodes() const
     {
         // TODO descobrir se dá para usar um simples cast aqui?
         std::vector<Node*> result;
         std::copy(
-            this->children.cbegin(),
-            this->children.cend(),
+            this->children.cbegin(), this->children.cend(),
             std::back_inserter(result));
         return result;
     }
 
-  protected:
+//   protected:
     std::vector<T*> children;
 };
 
 struct TypedNode : Node {
     virtual bool is_typed() const { return true; }
-    types::Type* get_type() const { return this->type; };
+    types::Type* get_type() const
+    {
+        assert(this->type);
+        return this->type;
+    };
 
     void set_type(types::Type* t) { this->type = t; };
     void set_type(types::PrimKind k) { this->type = new types::PrimType{k}; };
@@ -183,10 +188,55 @@ struct Variable : Expr {
     const sbtb::NameRef ref;
 };
 
+// Type coersion node
+struct Coersion : SingleChildBase<Expr> {
+    using SingleChildBase<Expr>::SingleChildBase;
+};
+using CoersionBuilder = std::function<Expr*(Expr*)>;
+
+// integer to real
+struct I2R : Coersion {
+    I2R(Expr *base) : Coersion(base) {
+        this->type = new types::PrimType(types::PrimKind::REAL);
+    }
+};
+extern const CoersionBuilder bdI2R;
+// real to integer
+struct R2I : Coersion {
+    R2I(Expr *base) : Coersion(base) {
+        this->type = new types::PrimType(types::PrimKind::INTEGER);
+    }
+};
+extern const CoersionBuilder bdR2I;
+// integer to char
+struct I2C : Coersion {
+    I2C(Expr *base) : Coersion(base) {
+        this->type = new types::PrimType(types::PrimKind::CHAR);
+    }
+};
+extern const CoersionBuilder bdI2C;
+// char to integer
+struct C2I : Coersion {
+    C2I(Expr *base) : Coersion(base) {
+        this->type = new types::PrimType(types::PrimKind::INTEGER);
+    }
+};
+extern const CoersionBuilder bdC2I;
+
+// function to pointer
+struct F2P : Coersion {
+    using Coersion::Coersion;
+};
+// vector to pointer
+struct V2P : Coersion {
+    using Coersion::Coersion;
+};
+
 // Unary operator
 struct UnOp : SingleChildBase<Expr> {
     UnOp(Expr* child) : SingleChildBase<Expr>(child)
     {
+        // TODO
         this->type = child->get_type();
     }
 };
@@ -276,7 +326,7 @@ struct IfStmt : Statement {
         this->expr = expr;
         this->stmt = stmt;
     }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node*> get_children_nodes() const
     {
         return std::vector<Node*>{this->expr, this->stmt};
     }
@@ -295,7 +345,7 @@ struct WhileStmt : Statement {
         this->expr = expr;
         this->stmt = stmt;
     }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node*> get_children_nodes() const
     {
         return std::vector<Node*>{this->expr, this->stmt};
     }
@@ -314,7 +364,7 @@ struct DoWhileStmt : Statement {
         this->expr = expr;
         this->stmt = stmt;
     }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node*> get_children_nodes() const
     {
         return std::vector<Node*>{this->expr, this->stmt};
     }
@@ -363,7 +413,7 @@ struct FunctionDefinition : Declaration {
         assert(body);
         this->body = body;
     }
-    virtual const std::vector<Node*> get_children() const
+    virtual const std::vector<Node*> get_children_nodes() const
     {
         return std::vector<Node*>{this->body};
     }
