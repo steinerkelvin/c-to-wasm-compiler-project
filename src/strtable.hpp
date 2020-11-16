@@ -1,6 +1,10 @@
 #if !defined(STRTABLE_H)
 #define STRTABLE_H
 
+/**
+ * @file strtable.hpp
+ */
+
 #include <cstdio>
 #include <cstdlib>
 

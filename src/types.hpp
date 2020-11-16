@@ -1,6 +1,10 @@
 #if !defined(TYPES_H)
 #define TYPES_H
 
+/**
+ * @file types.hpp
+ */
+
 #include <cassert>
 #include <cstdlib>
 #include <functional>

@@ -1,6 +1,10 @@
 #if !defined(DECLARATIONS_H)
 #define DECLARATIONS_H
 
+/**
+ * @file declarations.hpp
+ */
+
 #include <optional>
 #include <string>
 #include <vector>

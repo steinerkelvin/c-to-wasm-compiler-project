@@ -1,6 +1,10 @@
 #if !defined(UTIL_H)
 #define UTIL_H
 
+/**
+ * @file util.hpp
+ */
+
 #define ALLOC(VAR) ((typeof(VAR))malloc(sizeof(typeof(*(VAR)))))
 
 // Estrutura que resolve para verdadeiro apenas a primeira vez

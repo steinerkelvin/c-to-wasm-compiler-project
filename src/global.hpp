@@ -1,6 +1,10 @@
 #if !defined(GLOBAL_H)
 #define GLOBAL_H
 
+/**
+ * @file global.hpp
+ */
+
 #include "ast.hpp"
 #include "types.hpp"
 

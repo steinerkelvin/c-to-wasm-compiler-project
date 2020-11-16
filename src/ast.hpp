@@ -1,6 +1,10 @@
 #if !defined(AST_H)
 #define AST_H
 
+/**
+ * @file ast.hpp
+ */
+
 #include <algorithm>
 #include <cassert>
 #include <ostream>

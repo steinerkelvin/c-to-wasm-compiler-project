@@ -1,6 +1,10 @@
 #if !defined(OPERATIONS_H)
 #define OPERATIONS_H
 
+/**
+ * @file operations.hpp
+ */
+
 #include "ast.hpp"
 #include "types.hpp"
 

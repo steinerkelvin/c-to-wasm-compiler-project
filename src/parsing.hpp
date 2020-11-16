@@ -1,6 +1,10 @@
 #if !defined(PARSING_H)
 #define PARSING_H
 
+/**
+ * @file parsing.hpp
+ */
+
 #include "generated_parser.hpp"
 #include "symtable.hpp"
 

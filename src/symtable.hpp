@@ -1,6 +1,10 @@
 #if !defined(SYMTABLE_H)
 #define SYMTABLE_H
 
+/**
+ * @file symtable.hpp
+ */
+
 #include <cstddef>
 #include <optional>
 #include <string>
