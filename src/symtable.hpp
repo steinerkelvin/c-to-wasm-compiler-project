@@ -14,7 +14,7 @@ namespace sbtb {
 
 struct Row {
     std::string name;
-    types::Type *type;
+    types::Type* type;
 };
 
 struct TagRow : Row {};
@@ -26,13 +26,13 @@ struct SymRef {
     SymId sym_id;
 };
 struct TagRef : SymRef {
-    TagRow &get() const;
+    TagRow& get() const;
 };
 struct TypeRef : SymRef {
-    TypeRow &get() const;
+    TypeRow& get() const;
 };
 struct NameRef : SymRef {
-    NameRow &get() const;
+    NameRow& get() const;
 };
 
 /** Inicializa a tabela de símbolos */
@@ -52,23 +52,23 @@ void close_scope();
  * último escopo.
  */
 
-TagRef insert_tag(const std::string &namep, types::Type *type);
-TypeRef insert_typename(const std::string &namep, types::Type *type);
-NameRef insert_name(const std::string &namep, types::Type *type);
+TagRef insert_tag(const std::string& namep, types::Type* type);
+TypeRef insert_typename(const std::string& namep, types::Type* type);
+NameRef insert_name(const std::string& namep, types::Type* type);
 
-TagRow &get(const TagRef &ref);
-TypeRow &get(const TypeRef &ref);
-NameRow &get(const NameRef &ref);
+TagRow& get(const TagRef& ref);
+TypeRow& get(const TypeRef& ref);
+NameRow& get(const NameRef& ref);
 
 std::optional<TagRef>
-lookup_tag(const std::string &name, bool last_scope = false);
+lookup_tag(const std::string& name, bool last_scope = false);
 std::optional<TypeRef>
-lookup_type(const std::string &name, bool last_scope = false);
+lookup_type(const std::string& name, bool last_scope = false);
 std::optional<NameRef>
-lookup_name(const std::string &name, bool last_scope = false);
+lookup_name(const std::string& name, bool last_scope = false);
 
 /* Verifica se um nome de tipo está em escopo (em qualquer nível) */
-bool is_typename(const char *name);
+bool is_typename(const char* name);
 
 } // namespace sbtb
 

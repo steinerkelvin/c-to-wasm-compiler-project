@@ -8,7 +8,7 @@
 
 using namespace decl;
 
-void error_simple_type_spec(const char *const kind_name)
+void error_simple_type_spec(const char* const kind_name)
 {
     fprintf(stderr, "SEMANTIC ERROR (%d): ", 0); // TODO
     fprintf(stderr, "%s type specifier not valid here\n", kind_name);
@@ -16,8 +16,8 @@ void error_simple_type_spec(const char *const kind_name)
 }
 
 void handle_simple_type_spec(
-    std::optional<types::PrimType> &result_type,
-    const types::SimpleTypeSpec *spec)
+    std::optional<types::PrimType>& result_type,
+    const types::SimpleTypeSpec* spec)
 {
     using types::PrimKind;
     using types::PrimType;
@@ -66,7 +66,7 @@ void handle_simple_type_spec(
     }
 }
 
-types::PrimType make_type(const types::TypeQualOrTypeSpecList &pspecs)
+types::PrimType make_type(const types::TypeQualOrTypeSpecList& pspecs)
 {
     using types::PrimType;
     using types::SimpleTypeSpec;
@@ -74,13 +74,13 @@ types::PrimType make_type(const types::TypeQualOrTypeSpecList &pspecs)
 
     std::optional<PrimType> result_type;
 
-    for (const auto &pspec : pspecs) {
-        if (const auto it = std::get_if<TypeSpec *>(&pspec)) {
-            const TypeSpec *ptpspec = *it;
+    for (const auto& pspec : pspecs) {
+        if (const auto it = std::get_if<TypeSpec*>(&pspec)) {
+            const TypeSpec* ptpspec = *it;
             assert(ptpspec);
             // Trata especificador simples de tipo
             const auto simptpspec =
-                dynamic_cast<const SimpleTypeSpec *>(ptpspec);
+                dynamic_cast<const SimpleTypeSpec*>(ptpspec);
             if (simptpspec) {
                 // TODO usar um membro virtual em TypeSpec
                 handle_simple_type_spec(result_type, simptpspec);
@@ -91,12 +91,12 @@ types::PrimType make_type(const types::TypeQualOrTypeSpecList &pspecs)
     return *result_type;
 }
 
-types::ContainerType::Builder decl::vector_type_builder(ast::Expr *size_expr)
+types::ContainerType::Builder decl::vector_type_builder(ast::Expr* size_expr)
 {
     assert(size_expr);
     using ast::IntegerValue;
-    const IntegerValue *size_int_node =
-        dynamic_cast<const IntegerValue *>(size_expr);
+    const IntegerValue* size_int_node =
+        dynamic_cast<const IntegerValue*>(size_expr);
     if (!size_int_node) {
         std::cerr << "SEMANTIC ERROR (0): ";
         std::cerr << "vector size must be an integer literal value, ";
@@ -108,14 +108,14 @@ types::ContainerType::Builder decl::vector_type_builder(ast::Expr *size_expr)
 }
 
 types::ContainerType::Builder
-decl::function_type_builder(decl::AbstractParameterDecls *param_decls)
+decl::function_type_builder(decl::AbstractParameterDecls* param_decls)
 {
     using ast::IntegerValue;
     using types::Type;
     using types::TypeQualOrTypeSpecList;
     using types::TypeQualOrTypeSpecPointer;
 
-    std::vector<std::pair<std::optional<std::string>, Type *>> parameters;
+    std::vector<std::pair<std::optional<std::string>, Type*>> parameters;
 
     // Caso não haja parâmetros declarados
     if (!param_decls) {
@@ -123,18 +123,18 @@ decl::function_type_builder(decl::AbstractParameterDecls *param_decls)
     }
 
     // Varre os declaradores de parâmetro
-    for (auto &param_decl : *param_decls) {
-        const DeclarationSpecs *decl_specs = param_decl->first;
+    for (auto& param_decl : *param_decls) {
+        const DeclarationSpecs* decl_specs = param_decl->first;
         assert(decl_specs);
 
         // Lista onde serão armazenados os especificadores de tipo que estão
         // entre os especificadores de declaração do parâmetro
         TypeQualOrTypeSpecList typedecl_specs;
 
-        for (const auto &pspec : *decl_specs) {
+        for (const auto& pspec : *decl_specs) {
             // Trata especificadores de storage
-            StorageClassSpec *stor_spec =
-                dynamic_cast<StorageClassSpec *>(pspec);
+            StorageClassSpec* stor_spec =
+                dynamic_cast<StorageClassSpec*>(pspec);
             if (stor_spec != NULL) {
                 switch (stor_spec->kind) {
                     case StorageClassSpec::Kind::REGISTER:
@@ -154,7 +154,7 @@ decl::function_type_builder(decl::AbstractParameterDecls *param_decls)
                 }
             }
             // Trata especificadores de tipo, armazenando na lista acima
-            TypeDeclSpec *typedecl_spec = dynamic_cast<TypeDeclSpec *>(pspec);
+            TypeDeclSpec* typedecl_spec = dynamic_cast<TypeDeclSpec*>(pspec);
             if (typedecl_spec != NULL) {
                 TypeQualOrTypeSpecPointer it = typedecl_spec->get();
                 typedecl_specs.push_back(it);
@@ -164,12 +164,12 @@ decl::function_type_builder(decl::AbstractParameterDecls *param_decls)
         // Consome os especificadores de tipo para construir o tipo base
         types::PrimType base_type = make_type(typedecl_specs);
 
-        AbstractDeclarator *abs_declarator = *param_decl->second;
+        AbstractDeclarator* abs_declarator = *param_decl->second;
         assert(abs_declarator);
 
         // Constrói o tipo final com todos os construtores que foram
         // empilhados na redução do declarador
-        types::Type *type = new types::PrimType(base_type);
+        types::Type* type = new types::PrimType(base_type);
 
         while (!abs_declarator->builders.empty()) {
             auto builder = *(abs_declarator->builders.end() - 1);
@@ -179,7 +179,7 @@ decl::function_type_builder(decl::AbstractParameterDecls *param_decls)
 
         // Trata o nome do parâmetro
         std::optional<std::string> name;
-        Declarator *declarator = dynamic_cast<Declarator *>(abs_declarator);
+        Declarator* declarator = dynamic_cast<Declarator*>(abs_declarator);
         if (declarator) {
             name = declarator->name;
         }
@@ -190,15 +190,15 @@ decl::function_type_builder(decl::AbstractParameterDecls *param_decls)
     return types::Function::builder(parameters);
 }
 
-void decl::declare(const DeclarationSpecs &pspecs, const InitDeclarators &decls)
+void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 {
     using types::TypeQualOrTypeSpecList;
     using types::TypeQualOrTypeSpecPointer;
     TypeQualOrTypeSpecList typedecl_specs;
 
     bool is_typedef = false;
-    for (const auto &pspec : pspecs) {
-        StorageClassSpec *stor_spec = dynamic_cast<StorageClassSpec *>(pspec);
+    for (const auto& pspec : pspecs) {
+        StorageClassSpec* stor_spec = dynamic_cast<StorageClassSpec*>(pspec);
         if (stor_spec != NULL) {
             switch (stor_spec->kind) {
                 case StorageClassSpec::Kind::TYPEDEF:
@@ -208,7 +208,7 @@ void decl::declare(const DeclarationSpecs &pspecs, const InitDeclarators &decls)
                     abort();
             }
         }
-        TypeDeclSpec *typedecl_spec = dynamic_cast<TypeDeclSpec *>(pspec);
+        TypeDeclSpec* typedecl_spec = dynamic_cast<TypeDeclSpec*>(pspec);
         if (typedecl_spec != NULL) {
             TypeQualOrTypeSpecPointer it = typedecl_spec->get();
             typedecl_specs.push_back(it);
@@ -217,8 +217,8 @@ void decl::declare(const DeclarationSpecs &pspecs, const InitDeclarators &decls)
 
     types::PrimType base_type = make_type(typedecl_specs);
 
-    for (auto &decl : decls) {
-        types::Type *type = new types::PrimType(base_type);
+    for (auto& decl : decls) {
+        types::Type* type = new types::PrimType(base_type);
 
         // Constrói o tipo final com todos os construtores que foram empilhados
         // na redução do declarador
@@ -250,8 +250,8 @@ void decl::declare(const DeclarationSpecs &pspecs, const InitDeclarators &decls)
 }
 
 // TODO nome mais legível para esse tipo de retorno
-std::pair<sbtb::NameRef, ScopeId> *
-decl::declare_function(const DeclarationSpecs *specs, Declarator *declarator)
+std::pair<sbtb::NameRef, ScopeId>*
+decl::declare_function(const DeclarationSpecs* specs, Declarator* declarator)
 {
     assert(specs);
     assert(declarator);
@@ -260,8 +260,8 @@ decl::declare_function(const DeclarationSpecs *specs, Declarator *declarator)
     using types::TypeQualOrTypeSpecPointer;
     TypeQualOrTypeSpecList typedecl_specs;
 
-    for (const auto &pspec : *specs) {
-        StorageClassSpec *stor_spec = dynamic_cast<StorageClassSpec *>(pspec);
+    for (const auto& pspec : *specs) {
+        StorageClassSpec* stor_spec = dynamic_cast<StorageClassSpec*>(pspec);
         if (stor_spec != NULL) {
             switch (stor_spec->kind) {
                 case StorageClassSpec::Kind::STATIC:
@@ -275,14 +275,14 @@ decl::declare_function(const DeclarationSpecs *specs, Declarator *declarator)
                     exit(1);
             }
         }
-        TypeDeclSpec *typedecl_spec = dynamic_cast<TypeDeclSpec *>(pspec);
+        TypeDeclSpec* typedecl_spec = dynamic_cast<TypeDeclSpec*>(pspec);
         if (typedecl_spec != NULL) {
             TypeQualOrTypeSpecPointer it = typedecl_spec->get();
             typedecl_specs.push_back(it);
         }
     }
 
-    types::Type *type = new types::PrimType(make_type(typedecl_specs));
+    types::Type* type = new types::PrimType(make_type(typedecl_specs));
 
     while (!declarator->builders.empty()) {
         auto builder = *(declarator->builders.end() - 1);
@@ -290,7 +290,7 @@ decl::declare_function(const DeclarationSpecs *specs, Declarator *declarator)
         type = builder(type);
     }
 
-    types::Function *type_func = dynamic_cast<types::Function *>(type);
+    types::Function* type_func = dynamic_cast<types::Function*>(type);
     assert(type_func);
 
     const std::string name = declarator->name;
@@ -303,7 +303,7 @@ decl::declare_function(const DeclarationSpecs *specs, Declarator *declarator)
     }
     sbtb::NameRef ref = sbtb::insert_name(name, type);
 
-    std::vector<std::pair<std::string, types::Type *>> concrete_parameters;
+    std::vector<std::pair<std::string, types::Type*>> concrete_parameters;
     for (auto [param_name, param_type] : type_func->parameters) {
         if (!param_name) {
             std::cerr << "SEMANTIC ERROR (" << 0 << "): ";

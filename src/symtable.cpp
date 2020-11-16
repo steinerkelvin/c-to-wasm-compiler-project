@@ -26,7 +26,7 @@ struct Scope {
     Scope(const ScopeId id, const std::optional<ScopeId> parent)
         : id(id), parent(parent){};
 
-    SymId add_tag(const std::string &name, Type *type)
+    SymId add_tag(const std::string& name, Type* type)
     {
         assert(tags_map.find(name) == tags_map.end());
         const SymId idx = tags.size();
@@ -35,7 +35,7 @@ struct Scope {
         tags_map[name] = idx;
         return idx;
     }
-    SymId add_type(const std::string &name, Type *type)
+    SymId add_type(const std::string& name, Type* type)
     {
         assert(types_map.find(name) == types_map.end());
         const SymId idx = types.size();
@@ -44,7 +44,7 @@ struct Scope {
         types_map[name] = idx;
         return idx;
     }
-    SymId add_name(const std::string &name, Type *type)
+    SymId add_name(const std::string& name, Type* type)
     {
         assert(names_map.find(name) == names_map.end());
         const SymId idx = names.size();
@@ -90,63 +90,63 @@ void close_scope()
     scope_stack.pop_back();
 }
 
-TagRow &TagRef::get() const
+TagRow& TagRef::get() const
 {
     assert(scopes.size() > this->scope_id);
-    Scope &scope = scopes[this->scope_id];
+    Scope& scope = scopes[this->scope_id];
     assert(scope.tags.size() > this->sym_id);
     return scope.tags[this->sym_id];
 }
-TypeRow &TypeRef::get() const
+TypeRow& TypeRef::get() const
 {
     assert(scopes.size() > this->scope_id);
-    Scope &scope = scopes[this->scope_id];
+    Scope& scope = scopes[this->scope_id];
     assert(scope.types.size() > this->sym_id);
     return scope.types[this->sym_id];
 }
-NameRow &NameRef::get() const
+NameRow& NameRef::get() const
 {
     assert(scopes.size() > this->scope_id);
-    Scope &scope = scopes[this->scope_id];
+    Scope& scope = scopes[this->scope_id];
     assert(scope.names.size() > this->sym_id);
     return scope.names[this->sym_id];
 }
 
-TagRef insert_tag(const std::string &name, Type *type)
+TagRef insert_tag(const std::string& name, Type* type)
 {
     assert(scope_stack.size() > 0);
     const ScopeId scope_id = *(scope_stack.end() - 1);
-    Scope &scope = scopes[scope_id];
+    Scope& scope = scopes[scope_id];
     const SymId sym_id = scope.add_tag(name, type);
     return TagRef{{scope_id, sym_id}};
 }
 
-TypeRef insert_typename(const std::string &name, Type *type)
+TypeRef insert_typename(const std::string& name, Type* type)
 {
     assert(scope_stack.size() > 0);
     const ScopeId scope_id = *(scope_stack.end() - 1);
-    Scope &scope = scopes[scope_id];
+    Scope& scope = scopes[scope_id];
     const SymId sym_id = scope.add_type(name, type);
     return TypeRef{{scope_id, sym_id}};
 }
 
-NameRef insert_name(const std::string &name, Type *type)
+NameRef insert_name(const std::string& name, Type* type)
 {
     assert(scope_stack.size() > 0);
     const ScopeId scope_id = *(scope_stack.end() - 1);
-    Scope &scope = scopes[scope_id];
+    Scope& scope = scopes[scope_id];
     const SymId sym_id = scope.add_name(name, type);
     return NameRef{{scope_id, sym_id}};
 }
 
-std::optional<TagRef> lookup_tag(const std::string &name, bool last_scope)
+std::optional<TagRef> lookup_tag(const std::string& name, bool last_scope)
 {
     assert(scope_stack.size() > 0);
     if (!last_scope)
         for (const auto scope_id : scope_stack) {
-            Scope &scope = scopes[scope_id];
-            const auto &map = scope.tags_map;
-            const auto &it = map.find(name);
+            Scope& scope = scopes[scope_id];
+            const auto& map = scope.tags_map;
+            const auto& it = map.find(name);
             if (it != map.end()) {
                 const SymId sym_id = it->second;
                 return {(TagRef){{scope_id, sym_id}}};
@@ -154,9 +154,9 @@ std::optional<TagRef> lookup_tag(const std::string &name, bool last_scope)
         }
     else {
         const ScopeId scope_id = *(scope_stack.end() - 1);
-        Scope &scope = scopes[scope_id];
-        const auto &map = scope.tags_map;
-        const auto &it = map.find(name);
+        Scope& scope = scopes[scope_id];
+        const auto& map = scope.tags_map;
+        const auto& it = map.find(name);
         if (it != map.end()) {
             const SymId sym_id = it->second;
             return {(TagRef){{scope_id, sym_id}}};
@@ -165,14 +165,14 @@ std::optional<TagRef> lookup_tag(const std::string &name, bool last_scope)
     return {};
 }
 
-std::optional<TypeRef> lookup_type(const std::string &name, bool last_scope)
+std::optional<TypeRef> lookup_type(const std::string& name, bool last_scope)
 {
     assert(scope_stack.size() > 0);
     if (!last_scope)
         for (const auto scope_id : scope_stack) {
-            Scope &scope = scopes[scope_id];
-            const auto &map = scope.types_map;
-            const auto &it = map.find(name);
+            Scope& scope = scopes[scope_id];
+            const auto& map = scope.types_map;
+            const auto& it = map.find(name);
             if (it != map.end()) {
                 const SymId sym_id = it->second;
                 return {(TypeRef){{scope_id, sym_id}}};
@@ -180,9 +180,9 @@ std::optional<TypeRef> lookup_type(const std::string &name, bool last_scope)
         }
     else {
         const ScopeId scope_id = *(scope_stack.end() - 1);
-        Scope &scope = scopes[scope_id];
-        const auto &map = scope.types_map;
-        const auto &it = map.find(name);
+        Scope& scope = scopes[scope_id];
+        const auto& map = scope.types_map;
+        const auto& it = map.find(name);
         if (it != map.end()) {
             const SymId sym_id = it->second;
             return {(TypeRef){{scope_id, sym_id}}};
@@ -191,14 +191,14 @@ std::optional<TypeRef> lookup_type(const std::string &name, bool last_scope)
     return {};
 }
 
-std::optional<NameRef> lookup_name(const std::string &name, bool last_scope)
+std::optional<NameRef> lookup_name(const std::string& name, bool last_scope)
 {
     assert(scope_stack.size() > 0);
     if (!last_scope)
         for (const auto scope_id : scope_stack) {
-            Scope &scope = scopes[scope_id];
-            const auto &map = scope.names_map;
-            const auto &it = map.find(name);
+            Scope& scope = scopes[scope_id];
+            const auto& map = scope.names_map;
+            const auto& it = map.find(name);
             if (it != map.end()) {
                 const SymId sym_id = it->second;
                 return {(NameRef){{scope_id, sym_id}}};
@@ -206,9 +206,9 @@ std::optional<NameRef> lookup_name(const std::string &name, bool last_scope)
         }
     else {
         const ScopeId scope_id = *(scope_stack.end() - 1);
-        Scope &scope = scopes[scope_id];
-        const auto &map = scope.names_map;
-        const auto &it = map.find(name);
+        Scope& scope = scopes[scope_id];
+        const auto& map = scope.names_map;
+        const auto& it = map.find(name);
         if (it != map.end()) {
             const SymId sym_id = it->second;
             return {(NameRef){{scope_id, sym_id}}};
@@ -217,12 +217,12 @@ std::optional<NameRef> lookup_name(const std::string &name, bool last_scope)
     return {};
 }
 
-bool is_typename(const char *namep)
+bool is_typename(const char* namep)
 {
     const std::string name(namep);
-    for (auto &scope_id : scope_stack) {
-        const auto &scope = scopes[scope_id];
-        const auto &map = scope.types_map;
+    for (auto& scope_id : scope_stack) {
+        const auto& scope = scopes[scope_id];
+        const auto& map = scope.types_map;
         const auto it = map.find(name);
         if (it != map.end()) {
             return true;

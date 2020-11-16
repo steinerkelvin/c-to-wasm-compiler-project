@@ -2,7 +2,7 @@
 
 namespace pars {
 
-sbtb::NameRef get_var(const std::string &name)
+sbtb::NameRef get_var(const std::string& name)
 {
     auto pos = sbtb::lookup_name(name);
     if (pos) {

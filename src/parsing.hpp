@@ -11,7 +11,7 @@ extern int yylineno;
 
 namespace pars {
 
-sbtb::NameRef get_var(const std::string &name);
+sbtb::NameRef get_var(const std::string& name);
 
 } // namespace pars
 

@@ -37,8 +37,8 @@ struct TypeDeclSpec : DeclarationSpec {
     types::TypeQualOrTypeSpecPointer value;
 };
 
-struct DeclarationSpecs : std::vector<DeclarationSpec *> {
-    void add(DeclarationSpec *spec) { this->push_back(spec); }
+struct DeclarationSpecs : std::vector<DeclarationSpec*> {
+    void add(DeclarationSpec* spec) { this->push_back(spec); }
 };
 
 struct AbstractDeclarator {
@@ -50,24 +50,24 @@ struct AbstractDeclarator {
 
 struct Declarator : AbstractDeclarator {
     const std::string name;
-    std::optional<ast::Expr *> init_expr;
+    std::optional<ast::Expr*> init_expr;
 
-    Declarator(const std::string &name) : name(name) {}
-    void set_init(ast::Expr *init_expr) { this->init_expr = init_expr; };
+    Declarator(const std::string& name) : name(name) {}
+    void set_init(ast::Expr* init_expr) { this->init_expr = init_expr; };
 };
 
-struct InitDeclarators : std::vector<Declarator *> {
-    void add(Declarator *init) { this->push_back(init); }
+struct InitDeclarators : std::vector<Declarator*> {
+    void add(Declarator* init) { this->push_back(init); }
 };
 
 struct AbstractParameterDecl
-    : std::pair<DeclarationSpecs *, std::optional<AbstractDeclarator *>> {
+    : std::pair<DeclarationSpecs*, std::optional<AbstractDeclarator*>> {
 
-    using std::pair<DeclarationSpecs *, std::optional<AbstractDeclarator *>>::
+    using std::pair<DeclarationSpecs*, std::optional<AbstractDeclarator*>>::
         pair;
 
-    static AbstractParameterDecl *
-    from(DeclarationSpecs *specs, AbstractDeclarator *decl)
+    static AbstractParameterDecl*
+    from(DeclarationSpecs* specs, AbstractDeclarator* decl)
     {
         if (decl != NULL) {
             return new AbstractParameterDecl(specs, decl);
@@ -77,25 +77,25 @@ struct AbstractParameterDecl
     }
 };
 
-struct AbstractParameterDecls : std::vector<AbstractParameterDecl *> {
-    void add(AbstractParameterDecl *param_decl) { this->push_back(param_decl); }
+struct AbstractParameterDecls : std::vector<AbstractParameterDecl*> {
+    void add(AbstractParameterDecl* param_decl) { this->push_back(param_decl); }
 };
 
 // Retorna um construtor de tipo de vetor resolvendo a expressão `size_expr`
 // para literal de inteiro, imprimindo erro e abortando em caso de falha
-types::ContainerType::Builder vector_type_builder(ast::Expr *size_expr);
+types::ContainerType::Builder vector_type_builder(ast::Expr* size_expr);
 
 // Retorna um construtor de tipo de função a partir de uma lista de
 // declaradores de parâmetros `param_decls`
 types::ContainerType::Builder
-function_type_builder(decl::AbstractParameterDecls *param_decls);
+function_type_builder(decl::AbstractParameterDecls* param_decls);
 
 // Consome especificadores de declaração e declaradores, registrando
 // adequadamente os nomes no último escopo aberto
-void declare(const DeclarationSpecs &specs, const InitDeclarators &decls);
+void declare(const DeclarationSpecs& specs, const InitDeclarators& decls);
 
-std::pair<sbtb::NameRef, ScopeId> *
-declare_function(const DeclarationSpecs *specs, Declarator *declarator);
+std::pair<sbtb::NameRef, ScopeId>*
+declare_function(const DeclarationSpecs* specs, Declarator* declarator);
 
 }; // namespace decl
 
