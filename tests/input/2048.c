@@ -4,7 +4,12 @@
 #include <string.h>
 // #include <time.h>
 
+#if 0
+void srand(int);
+int rand();
 void printf(const char *);
+int scanf(const char *);
+#endif
 
 const char EMPTY_CELL[] = "        ";
 const char TABLE_WIDTH = 5 + 4 * 8;
@@ -170,7 +175,16 @@ void init_table() {
     insert_random_tile();
 }
 
-void clean_table() { memset(table, 0, sizeof(table)); }
+void clean_table() {
+    // memset(table, 0, sizeof(table));
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (table[i][j] == 0) {
+                table[i][j] = 0;
+            }
+        }
+    }
+}
 
 void update_record(int n) { record = n; }
 
@@ -182,23 +196,23 @@ void add_score(int n) {
 }
 
 int move_table_hor(int dir) {
-    int new_row[4], cur_tile;
-    int i, j, c, n;
+    int i, j, c;
     int moved = 0;
 
     // para cada linha da tabela
     for (i = 0; i < 4; i++) {
-        n = 0, cur_tile = 0;
-        // limpa o vetor para a nova linha
-        memset(new_row, 0, 4 * sizeof(new_row[0]));
+        int n = 0, cur_tile = 0;
+        // vetor para a nova linha
+        int new_row[4] = {0, 0, 0, 0};
         // para cada colula
         for (j = 0; j < 4; j++) {
             // determina o valor do �ndice da coluna baseado na direção do
             // movimento
-            if (dir == +1) // direita
+            if (dir == +1) { // direita
                 c = 3 - j;
-            else if (dir == -1) // esquerda
+            } else if (dir == -1) { // esquerda
                 c = j;
+            }
             // se n�o houver peça ativa e encontrar uma peça
             if (!cur_tile && table[i][c]) {
                 cur_tile = table[i][c];
@@ -220,9 +234,9 @@ int move_table_hor(int dir) {
                 }
             }
         }
-        if (cur_tile)
+        if (cur_tile) {
             new_row[n++] = cur_tile;
-
+        }
         // escreve a nova coluna na tabela de acordo com a dirte��o do movimento
         for (j = 0; j < 4; j++) {
             if (dir == +1)
@@ -238,15 +252,14 @@ int move_table_hor(int dir) {
 }
 
 int move_table_vert(int dir) {
-    int new_col[4], cur_tile;
-    int i, j, r, n;
+    int i, j, r;
     int moved = 0;
 
     // para cada coluna da tabela
     for (i = 0; i < 4; i++) {
-        n = 0, cur_tile = 0;
-        // limpa o vetor para a nova linha
-        memset(new_col, 0, 4 * sizeof(new_col[0]));
+        int n = 0, cur_tile = 0;
+        // vetor para a nova linha
+        int new_col[4] = {0, 0, 0, 0};
         // para linha colula
         for (j = 0; j < 4; j++) {
             // determina o valor do �ndice da linha baseado na direção do
@@ -276,15 +289,17 @@ int move_table_vert(int dir) {
                 }
             }
         }
-        if (cur_tile)
+        if (cur_tile) {
             new_col[n++] = cur_tile;
+        }
 
         // escreve a nova coluna na tabela de acordo com a direçãos do movimento
         for (j = 0; j < 4; j++) {
-            if (dir == +1)
+            if (dir == +1) {
                 r = j;
-            else if (dir == -1)
+            } else if (dir == -1) {
                 r = 3 - j;
+            }
             if (!moved && table[r][i] != new_col[j])
                 moved = 1;
             table[r][i] = new_col[j];
@@ -316,12 +331,13 @@ int main() {
     while (1) {
         char ch;
         const int ret = scanf(" %c", &ch);
-        if (ret != 1)
+        if (ret != 1) {
             continue;
+        }
 
-        if ((char)ch == 'R' || (char)ch == 'r')
+        if ((char)ch == 'R' || (char)ch == 'r') {
             reset_game();
-        else if ((char)ch == 'Q' || (char)ch == 'q') {
+        } else if ((char)ch == 'Q' || (char)ch == 'q') {
             break;
         } else {
             int moved = 0;
