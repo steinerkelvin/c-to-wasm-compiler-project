@@ -5,12 +5,17 @@
 
 // Estrutura que resolve para verdadeiro apenas a primeira vez
 struct Once {
-    bool flag = true;
-    operator bool() {
+    operator bool()
+    {
         const bool result = flag;
         flag = false;
         return result;
     }
+    void reset() {
+        flag = true;
+    }
+  protected:
+    bool flag = true;
 };
 
 #endif // UTIL_H
