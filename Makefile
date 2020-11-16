@@ -20,7 +20,7 @@ customs=$(patsubst custom/%.cpp,bin/custom/%,$(src_custom))
 all: exe
 
 test: exe
-	@ echo TESTING
+	@ echo; echo TESTING
 	./run_tests.sh
 
 format:
@@ -29,8 +29,14 @@ format:
 doxygen:
 	doxygen
 
+cp=cp2
+
 pdf:
-	pandoc ./relatorio-cp2.md -o ./relatorio-cp2.pdf
+	pandoc ./relatorio-$(cp).md -o ./relatorio-$(cp).pdf
+
+zip:
+	@# zip -r compiladores-dope-$(cp).zip ./ -x '.git/*' 'tmp/*' 'doxy/*' '.dep/*'
+	git archive -o compiladores-dope-$(cp).zip HEAD
 
 clean:
 	rm -f -r ./.deps
