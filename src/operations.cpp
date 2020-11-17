@@ -119,30 +119,6 @@ Type* btnot_verify(const Type* u, const char* op)
     return new PrimType(result);
 }
 
-Type* assign_verify(Type* l, Type* r, const char* op)
-{
-    PrimType* pl = dynamic_cast<PrimType*>(l);
-    PrimType* pr = dynamic_cast<PrimType*>(r);
-    if (!pl || !pr) {
-        type_error(op, l, r);
-    }
-    PrimKind kl = pl->kind;
-    PrimKind kr = pr->kind;
-    if (kl == PrimKind::VOID) {
-        std::cerr << "SEMANTIC ERROR (0): ";
-        std::cerr << "incompatible type for operator '%s', ";
-        std::cerr << "LHS is \'" << (*l) << "\'." << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    if (kr == PrimKind::VOID) {
-        std::cerr << "SEMANTIC ERROR (0): ";
-        std::cerr << "incompatible type for operator '%s', ";
-        std::cerr << "RHS is \'" << (*r) << "\'." << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    return r;
-}
-
 static void assignment_type_error(const Type* target, const Type* source)
 {
     std::cerr << "SEMANTIC ERROR (0): ";
@@ -227,6 +203,16 @@ Expr* check_assignment(Type* target_type, Expr* source_node)
         }
     }
     assignment_type_error(target_type, source_type);
+    exit(EXIT_FAILURE);
+}
+
+Expr* unify_assignment(Expr* target, Expr* value) {
+    assert(target);
+    auto target_type = target->get_type();
+    auto new_value = check_assignment(target_type, value);
+    auto result = new ast::Assign(target, new_value);
+    result->set_type(target_type);
+    return result;
 }
 
 Expr* address_of(Expr* value)
@@ -259,21 +245,13 @@ Expr* derreference(Expr* value)
     types::Pointer* type_pointer = dynamic_cast<types::Pointer*>(type);
     if (!type_pointer) {
         std::cerr << "SEMANTIC ERROR (0): ";
-        std::cerr << "derreference value must be of pointer type, ";
+        std::cerr << "derreferenced value must be of pointer type, ";
         std::cerr << "got \'" << *type << "\' instead." << std::endl;
         exit(1);
     }
 
-    Type* new_type;
-    if (type_pointer->n >= 2) {
-        types::Pointer* new_pointer_type = new types::Pointer(*type_pointer);
-        new_pointer_type->n--;
-        new_type = new_pointer_type;
-    } else {
-        new_type = type_pointer->get_base();
-    }
-
-    Expr* new_node = new ast::AddressOf(value);
+    Type* new_type = type_pointer->derreference();
+    Expr* new_node = new ast::Derreference(value);
     new_node->set_type(new_type);
     return new_node;
 }

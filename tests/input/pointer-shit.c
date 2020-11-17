@@ -5,8 +5,11 @@ int main() {
     int *pa = &a;
     int **ppa = &pa;
     int *pb = &b;
-    // **ppa = *pb; // TODO
+    **ppa = *pb;
+    pa = pb;
 
     char c = 3;
+    char *pc = &c;
     // pa = &c; // ERRO
+    // pa = pc; // ERRO
 }

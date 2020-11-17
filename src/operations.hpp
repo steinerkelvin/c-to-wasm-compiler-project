@@ -20,12 +20,12 @@ Type* unify_comp(const Type* l, const Type* r, const char* op);
 Type* unify_bitwise(const Type* l, const Type* r, const char* op);
 Type* unary_verify(const Type* u, const char* op);
 Type* btnot_verify(const Type* u, const char* op);
-Type* assign_verify(Type* l, Type* r, const char* op);
 
-Expr* check_assignment(Type* target_type, Expr *value);
+Expr* check_assignment(Type* target_type, Expr* value);
+Expr* unify_assignment(Expr* target, Expr* value);
 
 Expr* address_of(Expr* value);
-// Expr *derreference(Expr *value); // TODO
+Expr* derreference(Expr* value);
 Expr* index_access(Expr* value, Expr* index);
 Expr* function_call(Expr* value, ast::Exprs* parameters);
 

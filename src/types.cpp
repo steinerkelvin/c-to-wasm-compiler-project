@@ -21,14 +21,35 @@ const char* get_prim_text(PrimKind kind)
     abort();
 }
 
+Type* Pointer::derreference() const {
+    assert(this->n >= 1);
+    if (this->n == 1) {
+        return this->get_base();
+    }
+    // n >= 2
+    auto new_type = new Pointer(*this);
+    new_type->n--;
+    return new_type;
+}
+Pointer* Pointer::add_indiretion(Type* type) {
+    if (auto type_pt = dynamic_cast<Pointer*>(type)) {
+        auto new_type = new Pointer(*type_pt);
+        new_type->n++;
+        return new_type;
+    }
+    return new Pointer(type);
+}
+
 std::optional<Pointer*> Pointer::to_pointer_implicit() { return this; }
 std::optional<Pointer*> Vector::to_pointer_implicit()
 {
-    return new Pointer(this, 1);
+    // TODO
+    abort();
+    return new Pointer(this);
 }
 std::optional<Pointer*> Function::to_pointer_implicit()
 {
-    return new Pointer(this, 1);
+    return new Pointer(this);
 }
 
 bool PrimType::is_compatible_with(const Type* other)

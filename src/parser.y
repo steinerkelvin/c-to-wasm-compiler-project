@@ -512,18 +512,18 @@ comma-expression
 
 assignment-expression
     : conditional-expression
-    //| unary-expression assignment-operator assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),$2); $$ = $3; }
-    | unary-expression ASSIGN  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"="); $$ = $3; }
-    | unary-expression STARASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"*="); $$ = $3; }
-    | unary-expression OVERASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"/="); $$ = $3; }
-    | unary-expression MODASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"%="); $$ = $3; }
-    | unary-expression PLUSASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"+="); $$ = $3; }
-    | unary-expression MINASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"-="); $$ = $3; }
-    | unary-expression SLASS   assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"<<="); $$ = $3; }
-    | unary-expression SRASS   assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),">>="); $$ = $3; }
-    | unary-expression ANDASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"&="); $$ = $3; }
-    | unary-expression XORASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"^="); $$ = $3; }
-    | unary-expression ORASS   assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"|="); $$ = $3; }
+    | unary-expression ASSIGN  assignment-expression  { $$ = ops::unify_assignment($1, $3); }
+    // // TODO
+    // | unary-expression STARASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"*="); $$ = $3; }
+    // | unary-expression OVERASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"/="); $$ = $3; }
+    // | unary-expression MODASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"%="); $$ = $3; }
+    // | unary-expression PLUSASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"+="); $$ = $3; }
+    // | unary-expression MINASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"-="); $$ = $3; }
+    // | unary-expression SLASS   assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"<<="); $$ = $3; }
+    // | unary-expression SRASS   assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),">>="); $$ = $3; }
+    // | unary-expression ANDASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"&="); $$ = $3; }
+    // | unary-expression XORASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"^="); $$ = $3; }
+    // | unary-expression ORASS   assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"|="); $$ = $3; }
     ;
 
 constant-expression : conditional-expression ;
@@ -601,12 +601,12 @@ unary-expression
     | PLUSPLUS   unary-expression   { ops::unary_verify($2->get_type(),"++"); $$ = new ast::PrefixPlusPlus($2); }
     | MINUSMINUS unary-expression   { ops::unary_verify($2->get_type(),"--"); $$ = new ast::PrefixMinusMinus($2); }
     | AMPER cast-expression         { $$ = ops::address_of($2); }
-    | STAR  cast-expression         { $$ = $2; }    // TODO
+    | STAR  cast-expression         { $$ = ops::derreference($2); }
     | PLUS  cast-expression         { ops::unary_verify($2->get_type(),"+"); $$ = $2; }
     | MINUS cast-expression         { ops::unary_verify($2->get_type(),"-"); $$ = new ast::InvertSignal($2);}
     | BTNOT cast-expression         { ops::btnot_verify($2->get_type(),"~"); $$ = new ast::BitNot($2); }
     | NOT   cast-expression         { ops::unary_verify($2->get_type(),"!"); $$ = new ast::Not($2); }
-    | SIZEOF unary-expression       { assert(0); } 
+    | SIZEOF unary-expression       { assert(0); }
     | SIZEOF LPAR type-name RPAR    { assert(0); }
     // | _Alignof LPAR type-name RPAR
     ;

@@ -22,7 +22,7 @@
 namespace ast {
 
 struct Node {
-    LABEL("Node");
+    LABEL("NODE");
     virtual bool is_typed() const { return false; }
     virtual const std::vector<Node*> get_children_nodes() const
     {
@@ -211,6 +211,7 @@ using CoersionBuilder = std::function<Expr*(Expr*)>;
 
 // integer to real
 struct I2R : Coersion {
+    LABEL("I2R");
     I2R(Expr* base) : Coersion(base)
     {
         this->type = new types::PrimType(types::PrimKind::REAL);
@@ -219,6 +220,7 @@ struct I2R : Coersion {
 extern const CoersionBuilder bdI2R;
 // real to integer
 struct R2I : Coersion {
+    LABEL("R2I");
     R2I(Expr* base) : Coersion(base)
     {
         this->type = new types::PrimType(types::PrimKind::INTEGER);
@@ -227,6 +229,7 @@ struct R2I : Coersion {
 extern const CoersionBuilder bdR2I;
 // integer to char
 struct I2C : Coersion {
+    LABEL("I2C");
     I2C(Expr* base) : Coersion(base)
     {
         this->type = new types::PrimType(types::PrimKind::CHAR);
@@ -235,6 +238,7 @@ struct I2C : Coersion {
 extern const CoersionBuilder bdI2C;
 // char to integer
 struct C2I : Coersion {
+    LABEL("C2I");
     C2I(Expr* base) : Coersion(base)
     {
         this->type = new types::PrimType(types::PrimKind::INTEGER);
@@ -247,10 +251,12 @@ extern const CoersionBuilder bdR2C;
 
 // function to pointer
 struct F2P : Coersion {
+    LABEL("F2P");
     using Coersion::Coersion;
 };
 // vector to pointer
 struct V2P : Coersion {
+    LABEL("V2P");
     using Coersion::Coersion;
 };
 
@@ -277,7 +283,6 @@ struct Not : UnOp {
     LABEL("!");
     using UnOp::UnOp;
 };
-
 struct BitNot : UnOp {
     LABEL("~");
     using UnOp::UnOp;
@@ -320,8 +325,18 @@ struct Over : BinOp {
     using BinOp::BinOp;
 };
 
+struct Assign : BinOp {
+    LABEL("=");
+    using BinOp::BinOp;
+};
+
+
 struct AddressOf : UnOp {
     LABEL("&x");
+    using UnOp::UnOp;
+};
+struct Derreference : UnOp {
+    LABEL("*x");
     using UnOp::UnOp;
 };
 

@@ -101,11 +101,21 @@ struct Pointer : ContainerType {
     // Número de indireções / "profundidade" do ponteiro
     size_t n;
 
-    Pointer(Type* base, size_t n) : ContainerType(base), n(n)
+    Pointer(Type* base, size_t n = 1) : ContainerType(base), n(n)
     {
         assert(base);
         assert(n > 0);
     };
+
+    /**
+     * Builds a new type removing one indirection level from the pointer type,
+     * returning the base type if the pointer has just one indirection level.
+     */
+    Type* derreference() const;
+    /**
+     * Builds a new type adding one indirection level to the pointer type.
+     */
+    static Pointer* add_indiretion(Type *type);
 
     virtual std::optional<Pointer*> to_pointer_implicit();
     virtual bool is_compatible_with(const Type *other);
