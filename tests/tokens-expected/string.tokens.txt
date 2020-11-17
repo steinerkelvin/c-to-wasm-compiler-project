@@ -1,0 +1,20 @@
+INT : int
+ID : main
+LPAR : (
+RPAR : )
+LCB : {
+STR_VAL : "Hello, world!"
+SEMI : ;
+CONST : const
+CHAR : char
+STAR : *
+ID : txt
+ASSIGN : =
+STR_VAL : "Hello, world!"
+SEMI : ;
+ID : txt
+SEMI : ;
+RETURN : return
+INT_VAL : 0
+SEMI : ;
+RCB : }

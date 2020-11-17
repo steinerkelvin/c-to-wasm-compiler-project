@@ -12,6 +12,7 @@
 #include <variant>
 #include <vector>
 
+#include "strtable.hpp"
 #include "symtable.hpp"
 #include "types.hpp"
 
@@ -101,7 +102,7 @@ struct MultiChildrenBase : R {
         return result;
     }
 
-//   protected:
+    //   protected:
     std::vector<T*> children;
 };
 
@@ -168,10 +169,24 @@ struct CharValue : BaseValue<char, types::PrimKind::CHAR> {
     LABEL("Char");
     CharValue(char value) : BaseValue<char, types::PrimKind::CHAR>(value) {}
 };
-struct StringValue : BaseValue<size_t, types::PrimKind::VOID> {
+
+struct StringValue : Expr {
     LABEL("String");
-    StringValue(size_t value) : BaseValue<size_t, types::PrimKind::VOID>(value)
-    {}
+    StringValue(StrRef ref) : ref(ref)
+    {
+        this->set_type(
+            new types::Pointer(new types::PrimType(types::PrimKind::CHAR), 1));
+    };
+    virtual void write_data_repr(std::ostream& stream) const
+    {
+        this->Expr::write_data_repr(stream);
+        stream << " \"" << this->ref.id << "\"";
+    };
+    StrRef get_ref() const { return this->ref; }
+    const std::string& get_str() const { return this->ref.get(); }
+
+  protected:
+    StrRef ref;
 };
 
 struct Variable : Expr {
@@ -196,28 +211,32 @@ using CoersionBuilder = std::function<Expr*(Expr*)>;
 
 // integer to real
 struct I2R : Coersion {
-    I2R(Expr *base) : Coersion(base) {
+    I2R(Expr* base) : Coersion(base)
+    {
         this->type = new types::PrimType(types::PrimKind::REAL);
     }
 };
 extern const CoersionBuilder bdI2R;
 // real to integer
 struct R2I : Coersion {
-    R2I(Expr *base) : Coersion(base) {
+    R2I(Expr* base) : Coersion(base)
+    {
         this->type = new types::PrimType(types::PrimKind::INTEGER);
     }
 };
 extern const CoersionBuilder bdR2I;
 // integer to char
 struct I2C : Coersion {
-    I2C(Expr *base) : Coersion(base) {
+    I2C(Expr* base) : Coersion(base)
+    {
         this->type = new types::PrimType(types::PrimKind::CHAR);
     }
 };
 extern const CoersionBuilder bdI2C;
 // char to integer
 struct C2I : Coersion {
-    C2I(Expr *base) : Coersion(base) {
+    C2I(Expr* base) : Coersion(base)
+    {
         this->type = new types::PrimType(types::PrimKind::INTEGER);
     }
 };

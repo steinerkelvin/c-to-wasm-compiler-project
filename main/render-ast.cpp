@@ -19,7 +19,7 @@ int main(void) {
     }
     // std::cout << (*last_expr) << std::endl;
     std::cout << (*root) << std::endl;
-    // strtb_print(stderr);
+    // strtb::repr(std::cerr);
 
     return 0;
 }

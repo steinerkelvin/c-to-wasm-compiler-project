@@ -1,5 +1,5 @@
-%output "generated_parser.cpp"        
-%defines "generated_parser.hpp"        
+%output "generated_parser.cpp"
+%defines "generated_parser.hpp"
 %define parse.error verbose // Give proper messages when a syntax error is found.
 %define parse.lac full      // Enable LAC to improve syntax error handling.
 %define parse.trace
@@ -8,6 +8,7 @@
 
 %code requires {
 #include <string>
+#include "strtable.hpp"
 #include "types.hpp"
 #include "declarations.hpp"
 #include "ast.hpp"
@@ -16,15 +17,17 @@
 %{
 #include <cstdio>
 #include <cstring>
+#include <cstdint>
 #include <iostream>
 #include <string>
-#include "types.hpp"
-#include "declarations.hpp"
 #include "parsing.hpp"
+#include "strtable.hpp"
+#include "types.hpp"
 #include "symtable.hpp"
+#include "declarations.hpp"
 #include "ast.hpp"
-#include "global.hpp"
 #include "operations.hpp"
+#include "global.hpp"
 
 int yylex(void);
 void yyerror(char const *s);
@@ -111,7 +114,8 @@ void yyerror(char const *s);
 %token DOT ARROW AMPER
 %token SEMI COLON COMMA QUEST ELLIPSIS
 
-%token <long long int> INT_VAL <double> REAL_VAL <char> CHAR_VAL <size_t> STR_VAL
+%token <long long int> INT_VAL <double> REAL_VAL <char> CHAR_VAL
+%token <StrRef> STR_VAL
 %token <std::string*> ID <size_t> TYPENAME
 
 %precedence RPAR
