@@ -205,9 +205,9 @@ Expr* check_assignment(Type* target_type, Expr* source_node)
         // If target type is pointer
     } else if (auto tg_pt = dynamic_cast<Pointer*>(target_type)) {
         // If source type can be converted to pointer implicitly
-        if (auto src_pt = source_type->to_pointer_implicit()) {
-            auto tg_base = tg_pt->get_base();
-            if (!tg_base->is_compatible_with(source_type)) {
+        if (auto src_pt_opt = source_type->to_pointer_implicit()) {
+            auto src_pt = *src_pt_opt;
+            if (!tg_pt->is_compatible_with(src_pt)) {
                 assignment_type_error(target_type, source_type);
             }
             // If source type is pointer already
@@ -216,12 +216,12 @@ Expr* check_assignment(Type* target_type, Expr* source_node)
                 // If source type is function, add coersion node
             } else if (dynamic_cast<Function*>(source_type)) {
                 auto new_node = new ast::F2P(source_node);
-                new_node->set_type(*src_pt);
+                new_node->set_type(src_pt);
                 return new_node;
                 // If source type is vector, add coersion node
             } else if (dynamic_cast<Vector*>(source_type)) {
                 auto new_node = new ast::F2P(source_node);
-                new_node->set_type(*src_pt);
+                new_node->set_type(src_pt);
                 return new_node;
             }
         }
