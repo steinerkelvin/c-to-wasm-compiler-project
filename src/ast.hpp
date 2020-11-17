@@ -153,10 +153,10 @@ struct BaseValue : Expr {
     T value;
 };
 
-struct IntegerValue : BaseValue<long long, types::PrimKind::INTEGER> {
+struct IntegerValue : BaseValue<uint64_t, types::PrimKind::INTEGER> {
     LABEL("Integer");
-    IntegerValue(long long value)
-        : BaseValue<long long, types::PrimKind::INTEGER>(value)
+    IntegerValue(uint64_t value)
+        : BaseValue<uint64_t, types::PrimKind::INTEGER>(value)
     {}
 };
 struct FloatingValue : BaseValue<double, types::PrimKind::REAL> {

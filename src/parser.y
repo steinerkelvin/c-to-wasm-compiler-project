@@ -7,6 +7,7 @@
 %define api.value.type union
 
 %code requires {
+#include <cstdint>
 #include <string>
 #include "strtable.hpp"
 #include "types.hpp"
@@ -17,7 +18,6 @@
 %{
 #include <cstdio>
 #include <cstring>
-#include <cstdint>
 #include <iostream>
 #include <string>
 #include "parsing.hpp"
@@ -114,7 +114,7 @@ void yyerror(char const *s);
 %token DOT ARROW AMPER
 %token SEMI COLON COMMA QUEST ELLIPSIS
 
-%token <long long int> INT_VAL <double> REAL_VAL <char> CHAR_VAL
+%token <char> CHAR_VAL <uint64_t> INT_VAL <double> REAL_VAL
 %token <StrRef> STR_VAL
 %token <std::string*> ID <size_t> TYPENAME
 

@@ -3,6 +3,8 @@
 
 /**
  * @file operations.hpp
+ *
+ * Type checking, type converstion and building AST nodes on expressions
  */
 
 #include "ast.hpp"
