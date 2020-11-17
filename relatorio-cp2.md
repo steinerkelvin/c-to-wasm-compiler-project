@@ -117,3 +117,35 @@ program
     : %empty                { $$ = new ast::Program(); }
     | program program-part  { $$->add($2); }
 ```
+
+## Versão defasada do Bison
+
+Mais uma vez a versão defasada do Bison que vem com o Ubuntu 18 nos causou
+transtorno, dessa vez por causa da seguinte feature documentada no [changelog]:
+
+```
+2018-08-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	add support for typed mid-rule actions
+	Prompted on Piotr Marcińczyk's message:
+	http://lists.gnu.org/archive/html/bug-bison/2017-06/msg00000.html.
+	See also http://lists.gnu.org/archive/html/bug-bison/2018-06/msg00001.html.
+
+	Because their type is unknown to Bison, the values of midrule actions are
+	not treated like the others: they don't have %printer and %destructor
+	support.  In addition, in C++, (Bison) variants cannot work properly.
+
+	Typed midrule actions address these issues.  Instead of:
+
+	    exp: { $<ival>$ = 1; } { $<ival>$ = 2; }   { $$ = $<ival>1 + $<ival>2; }
+
+	write:
+
+	    exp: <ival>{ $$ = 1; } <ival>{ $$ = 2; }   { $$ = $1 + $2; }
+```
+
+Optamos dessa vez por usar uma versão mais nova do Bison nessas máquinas através
+do [gerenciador de pacotes do NixOS][nix].
+
+[changelog]: https://fossies.org/linux/bison/ChangeLog
+[nix]: https://nixos.org/guides/install-nix.html
