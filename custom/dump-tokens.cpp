@@ -1,5 +1,5 @@
 #define DUMP_TOKENS
-#include "../src/scanner.cpp"
+#include "scanner.cpp"
 int yylex(void);
 int main() {
     yylex();
