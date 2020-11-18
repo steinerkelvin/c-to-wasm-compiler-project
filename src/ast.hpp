@@ -373,6 +373,28 @@ struct IfStmt : Statement {
     Statement* stmt;
 };
 
+struct IfElseStmt : Statement {
+    LABEL("IfElseStmt");
+    IfElseStmt(Expr* expr, Statement* stmt, Statement* else_stmt)
+    {
+        assert(expr);
+        assert(stmt);
+        assert(else_stmt);
+        this->expr = expr;
+        this->stmt = stmt;
+        this->else_stmt = else_stmt;
+    }
+    virtual const std::vector<Node*> get_children_nodes() const
+    {
+        return std::vector<Node*>{this->expr, this->stmt, this->else_stmt};
+    }
+
+  protected:
+    Expr* expr;
+    Statement* else_stmt;
+    Statement* stmt;
+};
+
 struct WhileStmt : Statement {
     LABEL("WhileStmt");
     WhileStmt(Expr* expr, Statement* stmt)

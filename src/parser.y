@@ -461,7 +461,7 @@ block-item
 
 if-stmt 
     : IF LPAR expression[expr] RPAR stmt[body]      { $$ = new ast::IfStmt($expr, $body); }
-    | IF LPAR expression RPAR stmt[body] ELSE stmt  { $$ = $body; }     // TODO
+    | IF LPAR expression[expr] RPAR stmt[body] ELSE stmt[block]  { $$ = new ast::IfElseStmt($expr, $body, $block); }    
     ;
 
 return-stmt
