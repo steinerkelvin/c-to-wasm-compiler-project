@@ -14,6 +14,21 @@ void yyerror (char const* s) {
     fprintf(stderr, "SYNTAX ERROR (%d): %s\n", yylineno, s);
     exit(EXIT_FAILURE);
 }
+
+// Stores current column
+int yycolumn = 1;
+// Stores line number of the last token
+int last_line = 1;
+
+/* Handle token positions */
+#define YY_USER_ACTION \
+    { \
+        yylloc.first_line = last_line; \
+        yylloc.last_line = last_line = yylineno; \
+        yylloc.first_column = yycolumn; \
+        yycolumn += yyleng; \
+        yylloc.last_column = yycolumn; \
+    }
 %}
 
 digit        0|([1-9]+[0-9]*)
@@ -23,15 +38,16 @@ real         (0|([1-9]+[0-9]*))"."[0-9]+
 
 %%
 
-    /* Ignora espacos em branco */
-[ \t\n\r]                 { }
+    /* Trata espacos em branco */
+\n+          { yycolumn = 1; }
+[ \t\r]+     { }
 
     /* Ignora comentarios */
-"/*"[^*/]*"*/"          { } 
-"//".*(\\(\r\n|\n).*)*\n       { }
+"//".*(\\(\r\n|\n).*)*\n    { yycolumn = 1; }
+"/*"[^*/]*"*/"              { }
 
     /* Ignora diretivas para o preprocessador */
-^[ \t\n\r]*"#".*\n        { }
+^[ \t\n\r]*"#".*\n        { yycolumn = 1; }
 
 auto                    { HANDLE_TOKEN(AUTO, {}); }
 break                   { HANDLE_TOKEN(BREAK, {}); }
@@ -103,7 +119,7 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 "..."                   { HANDLE_TOKEN(ELLIPSIS, {}); }
 "->"                    { HANDLE_TOKEN(ARROW, {}); }
 "="                     { HANDLE_TOKEN(ASSIGN, {}); }
-"*="                    { HANDLE_TOKEN(STARASS, {}); } 
+"*="                    { HANDLE_TOKEN(STARASS, {}); }
 "/="                    { HANDLE_TOKEN(OVERASS, {}); }
 "%="                    { HANDLE_TOKEN(MODASS, {}); }
 "+="                    { HANDLE_TOKEN(PLUSASS, {}); }

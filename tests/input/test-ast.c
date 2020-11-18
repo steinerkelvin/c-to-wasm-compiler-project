@@ -5,7 +5,7 @@ int *test(int a, int b) {
 }
 
 int main()
-{   
+{
     int (*f)(int a, int b);
     f;
 

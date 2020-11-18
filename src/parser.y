@@ -5,6 +5,7 @@
 %define parse.trace
 
 %define api.value.type union
+%locations
 
 %code requires {
 #include <cstdint>
