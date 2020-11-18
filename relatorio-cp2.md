@@ -96,6 +96,13 @@ Portanto desempilhando da direita para esquerda podemos construir o tipo:
 
     Vetor(4; Vetor(8; Ponteiro(int)))
 
+Como ninguém conseguiu elaborar uma maneira simples de reconstruir essa notação
+absurda a partir dos tipos construídos no parser, adotaremos nas representações
+dos tipos - em mensagens de erro, no diagrama da AST etc - uma notação
+semelhante à pilha do exemplo mostrada acima, pelo menos por hora:
+
+    [4][8]*int
+
 [bad-pointers]: https://www.quora.com/C-programming-language/Why-doesnt-C-use-better-notation-for-pointers
 [c-del]: https://eigenstate.org/notes/c-decl
 [spiral]: http://c-faq.com/decl/spiral.anderson.html
