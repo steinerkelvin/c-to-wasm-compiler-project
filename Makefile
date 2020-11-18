@@ -5,10 +5,12 @@ parser_files = src/generated_parser.cpp src/generated_parser.hpp src/generated_p
 scanner_files = src/scanner.cpp
 generated_files = $(parser_files) $(scanner_files)
 generated_headers = src/generated_parser.hpp
+generated_srcs = src/scanner.cpp src/generated_parser.cpp
+generated_objs = $(patsubst src/%.cpp,build/%.o,$(generated_srcs))
 
 # Arquivos de bibliotecas
 src_lib=$(wildcard src/*.cpp)
-objs=$(patsubst src/%.cpp,build/%.o,$(src_lib))
+objs=$(sort $(patsubst src/%.cpp,build/%.o,$(src_lib)) $(generated_objs) )
 
 # Arquivos de executáveis
 src_main=$(wildcard main/*.cpp)
@@ -42,7 +44,7 @@ clean:
 	rm -f -r ./.deps
 	rm -f -r ./bin
 	rm -f -r ./build
-	cd src/; rm -f *.output $(parser_files) $(scanner_files)
+	rm -f $(generated_files)
 
 show-versions:
 	make --version ; echo
