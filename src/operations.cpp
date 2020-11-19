@@ -296,6 +296,7 @@ Expr* unify_additive(
             auto new1 = c1(node1);
             auto new2 = c2(node2);
             auto new_node = constr(new1, new2);
+            new_node->set_type(result_type);
             return new_node;
         }
     }

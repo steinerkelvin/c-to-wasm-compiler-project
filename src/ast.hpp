@@ -289,7 +289,7 @@ struct BinOp : MultiChildrenBase<Expr> {
         this->merge_pos_from(right);
     }
     static Expr* builder(Expr* left, Expr* right) {
-        return new typename T::BinOp(left, right); // TODO
+        return new T(left, right); // TODO
     };
 };
 
