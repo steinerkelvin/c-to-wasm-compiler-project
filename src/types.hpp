@@ -183,60 +183,6 @@ struct Function : ContainerType {
     }
 };
 
-//
-// Estruturas para representar especificadores e qualificadores em declarações
-//
-// TODO mover para delclarations.hpp ?
-//
-
-struct TypeQualifier : pos::HasPosition {
-    const enum TypeQualifierKind {
-        CONST,
-        RESTRICT,
-        VOLATILE,
-    } kind;
-    TypeQualifier(TypeQualifierKind kind) : kind(kind) {};
-};
-
-struct TypeSpec : pos::HasPosition {
-    virtual ~TypeSpec() = default;
-};
-struct SimpleTypeSpec : TypeSpec {
-    const enum Kind {
-        VOID,
-        CHAR,
-        SHORT,
-        INT,
-        LONG,
-        SIGNED,
-        UNSIGNED,
-        FLOAT,
-        DOUBLE,
-    } kind;
-    SimpleTypeSpec(const Kind kind) : kind(kind) {}
-};
-
-struct StructOrUnionSpec : TypeSpec {
-    StructOrUnionSpec(const bool is_un) : is_union_flag(is_un){};
-    bool is_union() const { return this->is_union_flag; }
-
-  protected:
-    const bool is_union_flag;
-};
-struct EnumSpec : TypeSpec {};
-struct TypedefName : TypeSpec {
-    TypedefName(size_t ref) : ref(ref){};
-
-  protected:
-    const size_t ref;
-};
-
-using TypeQualOrTypeSpecPointer = std::variant<TypeQualifier*, TypeSpec*>;
-
-struct TypeQualOrTypeSpecList : std::vector<TypeQualOrTypeSpecPointer> {
-    void add(TypeQualOrTypeSpecPointer item) { this->push_back(item); }
-};
-
 }; // namespace types
 
 std::ostream& operator<<(std::ostream& stream, const types::Type& type);

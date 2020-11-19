@@ -37,13 +37,13 @@ void yyerror(char const *s);
 %type <ast::Program*> program
 %type <ast::Declaration*> program-part function-definition declaration
 
-%type <types::TypeQualifier*> type-qualifier
-%type <types::TypeSpec*> type-specifier
-%type <types::TypeQualOrTypeSpecList*> specifier-qualifier-list
+%type <decl::TypeQualifier*> type-qualifier
+%type <decl::TypeSpecifier*> type-specifier
+%type <decl::TypeQualOrTypeSpecList*> specifier-qualifier-list
 %type <size_t> typedef-name
 %type <bool> struct-or-union
-%type <types::StructOrUnionSpec*> struct-or-union-spec
-%type <types::EnumSpec*> enum-spec
+%type <decl::StructOrUnionSpec*> struct-or-union-spec
+%type <decl::EnumSpec*> enum-spec
 
 %type <decl::DeclarationSpecs*> declaration-specifiers
 %type <decl::DeclarationSpec*> declaration-specifier
@@ -172,26 +172,26 @@ storage-class-specifier
     ;
 
 type-specifier
-    : VOID      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::VOID);    $$->set_pos(@$); }
-    | CHAR      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::CHAR);    $$->set_pos(@$); }
-    | SHORT     { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::SHORT);   $$->set_pos(@$); }
-    | INT       { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::INT);     $$->set_pos(@$); }
-    | LONG      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::LONG);    $$->set_pos(@$); }
-    | FLOAT     { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::FLOAT);   $$->set_pos(@$); }
-    | DOUBLE    { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::DOUBLE);  $$->set_pos(@$); }
-    | SIGNED    { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::SIGNED);  $$->set_pos(@$); }
-    | UNSIGNED  { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::UNSIGNED);$$->set_pos(@$); }
+    : VOID      { $$ = new decl::SimpleTypeSpec(decl::SimpleTypeSpec::VOID);    $$->set_pos(@$); }
+    | CHAR      { $$ = new decl::SimpleTypeSpec(decl::SimpleTypeSpec::CHAR);    $$->set_pos(@$); }
+    | SHORT     { $$ = new decl::SimpleTypeSpec(decl::SimpleTypeSpec::SHORT);   $$->set_pos(@$); }
+    | INT       { $$ = new decl::SimpleTypeSpec(decl::SimpleTypeSpec::INT);     $$->set_pos(@$); }
+    | LONG      { $$ = new decl::SimpleTypeSpec(decl::SimpleTypeSpec::LONG);    $$->set_pos(@$); }
+    | FLOAT     { $$ = new decl::SimpleTypeSpec(decl::SimpleTypeSpec::FLOAT);   $$->set_pos(@$); }
+    | DOUBLE    { $$ = new decl::SimpleTypeSpec(decl::SimpleTypeSpec::DOUBLE);  $$->set_pos(@$); }
+    | SIGNED    { $$ = new decl::SimpleTypeSpec(decl::SimpleTypeSpec::SIGNED);  $$->set_pos(@$); }
+    | UNSIGNED  { $$ = new decl::SimpleTypeSpec(decl::SimpleTypeSpec::UNSIGNED);$$->set_pos(@$); }
     | struct-or-union-spec  { $$ = $1; }
     | enum-spec             { $$ = $1; }
-    | typedef-name          { $$ = new types::TypedefName($1); $$->set_pos(@$); }
+    | typedef-name          { $$ = new decl::TypedefName($1); $$->set_pos(@$); }
     ;
 
 typedef-name : TYPENAME ;
 
 struct-or-union-spec
-    : struct-or-union ID                                    { $$ = new types::StructOrUnionSpec($1); }
-    | struct-or-union ID LCB struct-declaration-list RCB    { $$ = new types::StructOrUnionSpec($1); }
-    | struct-or-union    LCB struct-declaration-list RCB    { $$ = new types::StructOrUnionSpec($1); }
+    : struct-or-union ID                                    { $$ = new decl::StructOrUnionSpec($1); }
+    | struct-or-union ID LCB struct-declaration-list RCB    { $$ = new decl::StructOrUnionSpec($1); }
+    | struct-or-union    LCB struct-declaration-list RCB    { $$ = new decl::StructOrUnionSpec($1); }
     ;
 
 struct-or-union
@@ -211,8 +211,8 @@ struct-declaration
     ;
 
 specifier-qualifier-list
-    : type-specifier    { $$ = new types::TypeQualOrTypeSpecList(); $$->add($1); }
-    | type-qualifier    { $$ = new types::TypeQualOrTypeSpecList(); $$->add($1); }
+    : type-specifier    { $$ = new decl::TypeQualOrTypeSpecList(); $$->add($1); }
+    | type-qualifier    { $$ = new decl::TypeQualOrTypeSpecList(); $$->add($1); }
     | specifier-qualifier-list type-specifier       { $$ = $1; $$->add($2); }
     | specifier-qualifier-list type-qualifier       { $$ = $1; $$->add($2); }
     ;
@@ -228,9 +228,9 @@ struct-declarator
     ;
 
 enum-spec
-    : ENUM ID                                           { $$ = new types::EnumSpec(); }
-    | ENUM ID LCB enumerator-list trailing-comma RCB    { $$ = new types::EnumSpec(); }
-    | ENUM    LCB enumerator-list trailing-comma RCB    { $$ = new types::EnumSpec(); }
+    : ENUM ID                                           { $$ = new decl::EnumSpec(); }
+    | ENUM ID LCB enumerator-list trailing-comma RCB    { $$ = new decl::EnumSpec(); }
+    | ENUM    LCB enumerator-list trailing-comma RCB    { $$ = new decl::EnumSpec(); }
     ;
 
 trailing-comma : COMMA | %empty ;
@@ -245,9 +245,9 @@ enumerator
     ;
 
 type-qualifier
-    : CONST     { $$ = new types::TypeQualifier(types::TypeQualifier::CONST);    }
-    | RESTRICT  { $$ = new types::TypeQualifier(types::TypeQualifier::RESTRICT); }
-    | VOLATILE  { $$ = new types::TypeQualifier(types::TypeQualifier::VOLATILE); }
+    : CONST     { $$ = new decl::TypeQualifier(decl::TypeQualifier::CONST);    }
+    | RESTRICT  { $$ = new decl::TypeQualifier(decl::TypeQualifier::RESTRICT); }
+    | VOLATILE  { $$ = new decl::TypeQualifier(decl::TypeQualifier::VOLATILE); }
     // | "_Atomic"
     ;
 

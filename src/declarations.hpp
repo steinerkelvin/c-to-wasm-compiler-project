@@ -16,9 +16,61 @@
 namespace decl {
 using types::ContainerType;
 
+//
+// Structures to represent type specifiers and qualifiers
+//
+
 struct DeclarationSpec : pos::HasPosition {
-    /** Força a classe a ser polimórfica */
+    /* Forces the class to be polymorphic */
     virtual ~DeclarationSpec() = default;
+};
+
+struct TypeQualifier : pos::HasPosition {
+    const enum TypeQualifierKind {
+        CONST,
+        RESTRICT,
+        VOLATILE,
+    } kind;
+    TypeQualifier(TypeQualifierKind kind) : kind(kind) {};
+};
+
+struct TypeSpecifier : pos::HasPosition {
+    virtual ~TypeSpecifier() = default;
+};
+struct SimpleTypeSpec : TypeSpecifier {
+    const enum Kind {
+        VOID,
+        CHAR,
+        SHORT,
+        INT,
+        LONG,
+        SIGNED,
+        UNSIGNED,
+        FLOAT,
+        DOUBLE,
+    } kind;
+    SimpleTypeSpec(const Kind kind) : kind(kind) {}
+};
+
+struct StructOrUnionSpec : TypeSpecifier {
+    StructOrUnionSpec(const bool is_un) : is_union_flag(is_un){};
+    bool is_union() const { return this->is_union_flag; }
+
+  protected:
+    const bool is_union_flag;
+};
+struct EnumSpec : TypeSpecifier {};
+struct TypedefName : TypeSpecifier {
+    TypedefName(size_t ref) : ref(ref){};
+
+  protected:
+    const size_t ref;
+};
+
+using TypeQualOrTypeSpecPointer = std::variant<TypeQualifier*, TypeSpecifier*>;
+
+struct TypeQualOrTypeSpecList : std::vector<TypeQualOrTypeSpecPointer> {
+    void add(TypeQualOrTypeSpecPointer item) { this->push_back(item); }
 };
 
 struct StorageClassSpec : DeclarationSpec {
@@ -33,13 +85,12 @@ struct StorageClassSpec : DeclarationSpec {
     StorageClassSpec(const Kind kind) : kind(kind) {}
 };
 
-using types::TypeQualOrTypeSpecPointer;
 struct TypeDeclSpec : DeclarationSpec {
     TypeDeclSpec(const TypeQualOrTypeSpecPointer value) { this->value = value; }
     TypeQualOrTypeSpecPointer get() const { return this->value; }
 
   protected:
-    types::TypeQualOrTypeSpecPointer value;
+    TypeQualOrTypeSpecPointer value;
 };
 
 struct DeclarationSpecs : std::vector<DeclarationSpec*>, pos::HasPosition {

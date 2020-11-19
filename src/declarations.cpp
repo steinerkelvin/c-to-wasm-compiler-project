@@ -17,11 +17,11 @@ void error_simple_type_spec(const char* const kind_name)
 
 void handle_simple_type_spec(
     std::optional<types::PrimType>& result_type,
-    const types::SimpleTypeSpec* spec)
+    const decl::SimpleTypeSpec* spec)
 {
+    using decl::SimpleTypeSpec;
     using types::PrimKind;
     using types::PrimType;
-    using types::SimpleTypeSpec;
     assert(spec);
 
     switch (spec->kind) {
@@ -66,23 +66,23 @@ void handle_simple_type_spec(
     }
 }
 
-types::PrimType make_type(const types::TypeQualOrTypeSpecList& pspecs)
+types::PrimType make_type(const decl::TypeQualOrTypeSpecList& pspecs)
 {
+    using decl::SimpleTypeSpec;
+    using decl::TypeSpecifier;
     using types::PrimType;
-    using types::SimpleTypeSpec;
-    using types::TypeSpec;
 
     std::optional<PrimType> result_type;
 
     for (const auto& pspec : pspecs) {
-        if (const auto it = std::get_if<TypeSpec*>(&pspec)) {
-            const TypeSpec* ptpspec = *it;
+        if (const auto it = std::get_if<TypeSpecifier*>(&pspec)) {
+            const TypeSpecifier* ptpspec = *it;
             assert(ptpspec);
             // Trata especificador simples de tipo
             const auto simptpspec =
                 dynamic_cast<const SimpleTypeSpec*>(ptpspec);
             if (simptpspec) {
-                // TODO usar um membro virtual em TypeSpec
+                // TODO usar um membro virtual em TypeSpecifier
                 handle_simple_type_spec(result_type, simptpspec);
             }
         }
@@ -111,9 +111,9 @@ types::ContainerType::Builder
 decl::function_type_builder(decl::AbstractParameterDecls* param_decls)
 {
     using ast::IntegerValue;
+    using decl::TypeQualOrTypeSpecList;
+    using decl::TypeQualOrTypeSpecPointer;
     using types::Type;
-    using types::TypeQualOrTypeSpecList;
-    using types::TypeQualOrTypeSpecPointer;
 
     std::vector<std::pair<std::optional<std::string>, Type*>> parameters;
 
@@ -192,8 +192,8 @@ decl::function_type_builder(decl::AbstractParameterDecls* param_decls)
 
 void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 {
-    using types::TypeQualOrTypeSpecList;
-    using types::TypeQualOrTypeSpecPointer;
+    using decl::TypeQualOrTypeSpecList;
+    using decl::TypeQualOrTypeSpecPointer;
     TypeQualOrTypeSpecList typedecl_specs;
 
     bool is_typedef = false;
@@ -256,8 +256,8 @@ decl::declare_function(const DeclarationSpecs* specs, Declarator* declarator)
     assert(specs);
     assert(declarator);
 
-    using types::TypeQualOrTypeSpecList;
-    using types::TypeQualOrTypeSpecPointer;
+    using decl::TypeQualOrTypeSpecList;
+    using decl::TypeQualOrTypeSpecPointer;
     TypeQualOrTypeSpecList typedecl_specs;
 
     for (const auto& pspec : *specs) {
