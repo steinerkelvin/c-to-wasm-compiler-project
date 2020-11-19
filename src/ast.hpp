@@ -133,7 +133,9 @@ struct TypedNode : Node {
     types::Type* type = new types::PrimType{types::PrimKind::VOID};
 };
 
-struct Expr : TypedNode {};
+struct Expr : TypedNode {
+    static Expr* retsame(Expr* child) { return child; };
+};
 
 struct Exprs : MultiChildrenBase<Expr, Node> {
     LABEL("");
@@ -268,17 +270,20 @@ struct V2P : Coersion {
 };
 
 // Unary operator
+template <typename T>
 struct UnOp : SingleChildBase<Expr> {
     UnOp(Expr* child) : SingleChildBase<Expr>(child)
     {
-        // TODO
         this->type = child->get_type();
         this->merge_pos_from(child);
     }
+    static Expr* builder(Expr* child) { return new T(child); };
 };
 
+using UnBuilder = Expr* (*)(Expr* child);
+
 // Binary operator
-template<typename T>
+template <typename T>
 struct BinOp : MultiChildrenBase<Expr> {
     BinOp(Expr* left, Expr* right)
     {
@@ -288,38 +293,39 @@ struct BinOp : MultiChildrenBase<Expr> {
         this->merge_pos_from(left);
         this->merge_pos_from(right);
     }
-    static Expr* builder(Expr* left, Expr* right) {
-        return new T(left, right); // TODO
+    static Expr* builder(Expr* left, Expr* right)
+    {
+        return new T(left, right);
     };
 };
 
-using BinConstructor = Expr* (*)(Expr* left, Expr* right);
+using BinBuilder = Expr* (*)(Expr* left, Expr* right);
 
-struct Not : UnOp {
+struct Not : UnOp<Not> {
     LABEL("!");
     using UnOp::UnOp;
 };
-struct BitNot : UnOp {
+struct BitNot : UnOp<BitNot> {
     LABEL("~");
     using UnOp::UnOp;
 };
-struct InvertSignal : UnOp {
+struct InvertSignal : UnOp<InvertSignal> {
     LABEL("-");
     using UnOp::UnOp;
 };
-struct PosfixPlusPlus : UnOp {
+struct PosfixPlusPlus : UnOp<PosfixPlusPlus> {
     LABEL("++");
     using UnOp::UnOp;
 };
-struct PosfixMinusMinus : UnOp {
+struct PosfixMinusMinus : UnOp<PosfixMinusMinus> {
     LABEL("--");
     using UnOp::UnOp;
 };
-struct PrefixPlusPlus : UnOp {
+struct PrefixPlusPlus : UnOp<PrefixPlusPlus> {
     LABEL("p++");
     using UnOp::UnOp;
 };
-struct PrefixMinusMinus : UnOp {
+struct PrefixMinusMinus : UnOp<PrefixMinusMinus> {
     LABEL("p--");
     using UnOp::UnOp;
 };
@@ -340,17 +346,21 @@ struct Over : BinOp<Over> {
     LABEL("/");
     using BinOp::BinOp;
 };
+struct Mod : BinOp<Times> {
+    LABEL("%");
+    using BinOp::BinOp;
+};
 
 struct Assign : BinOp<Assign> {
     LABEL("=");
     using BinOp::BinOp;
 };
 
-struct AddressOf : UnOp {
+struct AddressOf : UnOp<AddressOf> {
     LABEL("&x");
     using UnOp::UnOp;
 };
-struct Derreference : UnOp {
+struct Derreference : UnOp<Derreference> {
     LABEL("*x");
     using UnOp::UnOp;
 };

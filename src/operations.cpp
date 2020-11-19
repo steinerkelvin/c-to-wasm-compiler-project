@@ -10,18 +10,36 @@ using types::Type;
 
 static void type_error(const char* op, const Type* t1, const Type* t2)
 {
-    std::cerr << "SEMANTIC ERROR (0): ";
+    assert(t1);
+    assert(t2);
+    std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
     std::cerr << "incompatible types for operator \'" << op << "\', ";
     std::cerr << "LHS is \'" << (*t1) << "\' and RHS is \'" << (*t2) << "\'."
               << std::endl;
     exit(EXIT_FAILURE);
 }
 
-static void type_error_unary(const char* op, const Type* t1)
+static void type_error_unary(const char* op, const Type* type)
+{
+    std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+    std::cerr << "incompatible type for operator \'" << op << "\', ";
+    std::cerr << "operand has type \'" << (*type) << "\'." << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+static void type_error_assign(const Type* target, const Type* source)
 {
     std::cerr << "SEMANTIC ERROR (0): ";
-    std::cerr << "incompatible type for operator \'" << op << "\', ";
-    std::cerr << "operand is \'" << (*t1) << "\'." << std::endl;
+    std::cerr << "type \'" << (*source) << "\' cannot be assigned to type \'"
+              << (*target) << "\'." << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+static void type_error_bool(const Type* type)
+{
+    std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+    std::cerr << "condition expression cannot be resolved to integer."
+              << std::endl;
     exit(EXIT_FAILURE);
 }
 
@@ -29,27 +47,6 @@ static void type_error_unary(const char* op, const Type* t1)
 // Olf stuff
 // TODO complete refactor
 //
-
-static const PrimKind arith[4][4] = {
-    /* void	*/ {VOID, VOID, VOID, VOID},
-    /* char	*/ {VOID, INTEGER, INTEGER, VOID},
-    /* int 	*/ {VOID, INTEGER, INTEGER, REAL},
-    /* real	*/ {VOID, VOID, REAL, REAL}};
-
-Type* unify_arith(const Type* l, const Type* r, const char* op)
-{
-    const PrimType* pl = dynamic_cast<const PrimType*>(l);
-    const PrimType* pr = dynamic_cast<const PrimType*>(r);
-    if (!pl || !pr) {
-        type_error(op, l, r);
-    }
-    PrimKind kl = pl->kind;
-    PrimKind kr = pr->kind;
-    PrimKind result = arith[kl][kr];
-    if (result == PrimKind::VOID)
-        type_error(op, l, r);
-    return new PrimType(result);
-}
 
 static const PrimKind comp[4][4] = {
     /* void */ {VOID, VOID, VOID, VOID},
@@ -93,37 +90,6 @@ Type* unify_bitwise(const Type* l, const Type* r, const char* op)
     return new PrimType(result);
 }
 
-static const PrimKind unary[4] = {VOID, INTEGER, INTEGER, INTEGER};
-
-Type* unary_verify(const Type* u, const char* op)
-{
-    const PrimType* prim = dynamic_cast<const PrimType*>(u);
-    if (!prim) {
-        type_error_unary(op, u);
-    }
-    PrimKind k = prim->kind;
-    PrimKind result = unary[k];
-    if (result == PrimKind::VOID) {
-        type_error_unary(op, u);
-    }
-    return new PrimType(result);
-}
-
-static const PrimKind btnot[4] = {VOID, INTEGER, INTEGER, VOID};
-
-Type* btnot_verify(const Type* u, const char* op)
-{
-    const PrimType* prim = dynamic_cast<const PrimType*>(u);
-    if (!prim) {
-        type_error_unary(op, u);
-    }
-    PrimKind k = prim->kind;
-    PrimKind result = btnot[k];
-    if (result == PrimKind::VOID)
-        type_error_unary(op, u);
-    return new PrimType(result);
-}
-
 namespace prim_matrix {
 
     using ast::bdC2I;
@@ -159,9 +125,9 @@ namespace prim_matrix {
     const PrimKind arith_result[4][4] = {
         /*          void    char             int              real           */
         /* void	*/ {VOID,   VOID           , VOID           , VOID            },
-        /* char	*/ {VOID,   INTEGER        , INTEGER        , VOID            },
+        /* char	*/ {VOID,   INTEGER        , INTEGER        , REAL            },
         /* int 	*/ {VOID,   INTEGER        , INTEGER        , REAL            },
-        /* real	*/ {VOID,   VOID           , REAL           , REAL            }
+        /* real	*/ {VOID,   REAL           , REAL           , REAL            }
     };
     const CoersionPairMatrix arith_coersion = {
         /*          void    char             int              real           */
@@ -178,12 +144,32 @@ namespace prim_matrix {
 using prim_matrix::CoersionBuilderPair;
 using prim_matrix::ResultAndCoersionMatrixes;
 
-static void assignment_type_error(const Type* target, const Type* source)
+Expr* make_unary(Expr* node, ast::UnBuilder builder, const char* op)
 {
-    std::cerr << "SEMANTIC ERROR (0): ";
-    std::cerr << "type \'" << (*source) << "\' cannot be assigned to type \'"
-              << (*target) << "\'." << std::endl;
-    exit(EXIT_FAILURE);
+    assert(node);
+    auto type = node->get_type();
+    if (auto type_prim = dynamic_cast<PrimType*>(type)) {
+        auto kind = type_prim->get_kind();
+        if (!(kind == PrimKind::VOID)) {
+            return builder(node);
+        }
+    }
+    type_error_unary(op, type);
+    abort();
+}
+
+Expr* make_btnot(Expr* node, ast::UnBuilder builder, const char* op)
+{
+    assert(node);
+    auto type = node->get_type();
+    if (auto type_prim = dynamic_cast<PrimType*>(type)) {
+        auto kind = type_prim->get_kind();
+        if (kind == PrimKind::CHAR || kind == PrimKind::INTEGER) {
+            return builder(node);
+        }
+    }
+    type_error_unary(op, type);
+    abort();
 }
 
 static Expr* check_prim_assignment(PrimType* target_type, Expr* source_node)
@@ -194,13 +180,13 @@ static Expr* check_prim_assignment(PrimType* target_type, Expr* source_node)
     auto k2 = source_type->kind;
     auto func = prim_matrix::assignment[k1][k2];
     if (!func) {
-        assignment_type_error(target_type, source_type);
+        type_error_assign(target_type, source_type);
     }
     Expr* new_node = (*func)(source_node);
     return new_node;
 }
 
-Expr* check_assignment(Type* target_type, Expr* source_node)
+Expr* check_assign(Type* target_type, Expr* source_node)
 {
     assert(target_type);
     assert(source_node);
@@ -223,7 +209,7 @@ Expr* check_assignment(Type* target_type, Expr* source_node)
         if (auto src_pt_opt = source_type->to_pointer_implicit()) {
             auto src_pt = *src_pt_opt;
             if (!tg_pt->is_compatible_with(src_pt)) {
-                assignment_type_error(target_type, source_type);
+                type_error_assign(target_type, source_type);
             }
             // If source type is pointer already
             if (dynamic_cast<Pointer*>(source_type)) {
@@ -241,15 +227,15 @@ Expr* check_assignment(Type* target_type, Expr* source_node)
             }
         }
     }
-    assignment_type_error(target_type, source_type);
+    type_error_assign(target_type, source_type);
     exit(EXIT_FAILURE);
 }
 
-Expr* unify_assignment(Expr* target, Expr* value)
+Expr* unify_assign(Expr* target, Expr* value)
 {
     assert(target);
     auto target_type = target->get_type();
-    auto new_value = check_assignment(target_type, value);
+    auto new_value = check_assign(target_type, value);
     auto result = new ast::Assign(target, new_value);
     result->set_type(target_type);
     return result;
@@ -277,7 +263,7 @@ std::pair<Type*, CoersionBuilderPair> unify_bin_prim(
 }
 
 Expr* unify_additive(
-    Expr* node1, Expr* node2, ast::BinConstructor constr, const char* op)
+    Expr* node1, Expr* node2, ast::BinBuilder builder, const char* op)
 {
     assert(node1);
     assert(node2);
@@ -295,20 +281,39 @@ Expr* unify_additive(
             auto [c1, c2] = coersion;
             auto new1 = c1(node1);
             auto new2 = c2(node2);
-            auto new_node = constr(new1, new2);
+            auto new_node = builder(new1, new2);
             new_node->set_type(result_type);
             return new_node;
         }
     }
     type_error(op, type1, type2);
+    abort();
 }
 
-static void type_error_bool(const Type* type)
+Expr* unify_multi(
+    Expr* node1, Expr* node2, ast::BinBuilder builder, const char* op)
 {
-    std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
-    std::cerr << "condition expression cannot be resolved to integer."
-              << std::endl;
-    exit(EXIT_FAILURE);
+    assert(node1);
+    assert(node2);
+    auto type1 = node1->get_type();
+    auto type2 = node2->get_type();
+
+    if (auto type1_prim = dynamic_cast<PrimType*>(type1)) {
+        if (auto type2_prim = dynamic_cast<PrimType*>(type2)) {
+            // Handle primitive type operands with matrix for arithmetic
+            // on primitive types
+            auto [result_type, coersion] =
+                unify_bin_prim(prim_matrix::arith, type1_prim, type2_prim, op);
+            auto [c1, c2] = coersion;
+            auto new1 = c1(node1);
+            auto new2 = c2(node2);
+            auto new_node = builder(new1, new2);
+            new_node->set_type(result_type);
+            return new_node;
+        }
+    }
+    type_error(op, type1, type2);
+    abort();
 }
 
 Expr* check_bool(Expr* node)
@@ -329,6 +334,7 @@ Expr* check_bool(Expr* node)
         }
     }
     type_error_bool(type);
+    abort();
 }
 
 Expr* address_of(Expr* value)
@@ -350,7 +356,7 @@ Expr* derreference(Expr* value)
     // TODO refactor into types
     types::Pointer* type_pointer = dynamic_cast<types::Pointer*>(type);
     if (!type_pointer) {
-        std::cerr << "SEMANTIC ERROR (0): ";
+        std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
         std::cerr << "derreferenced value must be of pointer type, ";
         std::cerr << "got \'" << *type << "\' instead." << std::endl;
         exit(1);
@@ -383,7 +389,7 @@ Expr* index_access(Expr* value, Expr* index)
     const Vector* value_type_vector = dynamic_cast<const Vector*>(value_type);
     // TODO pointer
     if (!value_type_vector) {
-        std::cerr << "SEMANTIC ERROR (0): ";
+        std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
         std::cerr << "accessed value must be of array type, ";
         std::cerr << "got \'" << *value_type << "\' instead." << std::endl;
         exit(1);
@@ -433,7 +439,7 @@ Expr* function_call(Expr* value, ast::Exprs* args_node)
     for (size_t i = 0; i < type_parameters.size(); ++i) {
         auto tpparam = type_parameters[i];
         auto [n1, t1] = tpparam;
-        args[i] = check_assignment(t1, args[i]);
+        args[i] = check_assign(t1, args[i]);
     }
 
     Type* base_type = value_type_func->get_base();

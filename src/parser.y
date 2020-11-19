@@ -513,7 +513,7 @@ comma-expression
 
 assignment-expression
     : conditional-expression
-    | unary-expression ASSIGN  assignment-expression  { $$ = ops::unify_assignment($1, $3); }
+    | unary-expression ASSIGN  assignment-expression  { $$ = ops::unify_assign($1, $3); }
     // // TODO ?
     // | unary-expression STARASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"*="); $$ = $3; }
     // | unary-expression OVERASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"/="); $$ = $3; }
@@ -587,9 +587,9 @@ additive-expression
 
 multiplicative-expression
     : cast-expression
-    | multiplicative-expression STAR cast-expression    { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "*"); $$ = new ast::Times($1, $3); $$->set_type(res_type);$$->set_pos(@$); }
-    | multiplicative-expression OVER cast-expression    { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "/"); $$ = new ast::Over($1, $3);  $$->set_type(res_type);$$->set_pos(@$); }
-    | multiplicative-expression PERC cast-expression    { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "%"); /* TODO */                                           }
+    | multiplicative-expression STAR cast-expression    { $$ = ops::unify_multi($1, $3, ast::Times::builder, "*"); }
+    | multiplicative-expression OVER cast-expression    { $$ = ops::unify_multi($1, $3, ast::Over ::builder, "/"); }
+    | multiplicative-expression PERC cast-expression    { $$ = ops::unify_multi($1, $3, ast::Mod  ::builder, "%"); }
     ;
 
 cast-expression
@@ -599,14 +599,14 @@ cast-expression
 
 unary-expression
     : postfix-expression
-    | PLUSPLUS   unary-expression   { ops::unary_verify($2->get_type(),"++"); $$ = new ast::PrefixPlusPlus($2);   $$->set_pos(@$); }
-    | MINUSMINUS unary-expression   { ops::unary_verify($2->get_type(),"--"); $$ = new ast::PrefixMinusMinus($2); $$->set_pos(@$); }
-    | AMPER cast-expression         { $$ = ops::address_of($2); }
+    | PLUSPLUS   unary-expression   { $$ = ops::make_unary($2, ast::PrefixPlusPlus  ::builder, "++"); }
+    | MINUSMINUS unary-expression   { $$ = ops::make_unary($2, ast::PrefixMinusMinus::builder, "--"); }
+    | AMPER cast-expression         { $$ = ops::address_of($2);   }
     | STAR  cast-expression         { $$ = ops::derreference($2); }
-    | PLUS  cast-expression         { ops::unary_verify($2->get_type(),"+");  $$ = $2; }
-    | MINUS cast-expression         { ops::unary_verify($2->get_type(),"-");  $$ = new ast::InvertSignal($2);     $$->set_pos(@$); }
-    | BTNOT cast-expression         { ops::btnot_verify($2->get_type(),"~");  $$ = new ast::BitNot($2);           $$->set_pos(@$); }
-    | NOT   cast-expression         { ops::unary_verify($2->get_type(),"!");  $$ = new ast::Not($2);              $$->set_pos(@$); }
+    | PLUS  cast-expression         { $$ = ops::make_unary($2, ast::Expr            ::retsame, "+" ); }
+    | MINUS cast-expression         { $$ = ops::make_unary($2, ast::InvertSignal    ::builder, "-" ); }
+    | BTNOT cast-expression         { $$ = ops::make_btnot($2, ast::BitNot          ::builder, "~" ); }
+    | NOT   cast-expression         { $$ = ops::make_unary($2, ast::Not             ::builder, "!" ); }
     | SIZEOF unary-expression       { abort(); }
     | SIZEOF LPAR type-name RPAR    { abort(); }
     // | _Alignof LPAR type-name RPAR
@@ -618,8 +618,8 @@ postfix-expression
     | postfix-expression[value] LPAR argument-expression-list-opt[args] RPAR    { $$ = ops::function_call($value, $args); }
     | postfix-expression DOT   ID
     | postfix-expression ARROW ID
-    | postfix-expression PLUSPLUS       { ops::unary_verify($1->get_type(),"++"); $$ = new ast::PrefixPlusPlus($1);   $$->set_pos(@$); }
-    | postfix-expression MINUSMINUS     { ops::unary_verify($1->get_type(),"--"); $$ = new ast::PrefixMinusMinus($1); $$->set_pos(@$); }
+    | postfix-expression PLUSPLUS       { $$ = ops::make_unary($1, ast::PrefixPlusPlus  ::builder, "++"); }
+    | postfix-expression MINUSMINUS     { $$ = ops::make_unary($1, ast::PrefixMinusMinus::builder, "--"); }
     // | ( type-name ) { initializer-list }
     // | ( type-name ) { initializer-list , }
     ;

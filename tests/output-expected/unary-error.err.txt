@@ -1,0 +1,1 @@
+SEMANTIC ERROR (0): incompatible type for operator '~', operand has type 'real'.

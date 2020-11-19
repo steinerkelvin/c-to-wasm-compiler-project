@@ -15,17 +15,19 @@ using ast::Expr;
 using ast::Exprs;
 using types::Type;
 
-Type* unify_arith(const Type* l, const Type* r, const char* op);
 Type* unify_comp(const Type* l, const Type* r, const char* op);
 Type* unify_bitwise(const Type* l, const Type* r, const char* op);
-Type* unary_verify(const Type* u, const char* op);
-Type* btnot_verify(const Type* u, const char* op);
 
-Expr* check_assignment(Type* target_type, Expr* value);
-Expr* unify_assignment(Expr* target, Expr* value);
+Expr* make_unary(Expr* node, ast::UnBuilder builder, const char* op);
+Expr* make_btnot(Expr* node, ast::UnBuilder builder, const char* op);
 
 Expr* unify_additive(
-    Expr* node1, Expr* node2, ast::BinConstructor constr, const char* op);
+    Expr* node1, Expr* node2, ast::BinBuilder builder, const char* op);
+Expr* unify_multi(
+    Expr* node1, Expr* node2, ast::BinBuilder builder, const char* op);
+
+Expr* check_assign(Type* target_type, Expr* value);
+Expr* unify_assign(Expr* target, Expr* value);
 
 Expr* check_bool(Expr *cond_node);
 
