@@ -16,13 +16,6 @@ RETURN : return
 INT_VAL : 1
 SEMI : ;
 RCB : }
-ID : factorial
-LPAR : (
-ID : n
-MINUS : -
-INT_VAL : 1
-RPAR : )
-SEMI : ;
 RETURN : return
 ID : n
 STAR : *

@@ -61,6 +61,8 @@ Expr* derreference(Expr* value, pos::Pos posi);
 Expr* index_access(Expr* value, Expr* index, pos::Pos posi);
 Expr* function_call(Expr* value, ast::Exprs* parameters, pos::Pos posi);
 
+ast::Statement* return_value(Expr* value_node, pos::Pos posi);
+
 }; // namespace ops
 
 #endif /* OPERATIONS_H */

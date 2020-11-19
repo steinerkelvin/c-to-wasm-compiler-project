@@ -528,4 +528,11 @@ Expr* function_call(Expr* value, ast::Exprs* args_node, pos::Pos posi)
     return new_node;
 }
 
+ast::Statement* return_value(Expr* value_node, pos::Pos posi) {
+    assert(value_node);
+    // TODO type check
+    auto new_node = new ast::ReturnValue(value_node);
+    return new_node;
+}
+
 } // namespace ops

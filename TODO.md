@@ -1,2 +1,4 @@
 - Check return value type
 - Allow define already declared function
+- lvalue/rvalue
+- for

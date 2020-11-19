@@ -27,6 +27,18 @@ Hopefully, a C to WebAssemply compiler.
 
     make test
 
+### File structure
+
+    src/ - "library" sources
+    main/ - .cpp files that compile to executables
+    tests/ - test files
+        input/ - inputs
+        ast-dot/ - rendered ASTs
+        tokens/ - dumped tokens fomr input files
+        tokens-expected/ - expected token dumps
+        output/ - stdout and stderr outputs
+        output-expected/ - expected outputs
+
 ### Tested with versions
 
 - Make: `4.3-3` (Arch); `4.1` (Ubuntu Bionic)

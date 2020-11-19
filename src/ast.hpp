@@ -285,6 +285,7 @@ using UnBuilder = Expr* (*)(Expr* child);
 // Binary operator
 template <typename T>
 struct BinOp : MultiChildrenBase<Expr> {
+    // TODO ensure T = derived class (CRTP)
     BinOp(Expr* left, Expr* right)
     {
         assert(left != NULL);
@@ -346,32 +347,32 @@ struct Over : BinOp<Over> {
     LABEL("/");
     using BinOp::BinOp;
 };
-struct Mod : BinOp<Times> {
+struct Mod : BinOp<Mod> {
     LABEL("%");
     using BinOp::BinOp;
 };
 
-struct Less : BinOp<Times> {
+struct Less : BinOp<Less> {
     LABEL("<");
     using BinOp::BinOp;
 };
-struct Greater : BinOp<Times> {
+struct Greater : BinOp<Greater> {
     LABEL(">");
     using BinOp::BinOp;
 };
-struct LessEqual : BinOp<Times> {
+struct LessEqual : BinOp<LessEqual> {
     LABEL("<=");
     using BinOp::BinOp;
 };
-struct GreaterEqual : BinOp<Times> {
+struct GreaterEqual : BinOp<GreaterEqual> {
     LABEL(">=");
     using BinOp::BinOp;
 };
-struct Equal : BinOp<Times> {
+struct Equal : BinOp<Equal> {
     LABEL("==");
     using BinOp::BinOp;
 };
-struct NotEqual : BinOp<Times> {
+struct NotEqual : BinOp<NotEqual> {
     LABEL("==");
     using BinOp::BinOp;
 };
@@ -411,6 +412,20 @@ struct Call : TwoChildrenBase<Expr, Exprs, Expr> {
 
 struct Statement : Node {
     LABEL("Statement");
+};
+
+struct Break : Statement {
+    LABEL("break");
+};
+struct Continue : Statement {
+    LABEL("continue");
+};
+struct Return : Statement {
+    LABEL("return");
+};
+struct ReturnValue : SingleChildBase<Expr, Statement> {
+    LABEL("return");
+    using SingleChildBase::SingleChildBase;
 };
 
 struct IfStmt : Statement {

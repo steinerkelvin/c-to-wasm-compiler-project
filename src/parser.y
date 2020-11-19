@@ -431,13 +431,12 @@ stmt
     ;
 
 empty-stmt
-    : SEMI              { $$ = NULL; }
+    : SEMI              { $$ = NULL; }  // TODO
     ;
 
 // labeled-stmt
 //     : ID COLON stmt { $$ = $3; }
 //     ;
-
 // goto-stmt
 //     : GOTO ID SEMI  { $$ = NULL; }
 //     ;
@@ -455,7 +454,7 @@ block-list-opt
     | block-list-opt block-item     { $$ = $1; $$->add($2); }
     ;
 block-item
-    : declaration                   { $$ = NULL; }
+    : declaration                   { $$ = NULL; }  // TODO
     | stmt
     ;
 
@@ -465,14 +464,15 @@ if-stmt
     ;
 
 return-stmt
-    : RETURN expression-opt SEMI    { $$ = NULL; }
+    : RETURN SEMI               { $$ = new ast::Return(); }
+    | RETURN expression SEMI    { $$ = ops::return_value($2, @$); }
     ;
 
 continue-stmt
-    : CONTINUE SEMI     { $$ = NULL; }
+    : CONTINUE SEMI     { $$ = new ast::Continue(); }
     ;
 break-stmt
-    : BREAK SEMI        { $$ = NULL; }
+    : BREAK SEMI        { $$ = new ast::Break(); }
     ;
 case-stmt
     : CASE constant-expression COLON stmt[body]     { $$ = $body; }
