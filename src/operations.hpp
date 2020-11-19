@@ -21,11 +21,13 @@ Type* unify_bitwise(const Type* l, const Type* r, const char* op);
 Type* unary_verify(const Type* u, const char* op);
 Type* btnot_verify(const Type* u, const char* op);
 
+Expr* check_assignment(Type* target_type, Expr* value);
+Expr* unify_assignment(Expr* target, Expr* value);
+
 Expr* unify_additive(
     Expr* node1, Expr* node2, ast::BinConstructor constr, const char* op);
 
-Expr* check_assignment(Type* target_type, Expr* value);
-Expr* unify_assignment(Expr* target, Expr* value);
+Expr* check_bool(Expr *cond_node);
 
 Expr* address_of(Expr* value);
 Expr* derreference(Expr* value);

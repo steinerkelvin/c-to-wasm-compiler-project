@@ -287,7 +287,7 @@ Expr* unify_additive(
     if (auto left_type_ptopt = type1->to_pointer_implicit()) {
         // TODO pointer arithmetic?
         abort();
-    // Handles primitive type operands
+        // Handles primitive type operands
     } else if (auto type1_prim = dynamic_cast<PrimType*>(type1)) {
         if (auto type2_prim = dynamic_cast<PrimType*>(type2)) {
             auto [result_type, coersion] =
@@ -301,6 +301,34 @@ Expr* unify_additive(
         }
     }
     type_error(op, type1, type2);
+}
+
+static void type_error_bool(const Type* type)
+{
+    std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
+    std::cerr << "condition expression cannot be resolved to integer."
+              << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+Expr* check_bool(Expr* node)
+{
+    assert(node);
+    auto type = node->get_type();
+    if (auto type_prim = dynamic_cast<PrimType*>(type)) {
+        auto kind = type_prim->get_kind();
+        Expr* result_node = node;
+        switch (kind) {
+            case PrimKind::CHAR:
+                result_node = new ast::C2I(node);
+                return result_node;
+            case PrimKind::INTEGER:
+                return result_node;
+            default:
+                type_error_bool(type);
+        }
+    }
+    type_error_bool(type);
 }
 
 Expr* address_of(Expr* value)

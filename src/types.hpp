@@ -52,6 +52,7 @@ struct PrimType : Type {
     PrimKind kind;
     PrimType(const PrimType& type) = default;
     PrimType(PrimKind kind) : kind(kind){};
+    PrimKind get_kind() const { return kind; }
     virtual bool is_compatible_with(const Type* other);
     virtual std::ostream& write_repr(std::ostream& stream) const;
 };

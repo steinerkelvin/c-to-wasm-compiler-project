@@ -412,21 +412,21 @@ function-definition
 //     ;
 
 
-stmt 
+stmt
     : empty-stmt
-    | labeled-stmt
     | compound-stmt     { $$ = $1; }
-    | if-stmt
-    | switch-stmt
-    | case-stmt
-    | default-stmt
+    | labeled-stmt
     | goto-stmt
-    | break-stmt
-    | continue-stmt
     | return-stmt
+    | if-stmt
     | while-stmt
     | do-while-stmt
     | for-stmt
+    | break-stmt
+    | continue-stmt
+    | switch-stmt
+    | case-stmt
+    | default-stmt
     | expr-stmt         { $$ = $1; }
     ;
 
@@ -459,9 +459,9 @@ block-item
     | stmt
     ;
 
-if-stmt 
-    : IF LPAR expression[expr] RPAR stmt[body]      { $$ = new ast::IfStmt($expr, $body); }
-    | IF LPAR expression[expr] RPAR stmt[body] ELSE stmt[block]  { $$ = new ast::IfElseStmt($expr, $body, $block); }    
+if-stmt
+    : IF LPAR expression[expr] RPAR stmt[body]                  { auto cond = ops::check_bool($expr); $$ = new ast::IfStmt    (cond, $body);         }
+    | IF LPAR expression[expr] RPAR stmt[body] ELSE stmt[block] { auto cond = ops::check_bool($expr); $$ = new ast::IfElseStmt(cond, $body, $block); }
     ;
 
 return-stmt
@@ -482,11 +482,11 @@ default-stmt
     ;
 
 while-stmt
-    : WHILE LPAR expression[expr] RPAR stmt[body]         { $$ = new ast::WhileStmt($expr,$body); }
+    : WHILE LPAR expression[expr] RPAR stmt[body]         { auto cond = ops::check_bool($expr); $$ = new ast::WhileStmt(cond, $body); }
     ;
 
 do-while-stmt
-    : DO stmt[body] WHILE LPAR expression[expr] RPAR SEMI   { $$ = new ast::DoWhileStmt($expr,$body); }
+    : DO stmt[body] WHILE LPAR expression[expr] RPAR SEMI   { auto cond = ops::check_bool($expr); $$ = new ast::DoWhileStmt(cond, $body); }
     ;
 
 for-stmt
