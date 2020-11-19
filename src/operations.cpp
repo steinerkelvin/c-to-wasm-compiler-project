@@ -25,6 +25,11 @@ static void type_error_unary(const char* op, const Type* t1)
     exit(EXIT_FAILURE);
 }
 
+//
+// Olf stuff
+// TODO complete refactor
+//
+
 static const PrimKind arith[4][4] = {
     /* void	*/ {VOID, VOID, VOID, VOID},
     /* char	*/ {VOID, INTEGER, INTEGER, VOID},
@@ -119,6 +124,60 @@ Type* btnot_verify(const Type* u, const char* op)
     return new PrimType(result);
 }
 
+namespace prim_matrix {
+
+    using ast::bdC2I;
+    using ast::bdC2R;
+    using ast::bdI2C;
+    using ast::bdI2R;
+    using ast::bdR2C;
+    using ast::bdR2I;
+
+    using ast::CoersionBuilder;
+    using CoersionBuilderPair =
+        std::pair<ast::CoersionBuilder, ast::CoersionBuilder>;
+
+    using ResultMatrix = PrimKind[4][4];
+    using CoersionPairMatrix = const std::optional<CoersionBuilderPair>[4][4];
+    using ResultAndCoersionMatrixes =
+        const std::pair<const ResultMatrix*, const CoersionPairMatrix*>;
+    using p = CoersionBuilderPair;
+
+    const auto& error = std::nullopt;
+    const CoersionBuilder rsame = [](Expr* x) { return x; };
+
+    // clang-format off
+
+    const std::optional<CoersionBuilder> assignment[4][4] = {
+        /*           void   char    int   real */
+        /* void */ {error, error, error, error},
+        /* char */ {error, rsame, bdI2C, bdR2C},
+        /* int  */ {error, bdC2I, rsame, bdR2I},
+        /* real */ {error, bdC2R, bdI2R, rsame}
+    };
+
+    const PrimKind arith_result[4][4] = {
+        /*          void    char             int              real           */
+        /* void	*/ {VOID,   VOID           , VOID           , VOID            },
+        /* char	*/ {VOID,   INTEGER        , INTEGER        , VOID            },
+        /* int 	*/ {VOID,   INTEGER        , INTEGER        , REAL            },
+        /* real	*/ {VOID,   VOID           , REAL           , REAL            }
+    };
+    const CoersionPairMatrix arith_coersion = {
+        /*          void    char             int              real           */
+        /* void	*/ {error,  error          , error          , error           },
+        /* char	*/ {error,  p{rsame, rsame}, p{bdC2I, rsame}, p{bdC2R, rsame} },
+        /* int 	*/ {error,  p{rsame, bdC2I}, p{rsame, rsame}, p{bdI2R, rsame} },
+        /* real	*/ {error,  p{rsame, bdC2R}, p{rsame, bdI2R}, p{rsame, rsame} }
+    };
+    ResultAndCoersionMatrixes arith = {&arith_result, &arith_coersion};
+
+    // clang-format on
+} // namespace prim_matrix
+
+using prim_matrix::CoersionBuilderPair;
+using prim_matrix::ResultAndCoersionMatrixes;
+
 static void assignment_type_error(const Type* target, const Type* source)
 {
     std::cerr << "SEMANTIC ERROR (0): ";
@@ -127,33 +186,13 @@ static void assignment_type_error(const Type* target, const Type* source)
     exit(EXIT_FAILURE);
 }
 
-namespace prim_assigment {
-    using ast::bdC2I;
-    using ast::bdI2C;
-    using ast::bdI2R;
-    using ast::bdR2I;
-    using ast::bdC2R;
-    using ast::bdR2C;
-    using ast::CoersionBuilder;
-
-    const auto& error = std::nullopt;
-    const CoersionBuilder rsame = [](Expr* x) { return x; };
-
-    static std::optional<CoersionBuilder> matrix[4][4] = {
-        /*           void   char    int   real */
-        /* void */ {error, error, error, error},
-        /* char */ {error, rsame, bdI2C, bdR2C},
-        /* int  */ {error, bdC2I, rsame, bdR2I},
-        /* real */ {error, bdC2R, bdI2R, rsame}};
-} // namespace prim_assigment
-
-Expr* check_prim_assignment(PrimType* target_type, Expr* source_node)
+static Expr* check_prim_assignment(PrimType* target_type, Expr* source_node)
 {
     PrimType* source_type = dynamic_cast<PrimType*>(source_node->get_type());
     assert(source_type);
     auto k1 = target_type->kind;
     auto k2 = source_type->kind;
-    auto func = prim_assigment::matrix[k1][k2];
+    auto func = prim_matrix::assignment[k1][k2];
     if (!func) {
         assignment_type_error(target_type, source_type);
     }
@@ -206,13 +245,61 @@ Expr* check_assignment(Type* target_type, Expr* source_node)
     exit(EXIT_FAILURE);
 }
 
-Expr* unify_assignment(Expr* target, Expr* value) {
+Expr* unify_assignment(Expr* target, Expr* value)
+{
     assert(target);
     auto target_type = target->get_type();
     auto new_value = check_assignment(target_type, value);
     auto result = new ast::Assign(target, new_value);
     result->set_type(target_type);
     return result;
+}
+
+std::pair<Type*, CoersionBuilderPair> unify_bin_prim(
+    ResultAndCoersionMatrixes matrixes,
+    PrimType* type1,
+    PrimType* type2,
+    const char* op)
+{
+    assert(type1);
+    assert(type2);
+    auto [result_matrix, coersion_matrix] = matrixes;
+    PrimKind k1 = type1->kind;
+    PrimKind k2 = type2->kind;
+    auto result_kind = (*result_matrix)[k1][k2];
+    if (result_kind == PrimKind::VOID) {
+        type_error(op, type1, type2);
+    }
+    auto result_type = new PrimType(result_kind);
+    auto builder_pair = (*coersion_matrix)[k1][k2];
+    assert(builder_pair);
+    return {result_type, *builder_pair};
+}
+
+Expr* unify_additive(
+    Expr* node1, Expr* node2, ast::BinConstructor constr, const char* op)
+{
+    assert(node1);
+    assert(node2);
+    auto type1 = node1->get_type();
+    auto type2 = node2->get_type();
+
+    if (auto left_type_ptopt = type1->to_pointer_implicit()) {
+        // TODO pointer arithmetic?
+        abort();
+    // Handles primitive type operands
+    } else if (auto type1_prim = dynamic_cast<PrimType*>(type1)) {
+        if (auto type2_prim = dynamic_cast<PrimType*>(type2)) {
+            auto [result_type, coersion] =
+                unify_bin_prim(prim_matrix::arith, type1_prim, type2_prim, op);
+            auto [c1, c2] = coersion;
+            auto new1 = c1(node1);
+            auto new2 = c2(node2);
+            auto new_node = constr(new1, new2);
+            return new_node;
+        }
+    }
+    type_error(op, type1, type2);
 }
 
 Expr* address_of(Expr* value)

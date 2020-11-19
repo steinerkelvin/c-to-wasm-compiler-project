@@ -278,6 +278,7 @@ struct UnOp : SingleChildBase<Expr> {
 };
 
 // Binary operator
+template<typename T>
 struct BinOp : MultiChildrenBase<Expr> {
     BinOp(Expr* left, Expr* right)
     {
@@ -287,7 +288,12 @@ struct BinOp : MultiChildrenBase<Expr> {
         this->merge_pos_from(left);
         this->merge_pos_from(right);
     }
+    static Expr* builder(Expr* left, Expr* right) {
+        return new typename T::BinOp(left, right); // TODO
+    };
 };
+
+using BinConstructor = Expr* (*)(Expr* left, Expr* right);
 
 struct Not : UnOp {
     LABEL("!");
@@ -318,24 +324,24 @@ struct PrefixMinusMinus : UnOp {
     using UnOp::UnOp;
 };
 
-struct Plus : BinOp {
+struct Plus : BinOp<Plus> {
     LABEL("+");
     using BinOp::BinOp;
 };
-struct Minus : BinOp {
+struct Minus : BinOp<Minus> {
     LABEL("-");
     using BinOp::BinOp;
 };
-struct Times : BinOp {
+struct Times : BinOp<Times> {
     LABEL("*");
     using BinOp::BinOp;
 };
-struct Over : BinOp {
+struct Over : BinOp<Over> {
     LABEL("/");
     using BinOp::BinOp;
 };
 
-struct Assign : BinOp {
+struct Assign : BinOp<Assign> {
     LABEL("=");
     using BinOp::BinOp;
 };
@@ -349,7 +355,7 @@ struct Derreference : UnOp {
     using UnOp::UnOp;
 };
 
-struct IndexAccess : BinOp {
+struct IndexAccess : BinOp<IndexAccess> {
     LABEL("v[x]");
     using BinOp::BinOp;
 };

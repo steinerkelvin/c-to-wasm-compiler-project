@@ -581,8 +581,8 @@ shift-expression
 
 additive-expression
     : multiplicative-expression
-    | additive-expression PLUS  multiplicative-expression   { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "+"); $$ = new ast::Plus($1, $3); $$->set_type(res_type);  $$->set_pos(@$); }
-    | additive-expression MINUS multiplicative-expression   { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "-"); $$ = new ast::Minus($1, $3); $$->set_type(res_type); $$->set_pos(@$); }
+    | additive-expression PLUS  multiplicative-expression   { $$ = ops::unify_additive($1, $3, ast::Plus ::builder, "+"); }
+    | additive-expression MINUS multiplicative-expression   { $$ = ops::unify_additive($1, $3, ast::Minus::builder, "-"); }
     ;
 
 multiplicative-expression
