@@ -351,6 +351,31 @@ struct Mod : BinOp<Times> {
     using BinOp::BinOp;
 };
 
+struct Less : BinOp<Times> {
+    LABEL("<");
+    using BinOp::BinOp;
+};
+struct Greater : BinOp<Times> {
+    LABEL(">");
+    using BinOp::BinOp;
+};
+struct LessEqual : BinOp<Times> {
+    LABEL("<=");
+    using BinOp::BinOp;
+};
+struct GreaterEqual : BinOp<Times> {
+    LABEL(">=");
+    using BinOp::BinOp;
+};
+struct Equal : BinOp<Times> {
+    LABEL("==");
+    using BinOp::BinOp;
+};
+struct NotEqual : BinOp<Times> {
+    LABEL("==");
+    using BinOp::BinOp;
+};
+
 struct Assign : BinOp<Assign> {
     LABEL("=");
     using BinOp::BinOp;

@@ -1,0 +1,1 @@
+SEMANTIC ERROR (21:9-17): incompatible types for operator '==', LHS is 'integer' and RHS is '[4]integer'.

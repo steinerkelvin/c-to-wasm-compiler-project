@@ -15,8 +15,8 @@ using ast::Expr;
 using ast::Exprs;
 using types::Type;
 
-Type* unify_comp(const Type* l, const Type* r, const char* op);
-Type* unify_bitwise(const Type* l, const Type* r, const char* op);
+// TODO old
+Type* unify_bitwise_old(const Type* l, const Type* r, const char* op);
 
 Expr* make_unary(
     Expr* node, ast::UnBuilder builder, const char* op, pos::Pos posi);
@@ -30,6 +30,12 @@ Expr* unify_additive(
     const char* op,
     pos::Pos posi);
 Expr* unify_multi(
+    Expr* node1,
+    Expr* node2,
+    ast::BinBuilder builder,
+    const char* op,
+    pos::Pos posi);
+Expr* unify_comp(
     Expr* node1,
     Expr* node2,
     ast::BinBuilder builder,

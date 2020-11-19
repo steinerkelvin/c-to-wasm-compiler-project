@@ -536,47 +536,47 @@ conditional-expression
 
 or-expression
     : and-expression
-    | or-expression OR and-expression       { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "||"); $$->set_pos(@$); }
+    | or-expression OR and-expression      // { res_type = ops::unify_comp_old($1->get_type(), $3->get_type(), "||"); $$->set_pos(@$); }
     ;
 
 and-expression
     : bit-or-expression
-    | and-expression AND bit-or-expression  { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "&&"); $$->set_pos(@$); }
+    | and-expression AND bit-or-expression // { res_type = ops::unify_comp_old($1->get_type(), $3->get_type(), "&&"); $$->set_pos(@$); }
     ;
 
 bit-or-expression
     : bit-xor-expression
-    | bit-or-expression BTOR bit-xor-expression     { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "|"); $$->set_pos(@$); }
+    | bit-or-expression BTOR bit-xor-expression     { res_type = ops::unify_bitwise_old($1->get_type(), $3->get_type(), "|"); $$->set_pos(@$); }
     ;
 
 bit-xor-expression
     : bit-and-expression
-    | bit-xor-expression BTXOR bit-and-expression   { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "^"); $$->set_pos(@$); }
+    | bit-xor-expression BTXOR bit-and-expression   { res_type = ops::unify_bitwise_old($1->get_type(), $3->get_type(), "^"); $$->set_pos(@$); }
     ;
 
 bit-and-expression
     : equality-expression
-    | bit-and-expression AMPER equality-expression      { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "&"); $$->set_pos(@$); }
+    | bit-and-expression AMPER equality-expression      { res_type = ops::unify_bitwise_old($1->get_type(), $3->get_type(), "&"); $$->set_pos(@$); }
     ;
 
 equality-expression
     : relational-expression
-    | equality-expression EQ  relational-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "=="); $$->set_pos(@$); }
-    | equality-expression NEQ relational-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "!="); $$->set_pos(@$); }
+    | equality-expression EQ  relational-expression     { ops::unify_comp($1, $3, ast::Equal   ::builder, "==" , @$); }
+    | equality-expression NEQ relational-expression     { ops::unify_comp($1, $3, ast::NotEqual::builder, "!=" , @$); }
     ;
 
 relational-expression
     : shift-expression
-    | relational-expression LT shift-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "<");  $$->set_pos(@$); }
-    | relational-expression GT shift-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), ">");  $$->set_pos(@$); }
-    | relational-expression LET shift-expression    { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "<="); $$->set_pos(@$); }
-    | relational-expression GET shift-expression    { res_type = ops::unify_comp($1->get_type(), $3->get_type(), ">="); $$->set_pos(@$); }
+    | relational-expression LT shift-expression     { ops::unify_comp($1, $3, ast::Less        ::builder, "<" , @$); }
+    | relational-expression GT shift-expression     { ops::unify_comp($1, $3, ast::Greater     ::builder, ">" , @$); }
+    | relational-expression LET shift-expression    { ops::unify_comp($1, $3, ast::LessEqual   ::builder, "<=", @$); }
+    | relational-expression GET shift-expression    { ops::unify_comp($1, $3, ast::GreaterEqual::builder, ">=", @$); }
     ;
 
 shift-expression
     : additive-expression
-    | shift-expression LEFT  additive-expression    { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "<<"); $$->set_pos(@$); }
-    | shift-expression RIGHT additive-expression    { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), ">>"); $$->set_pos(@$); }
+    | shift-expression LEFT  additive-expression    { res_type = ops::unify_bitwise_old($1->get_type(), $3->get_type(), "<<"); $$->set_pos(@$); }
+    | shift-expression RIGHT additive-expression    { res_type = ops::unify_bitwise_old($1->get_type(), $3->get_type(), ">>"); $$->set_pos(@$); }
     ;
 
 additive-expression

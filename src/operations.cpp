@@ -62,34 +62,13 @@ static void type_error_bool(pos::Pos posi, const Type* type)
 // TODO complete refactor
 //
 
-static const PrimKind comp[4][4] = {
-    /* void */ {VOID, VOID, VOID, VOID},
-    /* char */ {VOID, INTEGER, INTEGER, INTEGER},
-    /* int  */ {VOID, INTEGER, INTEGER, INTEGER},
-    /* real */ {VOID, INTEGER, INTEGER, INTEGER}};
-
-Type* unify_comp(const Type* l, const Type* r, const char* op)
-{
-    const PrimType* pl = dynamic_cast<const PrimType*>(l);
-    const PrimType* pr = dynamic_cast<const PrimType*>(r);
-    if (!pl || !pr) {
-        type_error_old(op, l, r);
-    }
-    PrimKind kl = pl->kind;
-    PrimKind kr = pr->kind;
-    PrimKind result = comp[kl][kr];
-    if (result == PrimKind::VOID)
-        type_error_old(op, l, r);
-    return new PrimType(result);
-}
-
 static const PrimKind bitwise[4][4] = {
     /* void */ {VOID, VOID, VOID, VOID},
     /* char */ {VOID, INTEGER, INTEGER, VOID},
     /* int  */ {VOID, INTEGER, INTEGER, VOID},
     /* real */ {VOID, VOID, VOID, VOID}};
 
-Type* unify_bitwise(const Type* l, const Type* r, const char* op)
+Type* unify_bitwise_old(const Type* l, const Type* r, const char* op)
 {
     const PrimType* pl = dynamic_cast<const PrimType*>(l);
     const PrimType* pr = dynamic_cast<const PrimType*>(r);
@@ -151,6 +130,22 @@ namespace prim_matrix {
         /* real	*/ {error,  p{rsame, bdC2R}, p{rsame, bdI2R}, p{rsame, rsame} }
     };
     ResultAndCoersionMatrixes arith = {&arith_result, &arith_coersion};
+
+    const PrimKind comp_result[4][4] = {
+        /*          void    char             int              real           */
+        /* void	*/ {VOID,   VOID           , VOID           , VOID            },
+        /* char	*/ {VOID,   INTEGER        , INTEGER        , INTEGER         },
+        /* int 	*/ {VOID,   INTEGER        , INTEGER        , INTEGER         },
+        /* real	*/ {VOID,   INTEGER        , INTEGER        , INTEGER         }
+    };
+    const CoersionPairMatrix comp_coersion = {
+        /*          void    char             int              real           */
+        /* void	*/ {error,  error          , error          , error           },
+        /* char	*/ {error,  p{rsame, rsame}, p{bdC2I, rsame}, p{bdC2R, rsame} },
+        /* int 	*/ {error,  p{rsame, bdC2I}, p{rsame, rsame}, p{bdI2R, rsame} },
+        /* real	*/ {error,  p{rsame, bdC2R}, p{rsame, bdI2R}, p{rsame, rsame} }
+    };
+    ResultAndCoersionMatrixes comp = {&comp_result, &comp_coersion};
 
     // clang-format on
 } // namespace prim_matrix
@@ -330,6 +325,40 @@ Expr* unify_multi(
             // on primitive types
             auto [result_type, coersion] = unify_bin_prim(
                 prim_matrix::arith, type1_prim, type2_prim, op, posi);
+            auto [c1, c2] = coersion;
+            auto new1 = c1(node1);
+            auto new2 = c2(node2);
+            auto new_node = builder(new1, new2);
+            new_node->set_type(result_type);
+            return new_node;
+        }
+    }
+    type_error(op, posi, type1, type2);
+    abort();
+}
+
+Expr* unify_comp(
+    Expr* node1,
+    Expr* node2,
+    ast::BinBuilder builder,
+    const char* op,
+    pos::Pos posi)
+{
+    assert(node1);
+    assert(node2);
+    auto type1 = node1->get_type();
+    auto type2 = node2->get_type();
+
+    if (auto type1_ptopt = dynamic_cast<Pointer*>(type1)) {
+        if (auto type2_ptopt = dynamic_cast<Pointer*>(type2)) {
+            // TODO pointer comparison?
+        }
+        abort();
+    } else if (auto type1_prim = dynamic_cast<PrimType*>(type1)) {
+        if (auto type2_prim = dynamic_cast<PrimType*>(type2)) {
+            // Handles primitive type operands
+            auto [result_type, coersion] = unify_bin_prim(
+                prim_matrix::comp, type1_prim, type2_prim, op, posi);
             auto [c1, c2] = coersion;
             auto new1 = c1(node1);
             auto new2 = c2(node2);
