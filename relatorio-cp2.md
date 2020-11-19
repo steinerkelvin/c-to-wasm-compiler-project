@@ -30,9 +30,9 @@ implementação:
 bastando usar na implementação as representações correnpondentes com maior
 quantidade de bits.
 
-Também decidimos limitar o suporte a apenas vetores de tamanho conhecido em
-tempo de compilação, e funções com número fixo de argumentos, i.e. omitiremos o
-o suporte a "varargs".
+Decidimos limitar o suporte a apenas vetores de tamanho conhecido em tempo de
+compilação, e funções com número fixo de argumentos, i.e. omitiremos o o suporte
+a "varargs". Também foram omitidos enums, structs e unions.
 
 ### Notação em declarações
 
