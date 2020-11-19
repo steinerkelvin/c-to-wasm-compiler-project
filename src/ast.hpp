@@ -12,6 +12,7 @@
 #include <variant>
 #include <vector>
 
+#include "positions.hpp"
 #include "strtable.hpp"
 #include "symtable.hpp"
 #include "types.hpp"
@@ -21,8 +22,9 @@
 
 namespace ast {
 
-struct Node {
+struct Node : pos::HasPosition {
     LABEL("NODE");
+
     virtual bool is_typed() const { return false; }
     virtual const std::vector<Node*> get_children_nodes() const
     {
@@ -37,9 +39,13 @@ struct Node {
             stream << " ";
             child->write_repr(stream);
         }
+        if (auto this_pos = this->get_pos()) {
+            stream << " \"" << *this_pos << "\"";
+        }
         stream << ")";
     }
 };
+
 }; // namespace ast
 
 std::ostream& operator<<(std::ostream& stream, const ast::Node& node);
@@ -88,6 +94,7 @@ struct MultiChildrenBase : R {
     {
         assert(child);
         this->children.push_back(child);
+        this->merge_pos_from(child);
     };
 
     std::vector<T*>& get_children() { return this->children; }
@@ -266,6 +273,7 @@ struct UnOp : SingleChildBase<Expr> {
     {
         // TODO
         this->type = child->get_type();
+        this->merge_pos_from(child);
     }
 };
 
@@ -276,6 +284,8 @@ struct BinOp : MultiChildrenBase<Expr> {
         assert(left != NULL);
         assert(right != NULL);
         this->children = std::vector<Expr*>{left, right};
+        this->merge_pos_from(left);
+        this->merge_pos_from(right);
     }
 };
 
@@ -329,7 +339,6 @@ struct Assign : BinOp {
     LABEL("=");
     using BinOp::BinOp;
 };
-
 
 struct AddressOf : UnOp {
     LABEL("&x");
@@ -441,10 +450,10 @@ struct Block : MultiChildrenBase<Statement> {
     {
         // TODO
         // obs.: esse método inteiro pode ter removido em favor do método da
-        // super classe que tem o assert
+        // superclasse MultiChildrenBase que tem o assert
         // assert(stmt);
         if (stmt)
-            this->children.push_back(stmt);
+            this->MultiChildrenBase<Statement>::add(stmt);
     };
     void set_scope(const ScopeId scope_id) { this->scope_id = scope_id; }
 
@@ -483,11 +492,6 @@ struct FunctionDefinition : Declaration {
 
 struct Program : MultiChildrenBase<Declaration, Node> {
     LABEL("Program");
-    void add(Declaration* decl)
-    {
-        assert(decl);
-        this->children.push_back(decl);
-    };
 };
 
 }; // namespace ast

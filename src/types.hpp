@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "util.hpp"
+#include "positions.hpp"
 
 // Forward declaration
 // TODO refatorar?
@@ -185,16 +186,19 @@ struct Function : ContainerType {
 //
 // Estruturas para representar especificadores e qualificadores em declarações
 //
+// TODO mover para delclarations.hpp ?
+//
 
-struct TypeQualifier {
-    enum TypeQualifierKind {
+struct TypeQualifier : pos::HasPosition {
+    const enum TypeQualifierKind {
         CONST,
         RESTRICT,
         VOLATILE,
     } kind;
+    TypeQualifier(TypeQualifierKind kind) : kind(kind) {};
 };
 
-struct TypeSpec {
+struct TypeSpec : pos::HasPosition {
     virtual ~TypeSpec() = default;
 };
 struct SimpleTypeSpec : TypeSpec {

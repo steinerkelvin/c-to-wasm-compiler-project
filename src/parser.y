@@ -164,26 +164,26 @@ declaration-specifier
     ;
 
 storage-class-specifier
-    : TYPEDEF   { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::TYPEDEF); }
-    | EXTERN    { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::EXTERN); }
-    | STATIC    { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::STATIC); }
-    | AUTO      { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::AUTO); }
-    | REGISTER  { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::REGISTER); }
+    : TYPEDEF   { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::TYPEDEF); $$->set_pos(@$); }
+    | EXTERN    { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::EXTERN);  $$->set_pos(@$); }
+    | STATIC    { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::STATIC);  $$->set_pos(@$); }
+    | AUTO      { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::AUTO);    $$->set_pos(@$); }
+    | REGISTER  { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::REGISTER);$$->set_pos(@$); }
     ;
 
 type-specifier
-    : VOID      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::VOID); }
-    | CHAR      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::CHAR); }
-    | SHORT     { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::SHORT); }
-    | INT       { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::INT); }
-    | LONG      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::LONG); }
-    | FLOAT     { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::FLOAT); }
-    | DOUBLE    { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::DOUBLE); }
-    | SIGNED    { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::SIGNED); }
-    | UNSIGNED  { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::UNSIGNED); }
+    : VOID      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::VOID);    $$->set_pos(@$); }
+    | CHAR      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::CHAR);    $$->set_pos(@$); }
+    | SHORT     { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::SHORT);   $$->set_pos(@$); }
+    | INT       { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::INT);     $$->set_pos(@$); }
+    | LONG      { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::LONG);    $$->set_pos(@$); }
+    | FLOAT     { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::FLOAT);   $$->set_pos(@$); }
+    | DOUBLE    { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::DOUBLE);  $$->set_pos(@$); }
+    | SIGNED    { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::SIGNED);  $$->set_pos(@$); }
+    | UNSIGNED  { $$ = new types::SimpleTypeSpec(types::SimpleTypeSpec::UNSIGNED);$$->set_pos(@$); }
     | struct-or-union-spec  { $$ = $1; }
     | enum-spec             { $$ = $1; }
-    | typedef-name          { $$ = new types::TypedefName($1); }
+    | typedef-name          { $$ = new types::TypedefName($1); $$->set_pos(@$); }
     ;
 
 typedef-name : TYPENAME ;
@@ -245,9 +245,9 @@ enumerator
     ;
 
 type-qualifier
-    : CONST     { $$ = new types::TypeQualifier{types::TypeQualifier::CONST}; }
-    | RESTRICT  { $$ = new types::TypeQualifier{types::TypeQualifier::RESTRICT}; }
-    | VOLATILE  { $$ = new types::TypeQualifier{types::TypeQualifier::VOLATILE}; }
+    : CONST     { $$ = new types::TypeQualifier(types::TypeQualifier::CONST);    }
+    | RESTRICT  { $$ = new types::TypeQualifier(types::TypeQualifier::RESTRICT); }
+    | VOLATILE  { $$ = new types::TypeQualifier(types::TypeQualifier::VOLATILE); }
     // | "_Atomic"
     ;
 
@@ -633,23 +633,24 @@ argument-expression-list-opt
     | argument-expression-list
     ;
 argument-expression-list
-    : assignment-expression     { $$ = new ast::Exprs(); $$->add($1); }
+    : assignment-expression
+        { $$ = new ast::Exprs(); $$->add($1); }
     | argument-expression-list COMMA assignment-expression
-        { { $$ = $1; $$->add($3); } }
+        { $$ = $1; $$->add($3); }
     ;
-
 
 primary-expression
     : ID[name] {
             auto ref = pars::get_var(*($name));
             $$ = new ast::Variable(ref);
             $$->set_type(ref.get().type);
+            $$->set_pos(@$);
             delete $1;
         }
-    | INT_VAL       { $$ = new ast::IntegerValue($1); }
-    | REAL_VAL      { $$ = new ast::FloatingValue($1); }
-    | CHAR_VAL      { $$ = new ast::CharValue($1); }
-    | STR_VAL       { $$ = new ast::StringValue($1); }
+    | INT_VAL       { $$ = new ast::IntegerValue($1);  $$->set_pos(@$); }
+    | REAL_VAL      { $$ = new ast::FloatingValue($1); $$->set_pos(@$); }
+    | CHAR_VAL      { $$ = new ast::CharValue($1);     $$->set_pos(@$); }
+    | STR_VAL       { $$ = new ast::StringValue($1);   $$->set_pos(@$); }
     | LPAR expression RPAR      { $$ = $2; }
     // | generic-expression ??
     ;

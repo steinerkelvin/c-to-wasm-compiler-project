@@ -11,11 +11,12 @@
 
 #include "ast.hpp"
 #include "types.hpp"
+#include "positions.hpp"
 
 namespace decl {
 using types::ContainerType;
 
-struct DeclarationSpec {
+struct DeclarationSpec : pos::HasPosition {
     /** Força a classe a ser polimórfica */
     virtual ~DeclarationSpec() = default;
 };
@@ -27,9 +28,9 @@ struct StorageClassSpec : DeclarationSpec {
         STATIC,
         AUTO,
         REGISTER,
-    };
+    } kind;
+    // const Kind ;
     StorageClassSpec(const Kind kind) : kind(kind) {}
-    const Kind kind;
 };
 
 using types::TypeQualOrTypeSpecPointer;
@@ -41,8 +42,11 @@ struct TypeDeclSpec : DeclarationSpec {
     types::TypeQualOrTypeSpecPointer value;
 };
 
-struct DeclarationSpecs : std::vector<DeclarationSpec*> {
-    void add(DeclarationSpec* spec) { this->push_back(spec); }
+struct DeclarationSpecs : std::vector<DeclarationSpec*>, pos::HasPosition {
+    void add(DeclarationSpec* spec) {
+        this->push_back(spec);
+        this->merge_pos_from(spec);
+    }
 };
 
 struct AbstractDeclarator {
