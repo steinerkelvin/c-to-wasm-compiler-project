@@ -514,7 +514,7 @@ comma-expression
 assignment-expression
     : conditional-expression
     | unary-expression ASSIGN  assignment-expression  { $$ = ops::unify_assignment($1, $3); }
-    // // TODO
+    // // TODO ?
     // | unary-expression STARASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"*="); $$ = $3; }
     // | unary-expression OVERASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"/="); $$ = $3; }
     // | unary-expression MODASS  assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"%="); $$ = $3; }
@@ -531,65 +531,65 @@ constant-expression : conditional-expression ;
 
 conditional-expression
     : or-expression
-    | or-expression QUEST expression COLON conditional-expression
+    // | or-expression QUEST expression COLON conditional-expression    // TODO
     ;
 
 or-expression
-    : and-expression    
-    | or-expression OR and-expression       { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "||");}
+    : and-expression
+    | or-expression OR and-expression       { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "||"); $$->set_pos(@$); }
     ;
 
 and-expression
     : bit-or-expression
-    | and-expression AND bit-or-expression  { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "&&");}
+    | and-expression AND bit-or-expression  { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "&&"); $$->set_pos(@$); }
     ;
 
-bit-or-expression  
+bit-or-expression
     : bit-xor-expression
-    | bit-or-expression BTOR bit-xor-expression     { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "|"); }
+    | bit-or-expression BTOR bit-xor-expression     { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "|"); $$->set_pos(@$); }
     ;
 
-bit-xor-expression 
+bit-xor-expression
     : bit-and-expression
-    | bit-xor-expression BTXOR bit-and-expression   { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "^"); }
+    | bit-xor-expression BTXOR bit-and-expression   { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "^"); $$->set_pos(@$); }
     ;
 
-bit-and-expression 
+bit-and-expression
     : equality-expression
-    | bit-and-expression AMPER equality-expression      { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "&"); }
+    | bit-and-expression AMPER equality-expression      { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "&"); $$->set_pos(@$); }
     ;
 
 equality-expression
     : relational-expression
-    | equality-expression EQ  relational-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "==");}
-    | equality-expression NEQ relational-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "!=");}
+    | equality-expression EQ  relational-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "=="); $$->set_pos(@$); }
+    | equality-expression NEQ relational-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "!="); $$->set_pos(@$); }
     ;
 
 relational-expression
     : shift-expression
-    | relational-expression LT shift-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "<");}
-    | relational-expression GT shift-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), ">");}
-    | relational-expression LET shift-expression    { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "<=");}
-    | relational-expression GET shift-expression    { res_type = ops::unify_comp($1->get_type(), $3->get_type(), ">=");}
+    | relational-expression LT shift-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "<");  $$->set_pos(@$); }
+    | relational-expression GT shift-expression     { res_type = ops::unify_comp($1->get_type(), $3->get_type(), ">");  $$->set_pos(@$); }
+    | relational-expression LET shift-expression    { res_type = ops::unify_comp($1->get_type(), $3->get_type(), "<="); $$->set_pos(@$); }
+    | relational-expression GET shift-expression    { res_type = ops::unify_comp($1->get_type(), $3->get_type(), ">="); $$->set_pos(@$); }
     ;
 
 shift-expression
     : additive-expression
-    | shift-expression LEFT  additive-expression    { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "<<"); }
-    | shift-expression RIGHT additive-expression    { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), ">>"); }
+    | shift-expression LEFT  additive-expression    { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), "<<"); $$->set_pos(@$); }
+    | shift-expression RIGHT additive-expression    { res_type = ops::unify_bitwise($1->get_type(), $3->get_type(), ">>"); $$->set_pos(@$); }
     ;
 
 additive-expression
     : multiplicative-expression
-    | additive-expression PLUS  multiplicative-expression   { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "+"); $$ = new ast::Plus($1, $3); $$->set_type(res_type); }
-    | additive-expression MINUS multiplicative-expression   { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "-"); $$ = new ast::Minus($1, $3); $$->set_type(res_type); }
+    | additive-expression PLUS  multiplicative-expression   { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "+"); $$ = new ast::Plus($1, $3); $$->set_type(res_type);  $$->set_pos(@$); }
+    | additive-expression MINUS multiplicative-expression   { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "-"); $$ = new ast::Minus($1, $3); $$->set_type(res_type); $$->set_pos(@$); }
     ;
 
 multiplicative-expression
     : cast-expression
-    | multiplicative-expression STAR cast-expression    { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "*"); $$ = new ast::Times($1, $3); $$->set_type(res_type); }
-    | multiplicative-expression OVER cast-expression    { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "/"); $$ = new ast::Over($1, $3); $$->set_type(res_type); }
-    | multiplicative-expression PERC cast-expression    { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "%"); }
+    | multiplicative-expression STAR cast-expression    { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "*"); $$ = new ast::Times($1, $3); $$->set_type(res_type);$$->set_pos(@$); }
+    | multiplicative-expression OVER cast-expression    { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "/"); $$ = new ast::Over($1, $3);  $$->set_type(res_type);$$->set_pos(@$); }
+    | multiplicative-expression PERC cast-expression    { res_type = ops::unify_arith($1->get_type(), $3->get_type(), "%"); /* TODO */                                           }
     ;
 
 cast-expression
@@ -599,31 +599,27 @@ cast-expression
 
 unary-expression
     : postfix-expression
-    | PLUSPLUS   unary-expression   { ops::unary_verify($2->get_type(),"++"); $$ = new ast::PrefixPlusPlus($2); }
-    | MINUSMINUS unary-expression   { ops::unary_verify($2->get_type(),"--"); $$ = new ast::PrefixMinusMinus($2); }
+    | PLUSPLUS   unary-expression   { ops::unary_verify($2->get_type(),"++"); $$ = new ast::PrefixPlusPlus($2);   $$->set_pos(@$); }
+    | MINUSMINUS unary-expression   { ops::unary_verify($2->get_type(),"--"); $$ = new ast::PrefixMinusMinus($2); $$->set_pos(@$); }
     | AMPER cast-expression         { $$ = ops::address_of($2); }
     | STAR  cast-expression         { $$ = ops::derreference($2); }
-    | PLUS  cast-expression         { ops::unary_verify($2->get_type(),"+"); $$ = $2; }
-    | MINUS cast-expression         { ops::unary_verify($2->get_type(),"-"); $$ = new ast::InvertSignal($2);}
-    | BTNOT cast-expression         { ops::btnot_verify($2->get_type(),"~"); $$ = new ast::BitNot($2); }
-    | NOT   cast-expression         { ops::unary_verify($2->get_type(),"!"); $$ = new ast::Not($2); }
-    | SIZEOF unary-expression       { assert(0); }
-    | SIZEOF LPAR type-name RPAR    { assert(0); }
+    | PLUS  cast-expression         { ops::unary_verify($2->get_type(),"+");  $$ = $2; }
+    | MINUS cast-expression         { ops::unary_verify($2->get_type(),"-");  $$ = new ast::InvertSignal($2);     $$->set_pos(@$); }
+    | BTNOT cast-expression         { ops::btnot_verify($2->get_type(),"~");  $$ = new ast::BitNot($2);           $$->set_pos(@$); }
+    | NOT   cast-expression         { ops::unary_verify($2->get_type(),"!");  $$ = new ast::Not($2);              $$->set_pos(@$); }
+    | SIZEOF unary-expression       { abort(); }
+    | SIZEOF LPAR type-name RPAR    { abort(); }
     // | _Alignof LPAR type-name RPAR
     ;
 
 postfix-expression
     : primary-expression
-    | postfix-expression[value] LB expression[index] RB
-        { $$ = ops::index_access($value, $index); }
-    | postfix-expression[value] LPAR argument-expression-list-opt[args] RPAR
-        { $$ = ops::function_call($value, $args); }
+    | postfix-expression[value] LB expression[index] RB                         { $$ = ops::index_access($value, $index); }
+    | postfix-expression[value] LPAR argument-expression-list-opt[args] RPAR    { $$ = ops::function_call($value, $args); }
     | postfix-expression DOT   ID
     | postfix-expression ARROW ID
-    | postfix-expression PLUSPLUS
-        { ops::unary_verify($1->get_type(),"++"); $$ = new ast::PrefixPlusPlus($1); }
-    | postfix-expression MINUSMINUS
-        { ops::unary_verify($1->get_type(),"--"); $$ = new ast::PrefixMinusMinus($1); }
+    | postfix-expression PLUSPLUS       { ops::unary_verify($1->get_type(),"++"); $$ = new ast::PrefixPlusPlus($1);   $$->set_pos(@$); }
+    | postfix-expression MINUSMINUS     { ops::unary_verify($1->get_type(),"--"); $$ = new ast::PrefixMinusMinus($1); $$->set_pos(@$); }
     // | ( type-name ) { initializer-list }
     // | ( type-name ) { initializer-list , }
     ;
