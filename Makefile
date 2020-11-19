@@ -47,11 +47,14 @@ clean:
 	rm -f $(generated_files)
 
 show-versions:
-	make --version ; echo
-	flex --version ; echo
-	bison --version ; echo
-	clang --version ; echo
-
+	make --version
+	@echo
+	flex --version
+	@echo
+	bison --version
+	@echo
+	clang --version
+	@echo
 
 flex: $(scanner_files)
 
