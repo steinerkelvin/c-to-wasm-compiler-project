@@ -103,14 +103,13 @@ int main()
         i++;
     while (i < 10);
 
-    int flag = 0;
-start:
-    // TODO
-    if (flag) {
-        goto end;
-    }
-    flag = 1;
-end:;
+//     int flag = 0;
+// // start:
+//     if (flag) {
+//         // goto end;
+//     }
+//     flag = 1;
+// // end:;
 
     return 0;
 }

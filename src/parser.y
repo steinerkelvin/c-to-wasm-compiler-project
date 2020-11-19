@@ -62,12 +62,12 @@ void yyerror(char const *s);
 %type <ast::Block*> compound-stmt block-list-opt
 %type <ast::Statement*> block-item
 %type <ast::Statement*> empty-stmt
-%type <ast::Statement*> labeled-stmt
+// %type <ast::Statement*> labeled-stmt
+// %type <ast::Statement*> goto-stmt
 %type <ast::Statement*> if-stmt
 %type <ast::Statement*> switch-stmt
 %type <ast::Statement*> case-stmt
 %type <ast::Statement*> default-stmt
-%type <ast::Statement*> goto-stmt
 %type <ast::Statement*> break-stmt
 %type <ast::Statement*> continue-stmt
 %type <ast::Statement*> return-stmt
@@ -415,8 +415,8 @@ function-definition
 stmt
     : empty-stmt
     | compound-stmt     { $$ = $1; }
-    | labeled-stmt
-    | goto-stmt
+    // | labeled-stmt
+    // | goto-stmt
     | return-stmt
     | if-stmt
     | while-stmt
@@ -434,13 +434,13 @@ empty-stmt
     : SEMI              { $$ = NULL; }
     ;
 
-labeled-stmt
-    : ID COLON stmt { $$ = $3; }
-    ;  
+// labeled-stmt
+//     : ID COLON stmt { $$ = $3; }
+//     ;
 
-goto-stmt
-    : GOTO ID SEMI  { $$ = NULL; }
-    ;      
+// goto-stmt
+//     : GOTO ID SEMI  { $$ = NULL; }
+//     ;
 
 compound-stmt
     :   LCB
