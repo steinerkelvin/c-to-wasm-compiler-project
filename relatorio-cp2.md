@@ -3,7 +3,7 @@
 Para esta etapa, decidimos começar parte da implementação da AST para adquirir
 uma noção melhor de como deveriam ser as estruturas das tabelas de símbolos.
 
-Devido a meu profundo desgosto com soluções com pouca _type-safety_, optei por
+Devido a um profundo desgosto com soluções com pouca _type-safety_, optamos por
 tentar implementar uma AST com os nós tipados adequadamente. Isso acabou por
 resultar em uma hierarquia interessante de classes para representear os nós da
 AST.
