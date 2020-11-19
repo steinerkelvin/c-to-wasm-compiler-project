@@ -292,7 +292,7 @@ struct BinOp : MultiChildrenBase<Expr> {
         this->children = std::vector<Expr*>{left, right};
         this->merge_pos_from(left);
         this->merge_pos_from(right);
-    }
+    };
     static Expr* builder(Expr* left, Expr* right)
     {
         return new T(left, right);
@@ -373,6 +373,15 @@ struct Equal : BinOp<Times> {
 };
 struct NotEqual : BinOp<Times> {
     LABEL("==");
+    using BinOp::BinOp;
+};
+
+struct And : BinOp<And> {
+    LABEL("&&");
+    using BinOp::BinOp;
+};
+struct Or : BinOp<Or> {
+    LABEL("||");
     using BinOp::BinOp;
 };
 

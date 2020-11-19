@@ -52,7 +52,7 @@ type_error_assign(pos::Pos posi, const Type* target, const Type* source)
 static void type_error_bool(pos::Pos posi, const Type* type)
 {
     std::cerr << "SEMANTIC ERROR (" << posi << "): ";
-    std::cerr << "condition expression cannot be resolved to integer."
+    std::cerr << "expression cannot be resolved to boolean."
               << std::endl;
     exit(EXIT_FAILURE);
 }
@@ -390,6 +390,27 @@ Expr* check_bool(Expr* node, pos::Pos posi)
     }
     type_error_bool(posi, type);
     abort();
+}
+
+Expr* unify_logic(
+    Expr* node1,
+    Expr* node2,
+    ast::BinBuilder builder,
+    const char* op,
+    pos::Pos posi)
+{
+    assert(node1);
+    assert(node2);
+    auto pos1 = node1->get_pos();
+    auto pos2 = node2->get_pos();
+    assert(pos1);
+    assert(pos2);
+    // TODO alternative `check_bool` function to pass `op`
+    node1 = check_bool(node1, *pos1);
+    node2 = check_bool(node2, *pos2);
+    Expr* new_node = builder(node1, node2);
+    new_node->set_type(node1->get_type());
+    return new_node;
 }
 
 Expr* address_of(Expr* value, pos::Pos posi)

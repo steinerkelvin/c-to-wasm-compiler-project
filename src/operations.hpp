@@ -29,13 +29,24 @@ Expr* unify_additive(
     ast::BinBuilder builder,
     const char* op,
     pos::Pos posi);
+
 Expr* unify_multi(
     Expr* node1,
     Expr* node2,
     ast::BinBuilder builder,
     const char* op,
     pos::Pos posi);
+
 Expr* unify_comp(
+    Expr* node1,
+    Expr* node2,
+    ast::BinBuilder builder,
+    const char* op,
+    pos::Pos posi);
+
+Expr* check_bool(Expr* cond_node, pos::Pos posi);
+
+Expr* unify_logic(
     Expr* node1,
     Expr* node2,
     ast::BinBuilder builder,
@@ -44,8 +55,6 @@ Expr* unify_comp(
 
 Expr* check_assign(Type* target_type, Expr* value, pos::Pos posi);
 Expr* unify_assign(Expr* target, Expr* value, pos::Pos posi);
-
-Expr* check_bool(Expr* cond_node, pos::Pos posi);
 
 Expr* address_of(Expr* value, pos::Pos posi);
 Expr* derreference(Expr* value, pos::Pos posi);

@@ -536,12 +536,12 @@ conditional-expression
 
 or-expression
     : and-expression
-    | or-expression OR and-expression      // { res_type = ops::unify_comp_old($1->get_type(), $3->get_type(), "||"); $$->set_pos(@$); }
+    | or-expression OR and-expression      { $$ = ops::unify_logic($1, $3, ast::And::builder, "||", @$); }
     ;
 
 and-expression
     : bit-or-expression
-    | and-expression AND bit-or-expression // { res_type = ops::unify_comp_old($1->get_type(), $3->get_type(), "&&"); $$->set_pos(@$); }
+    | and-expression AND bit-or-expression { $$ = ops::unify_logic($1, $3, ast::Or::builder,  "&&", @$); }
     ;
 
 bit-or-expression
@@ -561,16 +561,16 @@ bit-and-expression
 
 equality-expression
     : relational-expression
-    | equality-expression EQ  relational-expression     { ops::unify_comp($1, $3, ast::Equal   ::builder, "==" , @$); }
-    | equality-expression NEQ relational-expression     { ops::unify_comp($1, $3, ast::NotEqual::builder, "!=" , @$); }
+    | equality-expression EQ  relational-expression     { $$ = ops::unify_comp($1, $3, ast::Equal   ::builder, "==" , @$); }
+    | equality-expression NEQ relational-expression     { $$ = ops::unify_comp($1, $3, ast::NotEqual::builder, "!=" , @$); }
     ;
 
 relational-expression
     : shift-expression
-    | relational-expression LT shift-expression     { ops::unify_comp($1, $3, ast::Less        ::builder, "<" , @$); }
-    | relational-expression GT shift-expression     { ops::unify_comp($1, $3, ast::Greater     ::builder, ">" , @$); }
-    | relational-expression LET shift-expression    { ops::unify_comp($1, $3, ast::LessEqual   ::builder, "<=", @$); }
-    | relational-expression GET shift-expression    { ops::unify_comp($1, $3, ast::GreaterEqual::builder, ">=", @$); }
+    | relational-expression LT shift-expression     { $$ = ops::unify_comp($1, $3, ast::Less        ::builder, "<" , @$); }
+    | relational-expression GT shift-expression     { $$ = ops::unify_comp($1, $3, ast::Greater     ::builder, ">" , @$); }
+    | relational-expression LET shift-expression    { $$ = ops::unify_comp($1, $3, ast::LessEqual   ::builder, "<=", @$); }
+    | relational-expression GET shift-expression    { $$ = ops::unify_comp($1, $3, ast::GreaterEqual::builder, ">=", @$); }
     ;
 
 shift-expression
