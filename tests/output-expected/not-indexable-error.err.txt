@@ -1,0 +1,1 @@
+SEMANTIC ERROR (3:5-9): accessed value must be of array type, got 'real' instead.

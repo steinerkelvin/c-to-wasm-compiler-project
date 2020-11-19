@@ -116,14 +116,14 @@ ContainerTypeBuilder pointer_type_builder(size_t n)
     return ContainerTypeBuilder::pointer(n);
 }
 
-ContainerTypeBuilder vector_type_builder(ast::Expr* size_expr)
+ContainerTypeBuilder vector_type_builder(ast::Expr* size_expr, pos::Pos posi)
 {
     assert(size_expr);
     using ast::IntegerValue;
     const IntegerValue* size_int_node =
         dynamic_cast<const IntegerValue*>(size_expr);
     if (!size_int_node) {
-        std::cerr << "SEMANTIC ERROR (0): ";
+        std::cerr << "SEMANTIC ERROR (" << posi << "): ";
         std::cerr << "vector size must be an integer literal value, ";
         std::cerr << "got \'" << (*size_expr) << "\' instead." << std::endl;
         exit(1);

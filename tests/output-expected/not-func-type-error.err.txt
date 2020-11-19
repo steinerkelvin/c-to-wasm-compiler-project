@@ -1,0 +1,1 @@
+SEMANTIC ERROR (4:5-10): called value must be of function type, got '[2]integer' instead.

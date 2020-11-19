@@ -190,7 +190,7 @@ ContainerTypeBuilder pointer_type_builder(size_t n);
  * returns a "builder" that is able of constructing a vector type with that
  * size from a given base type.
  */
-ContainerTypeBuilder vector_type_builder(ast::Expr* size_expr);
+ContainerTypeBuilder vector_type_builder(ast::Expr* size_expr, pos::Pos posi);
 
 /**
  * Given a list of parameter declarations, returns a "builder" that is able of

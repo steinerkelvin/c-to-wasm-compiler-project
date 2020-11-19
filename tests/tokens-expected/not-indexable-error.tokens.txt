@@ -1,0 +1,14 @@
+INT : int
+ID : main
+LPAR : (
+RPAR : )
+LCB : {
+FLOAT : float
+ID : r
+SEMI : ;
+ID : r
+LB : [
+INT_VAL : 2
+RB : ]
+SEMI : ;
+RCB : }

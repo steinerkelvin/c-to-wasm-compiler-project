@@ -135,13 +135,13 @@ program-part
     | declaration
     ;
 
-declaration 
+declaration
     : declaration-specifiers SEMI
         {
             $$ = new ast::Declaration();
         }
     | declaration-specifiers[specs] init-declarator-list[inits] SEMI
-        { 
+        {
             declare(*$specs, *$inits);
             delete $specs;
             delete $inits;
@@ -288,10 +288,10 @@ pointer
 direct-declarator
     : ID                    { $$ = new decl::Declarator(*$1); delete $1; }
     | LPAR declarator RPAR  { $$ = $2; }
-    | direct-declarator LB type-qualifier-list-opt        assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
+    | direct-declarator LB type-qualifier-list-opt        assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp, @exp)); }
     | direct-declarator LB type-qualifier-list-opt                                   RB     { $$ = $1; $$->add(decl::pointer_type_builder(1)); }
-    // | direct-declarator LB type-qualifier-list STATIC     assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
-    // | direct-declarator LB STATIC type-qualifier-list-opt assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
+    // | direct-declarator LB type-qualifier-list STATIC     assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp, @exp)); }
+    // | direct-declarator LB STATIC type-qualifier-list-opt assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp, @exp)); }
     // | direct-declarator LB type-qualifier-list-opt STAR                              RB
     // | direct-declarator LPAR identifier-list-opt RPAR
     | direct-declarator LPAR                     RPAR       { $$ = $1; $$->add(decl::function_type_builder(NULL)); }
@@ -342,8 +342,8 @@ abstract-declarator
 
 direct-abstract-declarator
     : LPAR abstract-declarator RPAR     { $$ = $2; }
-    |                            LB type-qualifier-list-opt assignment-expression[exp] RB   { $$ = new decl::AbstractDeclarator(); $$->add(decl::vector_type_builder($exp)); }
-    | direct-abstract-declarator LB type-qualifier-list-opt assignment-expression[exp] RB   { $$ = $1;                             $$->add(decl::vector_type_builder($exp)); }
+    |                            LB type-qualifier-list-opt assignment-expression[exp] RB   { $$ = new decl::AbstractDeclarator(); $$->add(decl::vector_type_builder($exp, @exp)); }
+    | direct-abstract-declarator LB type-qualifier-list-opt assignment-expression[exp] RB   { $$ = $1;                             $$->add(decl::vector_type_builder($exp, @exp)); }
     // |                            LB type-qualifier-list-opt                            RB
     // | direct-abstract-declarator LB type-qualifier-list-opt                            RB
     // |                            LB STATIC type-qualifier-list-opt assignment-expression RB
@@ -460,8 +460,8 @@ block-item
     ;
 
 if-stmt
-    : IF LPAR expression[expr] RPAR stmt[body]                  { auto cond = ops::check_bool($expr); $$ = new ast::IfStmt    (cond, $body);         }
-    | IF LPAR expression[expr] RPAR stmt[body] ELSE stmt[block] { auto cond = ops::check_bool($expr); $$ = new ast::IfElseStmt(cond, $body, $block); }
+    : IF LPAR expression[expr] RPAR stmt[body]                  { auto cond = ops::check_bool($expr, @expr); $$ = new ast::IfStmt    (cond, $body);         }
+    | IF LPAR expression[expr] RPAR stmt[body] ELSE stmt[block] { auto cond = ops::check_bool($expr, @expr); $$ = new ast::IfElseStmt(cond, $body, $block); }
     ;
 
 return-stmt
@@ -482,11 +482,11 @@ default-stmt
     ;
 
 while-stmt
-    : WHILE LPAR expression[expr] RPAR stmt[body]         { auto cond = ops::check_bool($expr); $$ = new ast::WhileStmt(cond, $body); }
+    : WHILE LPAR expression[expr] RPAR stmt[body]         { auto cond = ops::check_bool($expr, @expr); $$ = new ast::WhileStmt(cond, $body); }
     ;
 
 do-while-stmt
-    : DO stmt[body] WHILE LPAR expression[expr] RPAR SEMI   { auto cond = ops::check_bool($expr); $$ = new ast::DoWhileStmt(cond, $body); }
+    : DO stmt[body] WHILE LPAR expression[expr] RPAR SEMI   { auto cond = ops::check_bool($expr, @expr); $$ = new ast::DoWhileStmt(cond, $body); }
     ;
 
 for-stmt
@@ -513,7 +513,7 @@ comma-expression
 
 assignment-expression
     : conditional-expression
-    | unary-expression ASSIGN  assignment-expression  { $$ = ops::unify_assign($1, $3); }
+    | unary-expression ASSIGN  assignment-expression  { $$ = ops::unify_assign($1, $3, @$); }
     // // TODO ?
     // | unary-expression STARASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"*="); $$ = $3; }
     // | unary-expression OVERASS assignment-expression  { ops::assign_verify($1->get_type(),$3->get_type(),"/="); $$ = $3; }
@@ -581,15 +581,15 @@ shift-expression
 
 additive-expression
     : multiplicative-expression
-    | additive-expression PLUS  multiplicative-expression   { $$ = ops::unify_additive($1, $3, ast::Plus ::builder, "+"); }
-    | additive-expression MINUS multiplicative-expression   { $$ = ops::unify_additive($1, $3, ast::Minus::builder, "-"); }
+    | additive-expression PLUS  multiplicative-expression   { $$ = ops::unify_additive($1, $3, ast::Plus ::builder, "+", @$); }
+    | additive-expression MINUS multiplicative-expression   { $$ = ops::unify_additive($1, $3, ast::Minus::builder, "-", @$); }
     ;
 
 multiplicative-expression
     : cast-expression
-    | multiplicative-expression STAR cast-expression    { $$ = ops::unify_multi($1, $3, ast::Times::builder, "*"); }
-    | multiplicative-expression OVER cast-expression    { $$ = ops::unify_multi($1, $3, ast::Over ::builder, "/"); }
-    | multiplicative-expression PERC cast-expression    { $$ = ops::unify_multi($1, $3, ast::Mod  ::builder, "%"); }
+    | multiplicative-expression STAR cast-expression    { $$ = ops::unify_multi($1, $3, ast::Times::builder, "*", @$); }
+    | multiplicative-expression OVER cast-expression    { $$ = ops::unify_multi($1, $3, ast::Over ::builder, "/", @$); }
+    | multiplicative-expression PERC cast-expression    { $$ = ops::unify_multi($1, $3, ast::Mod  ::builder, "%", @$); }
     ;
 
 cast-expression
@@ -599,14 +599,14 @@ cast-expression
 
 unary-expression
     : postfix-expression
-    | PLUSPLUS   unary-expression   { $$ = ops::make_unary($2, ast::PrefixPlusPlus  ::builder, "++"); }
-    | MINUSMINUS unary-expression   { $$ = ops::make_unary($2, ast::PrefixMinusMinus::builder, "--"); }
-    | AMPER cast-expression         { $$ = ops::address_of($2);   }
-    | STAR  cast-expression         { $$ = ops::derreference($2); }
-    | PLUS  cast-expression         { $$ = ops::make_unary($2, ast::Expr            ::retsame, "+" ); }
-    | MINUS cast-expression         { $$ = ops::make_unary($2, ast::InvertSignal    ::builder, "-" ); }
-    | BTNOT cast-expression         { $$ = ops::make_btnot($2, ast::BitNot          ::builder, "~" ); }
-    | NOT   cast-expression         { $$ = ops::make_unary($2, ast::Not             ::builder, "!" ); }
+    | PLUSPLUS   unary-expression   { $$ = ops::make_unary($2, ast::PrefixPlusPlus  ::builder, "++", @$); }
+    | MINUSMINUS unary-expression   { $$ = ops::make_unary($2, ast::PrefixMinusMinus::builder, "--", @$); }
+    | AMPER cast-expression         { $$ = ops::address_of($2, @$);   }
+    | STAR  cast-expression         { $$ = ops::derreference($2, @$); }
+    | PLUS  cast-expression         { $$ = ops::make_unary($2, ast::Expr            ::retsame, "+" , @$); }
+    | MINUS cast-expression         { $$ = ops::make_unary($2, ast::InvertSignal    ::builder, "-" , @$); }
+    | BTNOT cast-expression         { $$ = ops::make_btnot($2, ast::BitNot          ::builder, "~" , @$); }
+    | NOT   cast-expression         { $$ = ops::make_unary($2, ast::Not             ::builder, "!" , @$); }
     | SIZEOF unary-expression       { abort(); }
     | SIZEOF LPAR type-name RPAR    { abort(); }
     // | _Alignof LPAR type-name RPAR
@@ -614,12 +614,12 @@ unary-expression
 
 postfix-expression
     : primary-expression
-    | postfix-expression[value] LB expression[index] RB                         { $$ = ops::index_access($value, $index); }
-    | postfix-expression[value] LPAR argument-expression-list-opt[args] RPAR    { $$ = ops::function_call($value, $args); }
+    | postfix-expression[value] LB expression[index] RB                         { $$ = ops::index_access($value, $index, @$); }
+    | postfix-expression[value] LPAR argument-expression-list-opt[args] RPAR    { $$ = ops::function_call($value, $args, @$); }
     | postfix-expression DOT   ID
     | postfix-expression ARROW ID
-    | postfix-expression PLUSPLUS       { $$ = ops::make_unary($1, ast::PrefixPlusPlus  ::builder, "++"); }
-    | postfix-expression MINUSMINUS     { $$ = ops::make_unary($1, ast::PrefixMinusMinus::builder, "--"); }
+    | postfix-expression PLUSPLUS       { $$ = ops::make_unary($1, ast::PrefixPlusPlus  ::builder, "++", @$); }
+    | postfix-expression MINUSMINUS     { $$ = ops::make_unary($1, ast::PrefixMinusMinus::builder, "--", @$); }
     // | ( type-name ) { initializer-list }
     // | ( type-name ) { initializer-list , }
     ;

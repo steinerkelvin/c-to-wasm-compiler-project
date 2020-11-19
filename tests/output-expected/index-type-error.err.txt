@@ -1,0 +1,1 @@
+SEMANTIC ERROR (9:5-11): index must heave integer type, got 'real' instead.
