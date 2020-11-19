@@ -157,18 +157,18 @@ declaration-specifiers
     ;
 declaration-specifier
     : storage-class-specifier   { $$ = $1; }
-    | type-specifier            { $$ = new decl::TypeDeclSpec($1); }
-    | type-qualifier            { $$ = new decl::TypeDeclSpec($1); }
+    | type-specifier            { $$ = new decl::TypeDeclSpec($1); $$->merge_pos_from($1); }
+    | type-qualifier            { $$ = new decl::TypeDeclSpec($1); $$->merge_pos_from($1); }
     // | function-specifier
     // | alignment-specifier
     ;
 
 storage-class-specifier
-    : TYPEDEF   { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::TYPEDEF); $$->set_pos(@$); }
-    | EXTERN    { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::EXTERN);  $$->set_pos(@$); }
-    | STATIC    { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::STATIC);  $$->set_pos(@$); }
-    | AUTO      { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::AUTO);    $$->set_pos(@$); }
-    | REGISTER  { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::REGISTER);$$->set_pos(@$); }
+    : TYPEDEF   { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::TYPEDEF);  $$->set_pos(@$); }
+    | EXTERN    { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::EXTERN);   $$->set_pos(@$); }
+    | STATIC    { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::STATIC);   $$->set_pos(@$); }
+    | AUTO      { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::AUTO);     $$->set_pos(@$); }
+    | REGISTER  { $$ = new decl::StorageClassSpec(decl::StorageClassSpec::REGISTER); $$->set_pos(@$); }
     ;
 
 type-specifier
@@ -189,9 +189,9 @@ type-specifier
 typedef-name : TYPENAME ;
 
 struct-or-union-spec
-    : struct-or-union ID                                    { $$ = new decl::StructOrUnionSpec($1); }
-    | struct-or-union ID LCB struct-declaration-list RCB    { $$ = new decl::StructOrUnionSpec($1); }
-    | struct-or-union    LCB struct-declaration-list RCB    { $$ = new decl::StructOrUnionSpec($1); }
+    : struct-or-union ID                                    { $$ = new decl::StructOrUnionSpec($1); $$->set_pos(@$); }
+    | struct-or-union ID LCB struct-declaration-list RCB    { $$ = new decl::StructOrUnionSpec($1); $$->set_pos(@$); }
+    | struct-or-union    LCB struct-declaration-list RCB    { $$ = new decl::StructOrUnionSpec($1); $$->set_pos(@$); }
     ;
 
 struct-or-union
@@ -199,7 +199,7 @@ struct-or-union
     | UNION     { $$ = true; }
     ;
 
-struct-declaration-list 
+struct-declaration-list
     : struct-declaration
     | struct-declaration-list struct-declaration
     ;
@@ -275,7 +275,7 @@ init-declarator
     ;
 
 declarator
-    : pointer direct-declarator     { $$ = $2; $$->add(types::Pointer::builder($1)); }
+    : pointer direct-declarator     { $$ = $2; $$->add(decl::pointer_type_builder($1)); }
     | direct-declarator
     ;
 
@@ -289,7 +289,7 @@ direct-declarator
     : ID                    { $$ = new decl::Declarator(*$1); delete $1; }
     | LPAR declarator RPAR  { $$ = $2; }
     | direct-declarator LB type-qualifier-list-opt        assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
-    | direct-declarator LB type-qualifier-list-opt                                   RB     { $$ = $1; $$->add(types::Pointer::builder(1)); }
+    | direct-declarator LB type-qualifier-list-opt                                   RB     { $$ = $1; $$->add(decl::pointer_type_builder(1)); }
     // | direct-declarator LB type-qualifier-list STATIC     assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
     // | direct-declarator LB STATIC type-qualifier-list-opt assignment-expression[exp] RB     { $$ = $1; $$->add(decl::vector_type_builder($exp)); }
     // | direct-declarator LB type-qualifier-list-opt STAR                              RB
@@ -335,8 +335,8 @@ abstract-declarator-opt
     | abstract-declarator
     ;
 abstract-declarator
-    : pointer                               { $$ = new decl::AbstractDeclarator(); $$->add(types::Pointer::builder($1)); }
-    | pointer direct-abstract-declarator    { $$ = $2;                             $$->add(types::Pointer::builder($1)); }
+    : pointer                               { $$ = new decl::AbstractDeclarator(); $$->add(decl::pointer_type_builder($1)); }
+    | pointer direct-abstract-declarator    { $$ = $2;                             $$->add(decl::pointer_type_builder($1)); }
     | direct-abstract-declarator
     ;
 

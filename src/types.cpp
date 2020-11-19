@@ -31,13 +31,13 @@ Type* Pointer::derreference() const {
     new_type->n--;
     return new_type;
 }
-Pointer* Pointer::add_indiretion(Type* type) {
+Pointer* Pointer::add_indiretion(Type* type, size_t n) {
     if (auto type_pt = dynamic_cast<Pointer*>(type)) {
         auto new_type = new Pointer(*type_pt);
-        new_type->n++;
+        new_type->n += n;
         return new_type;
     }
-    return new Pointer(type);
+    return new Pointer(type, n);
 }
 
 std::optional<Pointer*> Pointer::to_pointer_implicit() { return this; }

@@ -13,7 +13,6 @@
 #include <vector>
 
 #include "util.hpp"
-#include "positions.hpp"
 
 // Forward declaration
 // TODO refatorar?
@@ -48,7 +47,7 @@ enum PrimKind {
 // Retorna string que representa um tipo primitivo
 const char* get_prim_text(PrimKind kind);
 
-// Representa tipos primitivos
+/// Represents primitive types
 struct PrimType : Type {
     PrimKind kind;
     PrimType(const PrimType& type) = default;
@@ -57,18 +56,15 @@ struct PrimType : Type {
     virtual std::ostream& write_repr(std::ostream& stream) const;
 };
 
-// Representa um tipo que "contém" um outro tipo base
+/// Represents a type that "contains" another type
 // e.g. vetor, ponteiro, etc
-struct ContainerType : Type {
-    // Tipo de uma função que recebe um tipo base e constrói um ContainerType
-    using Builder = std::function<ContainerType*(Type*)>;
-    ContainerType(Type* base) : base(base){};
-    // Retorna o tipo base desse tipo composto
-    Type* get_base() const { return this->base; }
+class ContainerType : public Type {
+    Type* base_type;
 
-  protected:
-    // Tipo base
-    Type* base;
+  public:
+    ContainerType(Type* base_type) : base_type(base_type){};
+    /// Returns base type of this compound type
+    Type* get_base() const { return this->base_type; }
 };
 
 // Representa tipo de um vetor
@@ -79,21 +75,13 @@ struct Vector : ContainerType {
     Vector(Type* base, size_t size) : ContainerType(base), size(size){};
 
     virtual std::optional<Pointer*> to_pointer_implicit();
-    virtual bool is_compatible_with(const Type *other);
+    virtual bool is_compatible_with(const Type* other);
 
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
         stream << "[" << size << "]";
-        this->base->write_repr(stream);
+        this->get_base()->write_repr(stream);
         return stream;
-    }
-
-    // Retorna um "construtor" para o tipo Vetor a partir de um tipo base
-    static ContainerType::Builder builder(size_t size)
-    {
-        return [size](Type* base) -> ContainerType* {
-            return new Vector(base, size);
-        };
     }
 };
 
@@ -116,10 +104,10 @@ struct Pointer : ContainerType {
     /**
      * Builds a new type adding one indirection level to the pointer type.
      */
-    static Pointer* add_indiretion(Type *type);
+    static Pointer* add_indiretion(Type* type, size_t n = 1);
 
     virtual std::optional<Pointer*> to_pointer_implicit();
-    virtual bool is_compatible_with(const Type *other);
+    virtual bool is_compatible_with(const Type* other);
 
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
@@ -128,16 +116,8 @@ struct Pointer : ContainerType {
             stream << "*";
         }
         // stream << ")";
-        this->base->write_repr(stream);
+        this->get_base()->write_repr(stream);
         return stream;
-    }
-
-    // Retorna um "construtor" para o tipo Vetor a partir de um tipo base
-    static ContainerType::Builder builder(size_t size)
-    {
-        return [size](Type* base) -> ContainerType* {
-            return new Pointer(base, size);
-        };
     }
 };
 
@@ -152,7 +132,7 @@ struct Function : ContainerType {
         : ContainerType(rettype), parameters(parameters){};
 
     virtual std::optional<Pointer*> to_pointer_implicit();
-    virtual bool is_compatible_with(const Type *other);
+    virtual bool is_compatible_with(const Type* other);
 
     virtual std::ostream& write_repr(std::ostream& stream) const
     {
@@ -170,16 +150,8 @@ struct Function : ContainerType {
         }
 
         stream << ")";
-        this->base->write_repr(stream);
+        this->get_base()->write_repr(stream);
         return stream;
-    }
-
-    // Retorna um "construtor" para o tipo Function a partir de um tipo base
-    static ContainerType::Builder builder(const Parameters& parameters)
-    {
-        return [parameters](Type* rettype) -> ContainerType* {
-            return new Function(rettype, parameters);
-        };
     }
 };
 

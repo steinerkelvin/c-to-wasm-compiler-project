@@ -6,20 +6,18 @@
 
 #include "symtable.hpp"
 
-using namespace decl;
+namespace decl {
 
-void error_simple_type_spec(const char* const kind_name)
+static void error_simple_type_spec(const char* const kind_name)
 {
     fprintf(stderr, "SEMANTIC ERROR (%d): ", 0); // TODO
     fprintf(stderr, "%s type specifier not valid here\n", kind_name);
     exit(1);
 }
 
-void handle_simple_type_spec(
-    std::optional<types::PrimType>& result_type,
-    const decl::SimpleTypeSpec* spec)
+static void handle_simple_type_spec(
+    std::optional<types::PrimType>& result_type, const SimpleTypeSpec* spec)
 {
-    using decl::SimpleTypeSpec;
     using types::PrimKind;
     using types::PrimType;
     assert(spec);
@@ -66,10 +64,8 @@ void handle_simple_type_spec(
     }
 }
 
-types::PrimType make_type(const decl::TypeQualOrTypeSpecList& pspecs)
+types::PrimType make_type(const TypeQualOrTypeSpecList& pspecs)
 {
-    using decl::SimpleTypeSpec;
-    using decl::TypeSpecifier;
     using types::PrimType;
 
     std::optional<PrimType> result_type;
@@ -91,7 +87,36 @@ types::PrimType make_type(const decl::TypeQualOrTypeSpecList& pspecs)
     return *result_type;
 }
 
-types::ContainerType::Builder decl::vector_type_builder(ast::Expr* size_expr)
+ContainerTypeBuilder ContainerTypeBuilder::pointer(size_t n)
+{
+    auto func = [n](types::Type* type) -> types::ContainerType* {
+        return types::Pointer::add_indiretion(type, n);
+    };
+    return ContainerTypeBuilder(func);
+}
+
+ContainerTypeBuilder ContainerTypeBuilder::vector(size_t size)
+{
+    auto func = [size](types::Type* base) -> ContainerType* {
+        return new types::Vector(base, size);
+    };
+    return ContainerTypeBuilder(func);
+}
+
+ContainerTypeBuilder ContainerTypeBuilder::function(FuncParameters parameters)
+{
+    auto func = [parameters](types::Type* rettype) -> ContainerType* {
+        return new types::Function(rettype, parameters);
+    };
+    return ContainerTypeBuilder(func);
+}
+
+ContainerTypeBuilder pointer_type_builder(size_t n)
+{
+    return ContainerTypeBuilder::pointer(n);
+}
+
+ContainerTypeBuilder vector_type_builder(ast::Expr* size_expr)
 {
     assert(size_expr);
     using ast::IntegerValue;
@@ -104,22 +129,19 @@ types::ContainerType::Builder decl::vector_type_builder(ast::Expr* size_expr)
         exit(1);
     }
     size_t size = size_int_node->get_value();
-    return types::Vector::builder(size);
+    return ContainerTypeBuilder::vector(size);
 }
 
-types::ContainerType::Builder
-decl::function_type_builder(decl::AbstractParameterDecls* param_decls)
+ContainerTypeBuilder function_type_builder(AbstractParameterDecls* param_decls)
 {
     using ast::IntegerValue;
-    using decl::TypeQualOrTypeSpecList;
-    using decl::TypeQualOrTypeSpecPointer;
     using types::Type;
 
     std::vector<std::pair<std::optional<std::string>, Type*>> parameters;
 
     // Caso não haja parâmetros declarados
     if (!param_decls) {
-        return types::Function::builder(parameters);
+        return ContainerTypeBuilder::function(parameters);
     }
 
     // Varre os declaradores de parâmetro
@@ -174,7 +196,7 @@ decl::function_type_builder(decl::AbstractParameterDecls* param_decls)
         while (!abs_declarator->builders.empty()) {
             auto builder = *(abs_declarator->builders.end() - 1);
             abs_declarator->builders.pop_back();
-            type = builder(type);
+            type = builder.build(type);
         }
 
         // Trata o nome do parâmetro
@@ -187,13 +209,11 @@ decl::function_type_builder(decl::AbstractParameterDecls* param_decls)
         parameters.push_back({name, type});
     }
 
-    return types::Function::builder(parameters);
+    return ContainerTypeBuilder::function(parameters);
 }
 
-void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
+void declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 {
-    using decl::TypeQualOrTypeSpecList;
-    using decl::TypeQualOrTypeSpecPointer;
     TypeQualOrTypeSpecList typedecl_specs;
 
     bool is_typedef = false;
@@ -225,7 +245,7 @@ void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
         while (!decl->builders.empty()) {
             auto builder = *(decl->builders.end() - 1);
             decl->builders.pop_back();
-            type = builder(type);
+            type = builder.build(type);
         }
 
         const std::string name = decl->name;
@@ -251,13 +271,11 @@ void decl::declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 
 // TODO nome mais legível para esse tipo de retorno
 std::pair<sbtb::NameRef, ScopeId>*
-decl::declare_function(const DeclarationSpecs* specs, Declarator* declarator)
+declare_function(const DeclarationSpecs* specs, Declarator* declarator)
 {
     assert(specs);
     assert(declarator);
 
-    using decl::TypeQualOrTypeSpecList;
-    using decl::TypeQualOrTypeSpecPointer;
     TypeQualOrTypeSpecList typedecl_specs;
 
     for (const auto& pspec : *specs) {
@@ -287,7 +305,7 @@ decl::declare_function(const DeclarationSpecs* specs, Declarator* declarator)
     while (!declarator->builders.empty()) {
         auto builder = *(declarator->builders.end() - 1);
         declarator->builders.pop_back();
-        type = builder(type);
+        type = builder.build(type);
     }
 
     types::Function* type_func = dynamic_cast<types::Function*>(type);
@@ -329,3 +347,5 @@ decl::declare_function(const DeclarationSpecs* specs, Declarator* declarator)
 
     return new std::pair<sbtb::NameRef, ScopeId>{ref, scope_id};
 }
+
+}; // namespace decl

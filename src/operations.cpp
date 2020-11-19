@@ -218,19 +218,9 @@ Expr* unify_assignment(Expr* target, Expr* value) {
 Expr* address_of(Expr* value)
 {
     Type* type = value->get_type();
-    types::Pointer* type_pointer = dynamic_cast<types::Pointer*>(type);
-
     // TODO check rvalue
 
-    types::Pointer* new_type;
-    // TODO refactor into types
-    if (type_pointer) {
-        new_type = new types::Pointer(*type_pointer);
-        new_type->n++;
-    } else {
-        new_type = new types::Pointer(type, 1);
-    }
-
+    types::Pointer* new_type = types::Pointer::add_indiretion(type);
     Expr* new_node = new ast::AddressOf(value);
     new_node->set_type(new_type);
     return new_node;
