@@ -53,8 +53,8 @@ void yyerror(char const *s);
 %type <decl::Declarator*> declarator
 %type <size_t> pointer
 %type <decl::Declarator*> direct-declarator
-%type <decl::AbstractParameterDecls*> parameter-type-list parameter-list
-%type <decl::AbstractParameterDecl*> parameter-declaration
+%type <decl::ParameterDeclarations*> parameter-type-list parameter-list
+%type <decl::ParameterDeclaration*> parameter-declaration
 %type <decl::AbstractDeclarator*> abstract-declarator-opt abstract-declarator direct-abstract-declarator
 %type <ast::Expr*> initializer
 
@@ -319,12 +319,12 @@ parameter-type-list
     ;
 
 parameter-list
-    : parameter-declaration                         { $$ = new decl::AbstractParameterDecls(); $$->add($1); }
+    : parameter-declaration                         { $$ = new decl::ParameterDeclarations(); $$->add($1); }
     | parameter-list COMMA parameter-declaration    { $$ = $1; $$->add($3); }
     ;
 parameter-declaration
-    : declaration-specifiers declarator                 { $$ = new decl::AbstractParameterDecl($1, $2); }
-    | declaration-specifiers abstract-declarator-opt    { $$ = decl::AbstractParameterDecl::from($1, $2); }
+    : declaration-specifiers declarator                 { $$ = new decl::ParameterDeclaration($1, $2); }
+    | declaration-specifiers abstract-declarator-opt    { $$ = decl::ParameterDeclaration::from($1, $2); }
     ;
 
 

@@ -131,7 +131,7 @@ ContainerTypeBuilder vector_type_builder(ast::Expr* size_expr, pos::Pos posi)
     return ContainerTypeBuilder::vector(size);
 }
 
-ContainerTypeBuilder function_type_builder(AbstractParameterDecls* param_decls)
+ContainerTypeBuilder function_type_builder(ParameterDeclarations* param_decls)
 {
     using ast::IntegerValue;
     using types::Type;

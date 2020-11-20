@@ -115,14 +115,20 @@ struct DeclarationSpecs : std::vector<DeclarationSpec*>, pos::HasPosition {
 // Type builders
 //
 
+/// A type builder can build a specific container given just the base type.
 class ContainerTypeBuilder : pos::HasPosition {
     using FuncParameters = const types::Function::Parameters&;
     using Builder = std::function<types::ContainerType*(types::Type*)>;
+
+    /// The actual function that builds the type.
     const Builder func;
+
     ContainerTypeBuilder(Builder func) : func(func){};
 
   public:
-    types::ContainerType* build(types::Type* base_type) {
+    /// Builds the container type.
+    types::ContainerType* build(types::Type* base_type)
+    {
         return this->func(base_type);
     }
 
@@ -135,7 +141,10 @@ class ContainerTypeBuilder : pos::HasPosition {
 // Declarators
 //
 
-/// Declarator without a name
+/**
+ * Declarator with no name.
+ * It felt good to be out of the rain.
+ */
 struct AbstractDeclarator {
     std::vector<ContainerTypeBuilder> builders;
 
@@ -143,7 +152,7 @@ struct AbstractDeclarator {
     void add(ContainerTypeBuilder builder) { builders.push_back(builder); }
 };
 
-/// Declarator with a name, and maybe and initialization expression
+/// Declarator with a name, and maybe and initialization expression.
 struct Declarator : AbstractDeclarator {
     const std::string name;
     std::optional<ast::Expr*> init_expr;
@@ -157,26 +166,32 @@ struct InitDeclarators : std::vector<Declarator*> {
     void add(Declarator* init) { this->push_back(init); }
 };
 
-struct AbstractParameterDecl
+/// Function parameter declaration.
+struct ParameterDeclaration
     : std::pair<DeclarationSpecs*, std::optional<AbstractDeclarator*>> {
 
     using std::pair<DeclarationSpecs*, std::optional<AbstractDeclarator*>>::
         pair;
 
-    static AbstractParameterDecl*
+    static ParameterDeclaration*
     from(DeclarationSpecs* specs, AbstractDeclarator* decl)
     {
         if (decl != NULL) {
-            return new AbstractParameterDecl(specs, decl);
+            return new ParameterDeclaration(specs, decl);
         } else {
-            return new AbstractParameterDecl(specs, {});
+            return new ParameterDeclaration(specs, {});
         }
     }
 };
 
-struct AbstractParameterDecls : std::vector<AbstractParameterDecl*> {
-    void add(AbstractParameterDecl* param_decl) { this->push_back(param_decl); }
+/// List of parameter declarations.
+struct ParameterDeclarations : std::vector<ParameterDeclaration*> {
+    void add(ParameterDeclaration* param_decl) { this->push_back(param_decl); }
 };
+
+//
+// Functions for making type builders.
+//
 
 /**
  * Given the number of indirections `n`, returns a "builder" that is able of
@@ -197,10 +212,10 @@ ContainerTypeBuilder vector_type_builder(ast::Expr* size_expr, pos::Pos posi);
  * constructing a function type with the specified parameter types.
  */
 ContainerTypeBuilder
-function_type_builder(decl::AbstractParameterDecls* param_decls);
+function_type_builder(decl::ParameterDeclarations* param_decls);
 
 //
-// Declaration routines
+// Declaration routines.
 //
 
 /**
