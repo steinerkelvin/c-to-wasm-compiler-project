@@ -6,9 +6,9 @@ uma noção melhor de como deveriam ser as estruturas das tabelas de símbolos.
 Devido a um profundo desgosto com soluções com pouca _type-safety_, optamos por
 tentar implementar uma AST com os nós tipados adequadamente. Isso acabou por
 resultar em uma hierarquia interessante de classes para representear os nós da
-AST.
+AST, como é possível ver na figura.
 
-![Hierarquia de classes da AST](./docs/inherit_graph_1.png)
+![Hierarquia de classes da AST](./docs/inherit_graph_ast.png)
 
 Entendemos que isso facilitará a manipulação dos nós da AST, uma vez que, por
 exemplo, todos os nós envolvidos em operações com expressões tem o tipo `Expr` e

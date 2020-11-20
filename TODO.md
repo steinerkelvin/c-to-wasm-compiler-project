@@ -2,3 +2,4 @@
 - Allow define already declared function
 - lvalue/rvalue
 - for
+- positions on error messages at declarations.cpp
