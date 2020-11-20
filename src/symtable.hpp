@@ -39,25 +39,27 @@ struct NameRef : SymRef {
     NameRow& get() const;
 };
 
-/** Inicializa a tabela de símbolos */
+/**
+ * Init symbol table.
+ * Should be called once before the symbol table is used.
+ */
+
 ScopeId init();
 
 /**
- * Cria um novo espopo para nomes. Os nomes serão acidionados no último escopo
- * aberto.
+ * Creates a new scope for symbols to be declared into.
+ * Symbols will be added in the last opened spoce.
  */
 ScopeId open_scope();
 
-/* Fecha o último escopo aberto */
+/** Closes the last opened scope. */
 void close_scope();
 
-/**
- * Inserem uma tag de enum/struct/union, nome de tipo ou nome de variável no
- * último escopo.
- */
-
+/** Inserts enum/struct/union tag into the last opened scope. */
 TagRef insert_tag(const std::string& namep, types::Type* type);
+/** Inserts typedef'ed name into the last opened scope. */
 TypeRef insert_typename(const std::string& namep, types::Type* type);
+/** Inserts variable name into the last opened scope. */
 NameRef insert_name(const std::string& namep, types::Type* type);
 
 TagRow& get(const TagRef& ref);

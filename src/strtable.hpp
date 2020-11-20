@@ -16,10 +16,10 @@ struct StrRef {
 
 namespace strtb {
 
-// Adds string to string table
+/// Adds string to string table.
 StrRef add(const std::string& str);
 
-// Writes a representation of the entire string table into `stream`
+/// Writes a representation of the entire string table into `stream`.
 std::ostream& repr(std::ostream& stream);
 
 }; // namespace strtb
