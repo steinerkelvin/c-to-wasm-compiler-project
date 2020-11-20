@@ -15,11 +15,14 @@ extern int yylineno;
 
 namespace pars {
 
+/// Gets a reference to a declared variable.
 sbtb::NameRef get_var(const std::string& name);
 
 } // namespace pars
 
-/* Macros para tratamento de tokens no scanner */
+//
+// Macros for handling tokens on the scanner.
+//
 
 #if defined(DUMP_TOKENS)
 
@@ -41,7 +44,7 @@ sbtb::NameRef get_var(const std::string& name);
 #define HANDLE_TOKEN_ID(PROC)                                                  \
     {                                                                          \
         if (sbtb::is_typename(yytext)) {                                       \
-            yylval.TYPENAME = 0;                                               \
+            yylval.TYPENAME = 0; /* TODO */                                    \
             HANDLE_TOKEN(TYPENAME, PROC);                                      \
         } else {                                                               \
             yylval.ID = new std::string(yytext);                               \
