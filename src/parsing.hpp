@@ -13,12 +13,12 @@ typedef enum yytokentype yytoken_kind_t;
 
 extern int yylineno;
 
-namespace pars {
+namespace parsing {
 
 /// Gets a reference to a declared variable.
 symtb::NameRef get_var(const std::string& name);
 
-} // namespace pars
+} // namespace parsing
 
 //
 // Macros for handling tokens on the scanner.

@@ -1,6 +1,6 @@
 #include "parsing.hpp"
 
-namespace pars {
+namespace parsing {
 
 symtb::NameRef get_var(const std::string& name)
 {
@@ -14,4 +14,4 @@ symtb::NameRef get_var(const std::string& name)
     }
 }
 
-} // namespace pars
+} // namespace parsing

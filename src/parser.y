@@ -637,7 +637,7 @@ argument-expression-list
 
 primary-expression
     : ID[name] {
-            auto ref = pars::get_var(*($name));
+            auto ref = parsing::get_var(*($name));
             $$ = new ast::Variable(ref);
             $$->set_type(ref.get().type);
             $$->set_pos(@$);
