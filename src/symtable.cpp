@@ -4,12 +4,12 @@
 #include <string>
 #include <vector>
 
-using sbtb::NameRef;
-using sbtb::NameRow;
-using sbtb::TagRef;
-using sbtb::TagRow;
-using sbtb::TypeRef;
-using sbtb::TypeRow;
+using symtb::NameRef;
+using symtb::NameRow;
+using symtb::TagRef;
+using symtb::TagRow;
+using symtb::TypeRef;
+using symtb::TypeRow;
 using types::Type;
 
 struct Scope {
@@ -62,7 +62,7 @@ struct Scope {
 static std::vector<Scope> scopes;
 static std::vector<ScopeId> scope_stack;
 
-namespace sbtb {
+namespace symtb {
 
 ScopeId init()
 {
@@ -231,4 +231,4 @@ bool is_typename(const char* namep)
     return false;
 }
 
-} // namespace sbtb
+} // namespace symtb

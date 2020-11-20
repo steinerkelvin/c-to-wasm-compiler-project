@@ -14,7 +14,7 @@
 using ScopeId = size_t;
 using SymId = size_t;
 
-namespace sbtb {
+namespace symtb {
 
 struct Row {
     std::string name;
@@ -76,6 +76,6 @@ lookup_name(const std::string& name, bool last_scope = false);
 /* Verifica se um nome de tipo está em escopo (em qualquer nível) */
 bool is_typename(const char* name);
 
-} // namespace sbtb
+} // namespace symtb
 
 #endif // SYMTABLE_H

@@ -249,27 +249,27 @@ void declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 
         const std::string name = decl->name;
         if (is_typedef) {
-            if (sbtb::lookup_type(name, true)) {
+            if (symtb::lookup_type(name, true)) {
                 std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
                 std::cerr << "\'" << name << "\' already declared in this scope"
                           << std::endl;
                 assert(0); // TODO
             }
-            sbtb::insert_typename(name.c_str(), type);
+            symtb::insert_typename(name.c_str(), type);
         } else {
-            if (sbtb::lookup_name(name, true)) {
+            if (symtb::lookup_name(name, true)) {
                 std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
                 std::cerr << "\'" << name << "\' already declared in this scope"
                           << std::endl;
                 assert(0); // TODO
             }
-            sbtb::insert_name(name.c_str(), type);
+            symtb::insert_name(name.c_str(), type);
         }
     }
 }
 
 // TODO nome mais legível para esse tipo de retorno
-std::pair<sbtb::NameRef, ScopeId>*
+std::pair<symtb::NameRef, ScopeId>*
 declare_function(const DeclarationSpecs* specs, Declarator* declarator)
 {
     assert(specs);
@@ -311,14 +311,14 @@ declare_function(const DeclarationSpecs* specs, Declarator* declarator)
     assert(type_func);
 
     const std::string name = declarator->name;
-    if (sbtb::lookup_name(name, true)) {
+    if (symtb::lookup_name(name, true)) {
         // TODO allow defining already declared function
         std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
         std::cerr << "\'" << name << "\' already declared in this scope."
                   << std::endl;
         exit(1);
     }
-    sbtb::NameRef ref = sbtb::insert_name(name, type);
+    symtb::NameRef ref = symtb::insert_name(name, type);
 
     std::vector<std::pair<std::string, types::Type*>> concrete_parameters;
     for (auto [param_name, param_type] : type_func->parameters) {
@@ -330,21 +330,21 @@ declare_function(const DeclarationSpecs* specs, Declarator* declarator)
         concrete_parameters.push_back({*param_name, param_type});
     }
 
-    ScopeId scope_id = sbtb::open_scope();
+    ScopeId scope_id = symtb::open_scope();
 
     // Declare the functions parameters in the new scope
     for (auto [param_name, param_type] : concrete_parameters) {
-        if (sbtb::lookup_name(param_name, true)) {
+        if (symtb::lookup_name(param_name, true)) {
             // TODO allow defining already declared function
             std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
             std::cerr << "\'" << param_name << "\' already declared."
                       << std::endl;
             exit(1);
         }
-        sbtb::insert_name(param_name, param_type);
+        symtb::insert_name(param_name, param_type);
     }
 
-    return new std::pair<sbtb::NameRef, ScopeId>{ref, scope_id};
+    return new std::pair<symtb::NameRef, ScopeId>{ref, scope_id};
 }
 
 }; // namespace decl

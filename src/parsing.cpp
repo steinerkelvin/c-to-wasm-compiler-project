@@ -2,9 +2,9 @@
 
 namespace pars {
 
-sbtb::NameRef get_var(const std::string& name)
+symtb::NameRef get_var(const std::string& name)
 {
-    auto pos = sbtb::lookup_name(name);
+    auto pos = symtb::lookup_name(name);
     if (pos) {
         return *pos;
     } else {

@@ -16,7 +16,7 @@ extern int yylineno;
 namespace pars {
 
 /// Gets a reference to a declared variable.
-sbtb::NameRef get_var(const std::string& name);
+symtb::NameRef get_var(const std::string& name);
 
 } // namespace pars
 
@@ -43,7 +43,7 @@ sbtb::NameRef get_var(const std::string& name);
     }
 #define HANDLE_TOKEN_ID(PROC)                                                  \
     {                                                                          \
-        if (sbtb::is_typename(yytext)) {                                       \
+        if (symtb::is_typename(yytext)) {                                       \
             yylval.TYPENAME = 0; /* TODO */                                    \
             HANDLE_TOKEN(TYPENAME, PROC);                                      \
         } else {                                                               \

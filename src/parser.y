@@ -390,13 +390,13 @@ function-definition
         declarator[decl]
         // declaration-list-opt     // obscure arcane syntax
         LCB
-        <std::pair<sbtb::NameRef,ScopeId>*>{
+        <std::pair<symtb::NameRef,ScopeId>*>{
             // Declares the function in the outer scope,
             // and opens a new scope
             $$ = decl::declare_function($specs, $decl);
         }[func_ref_scope]
         block-list-opt[body]
-        { sbtb::close_scope(); }
+        { symtb::close_scope(); }
         RCB
         {
             auto [func_ref, scope_id] = *$func_ref_scope;
@@ -443,9 +443,9 @@ empty-stmt
 
 compound-stmt
     :   LCB
-        <ScopeId>{ $$ = sbtb::open_scope(); }[scopeid]
+        <ScopeId>{ $$ = symtb::open_scope(); }[scopeid]
         block-list-opt[block]
-        { sbtb::close_scope(); }
+        { symtb::close_scope(); }
         RCB
             { $$ = $block; $$->set_scope($scopeid); }
     ;
