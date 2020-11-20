@@ -122,7 +122,10 @@ struct TypedNode : Node {
     };
 
     void set_type(types::Type* t) { this->type = t; };
-    void set_type(types::PrimKind k) { this->type = new types::PrimType{k}; };
+    void set_type(types::PrimType::PrimKind k)
+    {
+        this->type = new types::PrimType(k);
+    };
 
     virtual void write_data_repr(std::ostream& stream) const
     {
@@ -130,7 +133,7 @@ struct TypedNode : Node {
     }
 
   protected:
-    types::Type* type = new types::PrimType{types::PrimKind::VOID};
+    types::Type* type = new types::PrimType{types::PrimType::VOID};
 };
 
 struct Expr : TypedNode {
@@ -143,7 +146,7 @@ struct Exprs : MultiChildrenBase<Expr, Node> {
 
 struct Value : Expr {};
 
-template <typename T, types::PrimKind type_kind>
+template <typename T, types::PrimType::PrimKind type_kind>
 struct BaseValue : Expr {
     BaseValue(T value)
     {
@@ -162,21 +165,21 @@ struct BaseValue : Expr {
     T value;
 };
 
-struct IntegerValue : BaseValue<uint64_t, types::PrimKind::INTEGER> {
+struct IntegerValue : BaseValue<uint64_t, types::PrimType::INTEGER> {
     LABEL("Integer");
     IntegerValue(uint64_t value)
-        : BaseValue<uint64_t, types::PrimKind::INTEGER>(value)
+        : BaseValue<uint64_t, types::PrimType::INTEGER>(value)
     {}
 };
-struct FloatingValue : BaseValue<double, types::PrimKind::REAL> {
+struct FloatingValue : BaseValue<double, types::PrimType::REAL> {
     LABEL("Real");
     FloatingValue(double value)
-        : BaseValue<double, types::PrimKind::REAL>(value)
+        : BaseValue<double, types::PrimType::REAL>(value)
     {}
 };
-struct CharValue : BaseValue<char, types::PrimKind::CHAR> {
+struct CharValue : BaseValue<char, types::PrimType::CHAR> {
     LABEL("Char");
-    CharValue(char value) : BaseValue<char, types::PrimKind::CHAR>(value) {}
+    CharValue(char value) : BaseValue<char, types::PrimType::CHAR>(value) {}
     virtual void write_data_repr(std::ostream& stream) const
     {
         this->Expr::write_data_repr(stream);
@@ -190,7 +193,7 @@ struct StringValue : Expr {
     StringValue(StrRef ref) : ref(ref)
     {
         this->set_type(
-            new types::Pointer(new types::PrimType(types::PrimKind::CHAR), 1));
+            new types::Pointer(new types::PrimType(types::PrimType::CHAR), 1));
     };
     virtual void write_data_repr(std::ostream& stream) const
     {
@@ -229,7 +232,7 @@ struct I2R : Coersion {
     LABEL("I2R");
     I2R(Expr* base) : Coersion(base)
     {
-        this->type = new types::PrimType(types::PrimKind::REAL);
+        this->type = new types::PrimType(types::PrimType::REAL);
     }
 };
 extern const CoersionBuilder bdI2R;
@@ -238,7 +241,7 @@ struct R2I : Coersion {
     LABEL("R2I");
     R2I(Expr* base) : Coersion(base)
     {
-        this->type = new types::PrimType(types::PrimKind::INTEGER);
+        this->type = new types::PrimType(types::PrimType::INTEGER);
     }
 };
 extern const CoersionBuilder bdR2I;
@@ -247,7 +250,7 @@ struct I2C : Coersion {
     LABEL("I2C");
     I2C(Expr* base) : Coersion(base)
     {
-        this->type = new types::PrimType(types::PrimKind::CHAR);
+        this->type = new types::PrimType(types::PrimType::CHAR);
     }
 };
 extern const CoersionBuilder bdI2C;
@@ -256,7 +259,7 @@ struct C2I : Coersion {
     LABEL("C2I");
     C2I(Expr* base) : Coersion(base)
     {
-        this->type = new types::PrimType(types::PrimKind::INTEGER);
+        this->type = new types::PrimType(types::PrimType::INTEGER);
     }
 };
 extern const CoersionBuilder bdC2I;

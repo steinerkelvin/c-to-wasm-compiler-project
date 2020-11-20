@@ -18,24 +18,23 @@ static void error_simple_type_spec(const char* const kind_name)
 static void handle_simple_type_spec(
     std::optional<types::PrimType>& result_type, const SimpleTypeSpec* spec)
 {
-    using types::PrimKind;
     using types::PrimType;
     assert(spec);
 
     switch (spec->kind) {
         case SimpleTypeSpec::VOID:
-            if (result_type && result_type->kind != PrimKind::VOID) {
+            if (result_type && result_type->kind != PrimType::VOID) {
                 error_simple_type_spec("void");
             } else {
-                result_type = PrimType{PrimKind::VOID};
+                result_type = PrimType(PrimType::VOID);
             }
             break;
         case SimpleTypeSpec::CHAR:
-            if (result_type && result_type->kind != PrimKind::CHAR) {
+            if (result_type && result_type->kind != PrimType::CHAR) {
                 error_simple_type_spec("char");
                 exit(1);
             } else {
-                result_type = PrimType{PrimKind::CHAR};
+                result_type = PrimType(PrimType::CHAR);
             }
             break;
         case SimpleTypeSpec::SHORT:
@@ -43,20 +42,20 @@ static void handle_simple_type_spec(
         case SimpleTypeSpec::LONG:
         case SimpleTypeSpec::SIGNED:
         case SimpleTypeSpec::UNSIGNED:
-            if (result_type && result_type->kind != PrimKind::INTEGER) {
+            if (result_type && result_type->kind != PrimType::INTEGER) {
                 error_simple_type_spec("integer");
                 exit(1);
             } else {
-                result_type = PrimType{PrimKind::INTEGER};
+                result_type = PrimType(PrimType::INTEGER);
             }
             break;
         case SimpleTypeSpec::FLOAT:
         case SimpleTypeSpec::DOUBLE:
-            if (result_type && result_type->kind != PrimKind::REAL) {
+            if (result_type && result_type->kind != PrimType::REAL) {
                 error_simple_type_spec("floating");
                 exit(1);
             } else {
-                result_type = PrimType{PrimKind::REAL};
+                result_type = PrimType(PrimType::REAL);
             }
             break;
         default:

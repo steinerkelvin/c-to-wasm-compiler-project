@@ -2,26 +2,8 @@
 
 namespace types {
 
-const char* get_prim_text(PrimKind kind)
+Type* Pointer::derreference() const
 {
-    switch (kind) {
-        case VOID:
-            return "void";
-            break;
-        case CHAR:
-            return "char";
-            break;
-        case INTEGER:
-            return "integer";
-            break;
-        case REAL:
-            return "real";
-            break;
-    }
-    abort();
-}
-
-Type* Pointer::derreference() const {
     assert(this->n >= 1);
     if (this->n == 1) {
         return this->get_base();
@@ -31,7 +13,8 @@ Type* Pointer::derreference() const {
     new_type->n--;
     return new_type;
 }
-Pointer* Pointer::add_indiretion(Type* type, size_t n) {
+Pointer* Pointer::add_indiretion(Type* type, size_t n)
+{
     if (auto type_pt = dynamic_cast<Pointer*>(type)) {
         auto new_type = new Pointer(*type_pt);
         new_type->n += n;
@@ -107,31 +90,68 @@ bool Function::is_compatible_with(const Type* other)
     return false;
 }
 
-} // namespace types
-
-std::ostream& operator<<(std::ostream& stream, const types::Type& type)
-{
-    return type.write_repr(stream);
-}
-
 std::ostream& types::PrimType::write_repr(std::ostream& stream) const
 {
-    using types::PrimKind;
     switch (this->kind) {
-        case PrimKind::VOID:
+        case PrimType::VOID:
             stream << "void";
             break;
-        case PrimKind::CHAR:
+        case PrimType::CHAR:
             stream << "char";
             break;
-        case PrimKind::INTEGER:
+        case PrimType::INTEGER:
             stream << "integer";
             break;
-        case PrimKind::REAL:
+        case PrimType::REAL:
             stream << "real";
             break;
         default:
             abort();
     }
     return stream;
+}
+
+std::ostream& Pointer::write_repr(std::ostream& stream) const
+{
+    // stream << "(";
+    for (size_t i = 0; i < this->n; i++) {
+        stream << "*";
+    }
+    // stream << ")";
+    this->get_base()->write_repr(stream);
+    return stream;
+}
+
+std::ostream& Vector::write_repr(std::ostream& stream) const
+{
+    stream << "[" << size << "]";
+    this->get_base()->write_repr(stream);
+    return stream;
+}
+
+std::ostream& Function::write_repr(std::ostream& stream) const
+{
+    stream << "(";
+
+    Once first;
+    for (auto [name, type] : parameters) {
+        if (!first) {
+            stream << ", ";
+        }
+        type->write_repr(stream);
+        if (name) {
+            stream << " " << *name;
+        }
+    }
+
+    stream << ")";
+    this->get_base()->write_repr(stream);
+    return stream;
+}
+
+} // namespace types
+
+std::ostream& operator<<(std::ostream& stream, const types::Type& type)
+{
+    return type.write_repr(stream);
 }

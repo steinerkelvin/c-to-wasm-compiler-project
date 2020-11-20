@@ -5,7 +5,6 @@
 
 namespace ops {
 using namespace types;
-using types::PrimKind;
 using types::PrimType;
 using types::Type;
 
@@ -52,8 +51,7 @@ type_error_assign(pos::Pos posi, const Type* target, const Type* source)
 static void type_error_bool(pos::Pos posi, const Type* type)
 {
     std::cerr << "SEMANTIC ERROR (" << posi << "): ";
-    std::cerr << "expression cannot be resolved to boolean."
-              << std::endl;
+    std::cerr << "expression cannot be resolved to boolean." << std::endl;
     exit(EXIT_FAILURE);
 }
 
@@ -62,11 +60,13 @@ static void type_error_bool(pos::Pos posi, const Type* type)
 // TODO complete refactor
 //
 
-static const PrimKind bitwise[4][4] = {
-    /* void */ {VOID, VOID, VOID, VOID},
-    /* char */ {VOID, INTEGER, INTEGER, VOID},
-    /* int  */ {VOID, INTEGER, INTEGER, VOID},
-    /* real */ {VOID, VOID, VOID, VOID}};
+// clang-format off
+static const PrimType::PrimKind bitwise[4][4] = {
+    /* void */ {PrimType::VOID, PrimType::VOID,    PrimType::VOID,    PrimType::VOID},
+    /* char */ {PrimType::VOID, PrimType::INTEGER, PrimType::INTEGER, PrimType::VOID},
+    /* int  */ {PrimType::VOID, PrimType::INTEGER, PrimType::INTEGER, PrimType::VOID},
+    /* real */ {PrimType::VOID, PrimType::VOID,    PrimType::VOID,    PrimType::VOID} };
+// clang-format on
 
 Type* unify_bitwise_old(const Type* l, const Type* r, const char* op)
 {
@@ -75,10 +75,10 @@ Type* unify_bitwise_old(const Type* l, const Type* r, const char* op)
     if (!pl || !pr) {
         type_error_old(op, l, r);
     }
-    PrimKind kl = pl->kind;
-    PrimKind kr = pr->kind;
-    PrimKind result = bitwise[kl][kr];
-    if (result == PrimKind::VOID)
+    PrimType::PrimKind kl = pl->kind;
+    PrimType::PrimKind kr = pr->kind;
+    PrimType::PrimKind result = bitwise[kl][kr];
+    if (result == PrimType::VOID)
         type_error_old(op, l, r);
     return new PrimType(result);
 }
@@ -96,7 +96,7 @@ namespace prim_matrix {
     using CoersionBuilderPair =
         std::pair<ast::CoersionBuilder, ast::CoersionBuilder>;
 
-    using ResultMatrix = PrimKind[4][4];
+    using ResultMatrix = PrimType::PrimKind[4][4];
     using CoersionPairMatrix = const std::optional<CoersionBuilderPair>[4][4];
     using ResultAndCoersionMatrixes =
         const std::pair<const ResultMatrix*, const CoersionPairMatrix*>;
@@ -115,7 +115,12 @@ namespace prim_matrix {
         /* real */ {error, bdC2R, bdI2R, rsame}
     };
 
-    const PrimKind arith_result[4][4] = {
+    const auto VOID = PrimType::VOID;
+    // const auto CHAR = PrimType::CHAR;
+    const auto INTEGER = PrimType::INTEGER;
+    const auto REAL = PrimType::REAL;
+
+    const PrimType::PrimKind arith_result[4][4] = {
         /*          void    char             int              real           */
         /* void	*/ {VOID,   VOID           , VOID           , VOID            },
         /* char	*/ {VOID,   INTEGER        , INTEGER        , REAL            },
@@ -131,7 +136,7 @@ namespace prim_matrix {
     };
     ResultAndCoersionMatrixes arith = {&arith_result, &arith_coersion};
 
-    const PrimKind comp_result[4][4] = {
+    const PrimType::PrimKind comp_result[4][4] = {
         /*          void    char             int              real           */
         /* void	*/ {VOID,   VOID           , VOID           , VOID            },
         /* char	*/ {VOID,   INTEGER        , INTEGER        , INTEGER         },
@@ -160,7 +165,7 @@ Expr* make_unary(
     auto type = node->get_type();
     if (auto type_prim = dynamic_cast<PrimType*>(type)) {
         auto kind = type_prim->get_kind();
-        if (!(kind == PrimKind::VOID)) {
+        if (!(kind == PrimType::VOID)) {
             return builder(node);
         }
     }
@@ -175,7 +180,7 @@ Expr* make_btnot(
     auto type = node->get_type();
     if (auto type_prim = dynamic_cast<PrimType*>(type)) {
         auto kind = type_prim->get_kind();
-        if (kind == PrimKind::CHAR || kind == PrimKind::INTEGER) {
+        if (kind == PrimType::CHAR || kind == PrimType::INTEGER) {
             return builder(node);
         }
     }
@@ -263,10 +268,10 @@ std::pair<Type*, CoersionBuilderPair> unify_bin_prim(
     assert(type1);
     assert(type2);
     auto [result_matrix, coersion_matrix] = matrixes;
-    PrimKind k1 = type1->kind;
-    PrimKind k2 = type2->kind;
+    PrimType::PrimKind k1 = type1->kind;
+    PrimType::PrimKind k2 = type2->kind;
     auto result_kind = (*result_matrix)[k1][k2];
-    if (result_kind == PrimKind::VOID) {
+    if (result_kind == PrimType::VOID) {
         type_error(op, posi, type1, type2);
     }
     auto result_type = new PrimType(result_kind);
@@ -379,10 +384,10 @@ Expr* check_bool(Expr* node, pos::Pos posi)
         auto kind = type_prim->get_kind();
         Expr* result_node = node;
         switch (kind) {
-            case PrimKind::CHAR:
+            case PrimType::CHAR:
                 result_node = new ast::C2I(node);
                 return result_node;
-            case PrimKind::INTEGER:
+            case PrimType::INTEGER:
                 return result_node;
             default:
                 type_error_bool(posi, type);
@@ -453,8 +458,8 @@ Expr* index_access(Expr* value, Expr* index, pos::Pos posi)
 
     const types::PrimType* index_type_prim =
         dynamic_cast<const types::PrimType*>(index_type);
-    if (!index_type_prim || !(index_type_prim->kind == PrimKind::CHAR ||
-                              index_type_prim->kind == PrimKind::INTEGER)) {
+    if (!index_type_prim || !(index_type_prim->kind == PrimType::CHAR ||
+                              index_type_prim->kind == PrimType::INTEGER)) {
         std::cerr << "SEMANTIC ERROR (" << posi << "): ";
         std::cerr << "index must heave integer type, ";
         std::cerr << "got \'" << *index_type << "\' instead." << std::endl;
@@ -528,7 +533,8 @@ Expr* function_call(Expr* value, ast::Exprs* args_node, pos::Pos posi)
     return new_node;
 }
 
-ast::Statement* return_value(Expr* value_node, pos::Pos posi) {
+ast::Statement* return_value(Expr* value_node, pos::Pos posi)
+{
     assert(value_node);
     // TODO type check
     auto new_node = new ast::ReturnValue(value_node);
