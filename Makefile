@@ -36,9 +36,10 @@ cp=cp2
 pdf:
 	pandoc ./relatorio-dope-$(cp).md -o ./relatorio-dope-$(cp).pdf
 
+name="compiladores-dope-$(cp)"
 zip:
 	@# zip -r compiladores-dope-$(cp).zip ./ -x '.git/*' 'tmp/*' 'doxy/*' '.dep/*'
-	git archive -o compiladores-dope-$(cp).zip HEAD
+	git archive --prefix=$(name)/ -o $(name).zip HEAD
 
 clean:
 	rm -f -r ./.deps
