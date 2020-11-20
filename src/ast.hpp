@@ -177,6 +177,12 @@ struct FloatingValue : BaseValue<double, types::PrimKind::REAL> {
 struct CharValue : BaseValue<char, types::PrimKind::CHAR> {
     LABEL("Char");
     CharValue(char value) : BaseValue<char, types::PrimKind::CHAR>(value) {}
+    virtual void write_data_repr(std::ostream& stream) const
+    {
+        this->Expr::write_data_repr(stream);
+        stream << " ";
+        stream << (int)this->value;
+    };
 };
 
 struct StringValue : Expr {

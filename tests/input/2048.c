@@ -67,7 +67,7 @@ void clear_screen() {
 void repeatPrint(char c[], int n) {
     int i;
     for (i = 0; i < n; i++) {
-        printf("%s", c);
+        // printf("%s", c);  // TODO
     }
 }
 
@@ -108,7 +108,7 @@ void render_table() {
             if (v) {
                 // set_bg_256color(get_tile_bg(v));
                 // set_fg_256color(get_tile_fg(v));
-                printf("  %4d  ", v);
+                // printf("  %4d  ", v); // TODO
                 // reset_bg_color();
                 // reset_fg_color();
                 printf("|");
@@ -126,7 +126,9 @@ void render_table() {
 }
 
 // printa informação sobre o jogo
-void render_info() { printf("SCORE: %-4d  RECORD: %-4d\n", score, record); }
+void render_info() {
+    // printf("SCORE: %-4d  RECORD: %-4d\n", score, record);  // TODO
+}
 
 void render_info_2() { printf("\nPress Q to quit.\n"); }
 
@@ -160,7 +162,13 @@ void insert_random_tile() {
             for (j = 0; j < 4; j++) {
                 if (table[i][j] == 0) {
                     if (c == n) {
-                        table[i][j] = rand() % 10 ? 2 : 4;
+                        // table[i][j] = rand() % 10 ? 2 : 4; // TODO
+                        int r = rand();
+                        if (r % 10 == 0) {
+                            table[i][j] = 4;
+                        } else {
+                            table[i][j] = 2;
+                        }
                     }
                     c++;
                 }
@@ -189,7 +197,8 @@ void clean_table() {
 void update_record(int n) { record = n; }
 
 void add_score(int n) {
-    score += n;
+    // score += n;  // TODO
+    score = score + n;  // TODO
     if (score > record) {
         update_record(score);
     }
@@ -330,7 +339,8 @@ int main() {
 
     while (1) {
         char ch;
-        const int ret = scanf(" %c", &ch);
+        int ret; // const int ret = scanf(" %c", &ch); // TODO
+
         if (ret != 1) {
             continue;
         }
@@ -372,7 +382,7 @@ int main() {
                 printf("press R to start a new game\n");
 
                 char ch;
-                const int ret = scanf(" %c", &ch);
+                int ret; // const int ret = scanf(" %c", &ch); // TODO
                 if (ret != 1) {
                     break;
                 }
