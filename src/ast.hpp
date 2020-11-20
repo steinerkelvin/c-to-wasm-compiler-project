@@ -39,9 +39,9 @@ struct Node : pos::HasPosition {
             stream << " ";
             child->write_repr(stream);
         }
-        if (auto this_pos = this->get_pos()) {
-            stream << " \"" << *this_pos << "\"";
-        }
+        // if (auto this_pos = this->get_pos()) {
+        //     stream << " \"" << *this_pos << "\"";
+        // }
         stream << ")";
     }
 };
