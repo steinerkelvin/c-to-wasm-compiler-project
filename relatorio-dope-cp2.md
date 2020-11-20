@@ -1,5 +1,22 @@
 # Relatório CP2 — Grupo DOPE
 
+## Organização dos módulos
+
+| Módulo       | namespace |                                                   |
+| ------------ | --------- | ------------------------------------------------- |
+| positions    | pos       | Representação das posições dos tokens na entrada. |
+| strtable     | strtb     | Tabela de strings.                                |
+| symtable     | symtb     | Tabela de símbolos.                               |
+| types        | types     | Representação de tipos.                           |
+| ast          | ast       | Implementação da árvore de sintaxe.               |
+| declarations | decl      | Tratamento de declarações.                        |
+| operations   | ops       | Tratamento de operações, type checking etc.       |
+| parsing      | parsing   | Código auxilixar para o parser.                   |
+| util         |           | Utilidades no geral.                              |
+| global       |           | Variáveis compartilhadas por vários módulos.      |
+
+## AST
+
 Para esta etapa, decidimos começar parte da implementação da AST para adquirir
 uma noção melhor de como deveriam ser as estruturas das tabelas de símbolos.
 
@@ -8,36 +25,56 @@ tentar implementar uma AST com os nós tipados adequadamente. Isso acabou por
 resultar em uma hierarquia interessante de classes para representear os nós da
 AST, como é possível ver na figura.
 
-![Hierarquia de classes da AST](./docs/inherit_graph_ast.png)
+![Hierarquia de classes da AST.](./docs/inherit_graph_ast.svg)
 
 Entendemos que isso facilitará a manipulação dos nós da AST, uma vez que, por
 exemplo, todos os nós envolvidos em operações com expressões tem o tipo `Expr` e
 portanto tem uma estrutura em comum e sabe-se que um método como `get_type()`
 pode ser chamado para obter o tipo da expressão.
 
+Implementamos nos nós da AST - através do métodos `write_repr()` e overload do
+operador `<<` - a capacidade de produzir uma representação da subávore no
+formato de "s-expression". O executável compilado em `bin/render-ast` tem a
+função apenas de produzir essa representação para um dado um programa de
+entrada. Ele é executado durante a bateria de testes (em `./run_tests.sh`) para
+cada arquivo de entrada de teste, e os arquivos que tem entrada bem formada tem
+a sua "s-expression" resultante renderizada pelo script `tree2dot` para um
+diagrama no formato "dot", do [`graphviz`][graphviz], na pasta `tests/ast-dot/`.
+
+[graphviz]: graphviz.org
+
+\newpage
+
 ## Tipos
 
 Decidimos resumir os tipos primitivos a apenas 4 possibilidades de
 implementação:
 
-- "`void`";
-- "`char`";
-- "`integer`, que emgloba os tipos `short`,
-  `int`, `long`, `long long`, com sinal e sem sinal;
-- e um tipo "`real`" que
-  representa os tipos de ponto flutuante `float` e `double`.
+- `void`
+- `char`
+- `integer`, que emgloba os tipos `short`, `int`, `long`, `long long`, com sinal
+  e sem sinal
+- e um tipo `real`, que representa os tipos de ponto flutuante `float` e
+  `double`
 
-bastando usar na implementação as representações correnpondentes com maior
+bastando usar na implementação as representações correnpondentes com a maior
 quantidade de bits.
 
 Decidimos limitar o suporte a apenas vetores de tamanho conhecido em tempo de
-compilação, e funções com número fixo de argumentos, i.e. omitiremos o o suporte
-a "varargs". Também foram omitidos enums, structs e unions.
+compilação, e funções com número fixo de argumentos, i.e. omitiremos o suporte a
+"varargs". Também foram omitidos enums, structs e unions.
+
+A classe ContainerType define um tipo que tem um outro tipo como base, como
+ponteiros e vetores. Por exemplo, o tipo `int*` tem como base o tipo do valor
+sendo apontado: `int`. A base de um tipo de função, por sua vez, é o tipo do
+valor de retorno.
+
+![Hierarquia de classes dos tipos.](./docs/inherit_graph_types.svg)
 
 ### Notação em declarações
 
 Tivemos certa dificuldade para compreender como exatamente funciona a notação
-das declarações em C. Como que cada parte contribui para o tipo resultante que
+das declarações em C, como que cada parte contribui para o tipo resultante que
 será associado ao símbolo sendo declarado. Considere o exemplo:
 
 ```c
@@ -46,8 +83,8 @@ int *vec[4][8];
 
 A sintaxe de cada "declarador" pode ser construída iniciando-se com um
 identificador — `vec` no exemplo — que pode ser concatenado à direita com
-`[<x>]` para formar um declarador de tipo de vetor, com `<x>` sendo o tamanho do
-vetor; ou `(<params>)`, para um tipo de função, com `<params>` sendo os tipos
+`[<x>]` para formar um declarador de tipo de vetor, sendo `<x>` o tamanho do
+vetor; ou `(<params>)`, para um tipo de função, sendo `<params>` os tipos
 dos parametros. Um declarador também pode ser concatenado à esquerda com um
 asterisco `*` para torná-lo um declarador de tipo de "ponteiro para", sendo que
 este tem precedência menor que os concatenados a direita. Naturalmente, um
@@ -59,10 +96,10 @@ int *((vec[4])[8]);
 ```
 
 O que pode fazer um incauto imaginar que o que está sendo declarado nessa linha
-é um ponteiro, visto que o `*` está mais por fora que os `[]` dos vetores.
-Porém, não é que está acontecendo. Ocorre que em C as declarações foram
-projetadas para [imitar a sintaxe][bad-pointers] da expressão em que o símbolo
-sendo declarado será usado.
+é um ponteiro, visto que o `*` está mais por fora que os `[]` de vetor. Porém,
+não é que está acontecendo. Ocorre que em C as declarações foram projetadas para
+[imitar a sintaxe][bad-pointers] da expressão em que o símbolo sendo declarado
+será usado.
 
 Ou seja, em:
 
@@ -75,16 +112,16 @@ partindo de `vec`:
 
 - selecionamos a quarta posição do vetor: `vec[3]`;
 - então a oitava posição do vetor resultante `vec[3][7]`;
-- e por fim derreferenciamos o ponteiro para acessar o valor de tipo `int` no
-  endereço que será atribuido à variável `x`: `*vec[3][7]`;
+- e por fim derreferenciamos o ponteiro para acessar o valor de tipo `int` que
+  será atribuido à variável `x`, no endereço do ponteiro: `*vec[3][7]`;
 
-Observe que navegando "de dentro para fora" na expressão nós desconstruimos os
+Observe que navegando "de dentro para fora" na expressão, desconstruímos os
 tipos compostos até chegar no tipo base. Isso é o contrário do que queremos
 fazer na declaração: a partir do tipo base, construir os tipos compostos.
 
-Portanto, em nossa implementação escolhemos empilhar as "partes" dos declaradoes
-e então desempilhá-lhas para construir o tipo na ordem inversa em que acontecem
-as reduções no parser. Empilhando o nosso exemplo da esqueda para direita temos:
+Então em nossa implementação escolhemos empilhar cada parte dos declaradores e
+então desempilhá-lhas para construir o tipo na ordem inversa em que acontecem as
+reduções no parser. Empilhando o nosso exemplo da esqueda para direita temos:
 
     vec => [4] [8] * int
 

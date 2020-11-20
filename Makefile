@@ -34,7 +34,7 @@ doxygen:
 cp=cp2
 
 pdf:
-	pandoc ./relatorio-$(cp).md -o ./relatorio-$(cp).pdf
+	pandoc ./relatorio-dope-$(cp).md -o ./relatorio-dope-$(cp).pdf
 
 zip:
 	@# zip -r compiladores-dope-$(cp).zip ./ -x '.git/*' 'tmp/*' 'doxy/*' '.dep/*'
