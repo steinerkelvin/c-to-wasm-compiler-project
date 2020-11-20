@@ -52,7 +52,7 @@ implementação:
 
 - `void`
 - `char`
-- `integer`, que emgloba os tipos `short`, `int`, `long`, `long long`, com sinal
+- `integer`, que engloba os tipos `short`, `int`, `long`, `long long`, com sinal
   e sem sinal
 - e um tipo `real`, que representa os tipos de ponto flutuante `float` e
   `double`
