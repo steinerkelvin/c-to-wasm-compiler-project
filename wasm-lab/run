@@ -1,0 +1,10 @@
+#!/bin/bash
+
+name=$1
+shift 1
+if [ -z "$name" ]; then
+    echo 1>&2
+fi
+
+wat2wasm "${name}.wat" -o "${name}.wasm" &&
+    node ./runtime.js "${name}.wasm"
