@@ -113,6 +113,10 @@ struct MultiChildrenBase : R {
     std::vector<T*> children;
 };
 
+//
+// Expressions
+//
+
 struct TypedNode : Node {
     virtual bool is_typed() const { return true; }
     types::Type* get_type() const
@@ -120,34 +124,45 @@ struct TypedNode : Node {
         assert(this->type);
         return this->type;
     };
-
     void set_type(types::Type* t) { this->type = t; };
-    void set_type(types::PrimType::PrimKind k)
-    {
-        this->type = new types::PrimType(k);
-    };
-
-    virtual void write_data_repr(std::ostream& stream) const
-    {
-        stream << " \"[" << *(this->type) << "]\"";
-    }
 
   protected:
     types::Type* type = new types::PrimType{types::PrimType::VOID};
 };
 
 struct Expr : TypedNode {
+    virtual bool is_lvalue(bool flag) const = 0;
+    virtual bool is_rvalue(bool flag) const = 0;
+
+    virtual void write_data_repr(std::ostream& stream) const
+    {
+        stream << " \"[" << *(this->type) << "]\"";
+    }
+
     static Expr* retsame(Expr* child) { return child; };
+};
+
+struct LExpr : Expr {
+    virtual bool is_lvalue(bool flag) const { return true; };
+    virtual bool is_rvalue(bool flag) const { return false; };
+};
+
+struct RExpr : Expr {
+    virtual bool is_lvalue(bool flag) const { return false; };
+    virtual bool is_rvalue(bool flag) const { return true; };
+};
+
+struct LRExpr : Expr {
+    virtual bool is_lvalue(bool flag) const { return true; };
+    virtual bool is_rvalue(bool flag) const { return true; };
 };
 
 struct Exprs : MultiChildrenBase<Expr, Node> {
     LABEL("");
 };
 
-struct Value : Expr {};
-
 template <typename T, types::PrimType::PrimKind type_kind>
-struct BaseValue : Expr {
+struct BaseValue : RExpr {
     BaseValue(T value)
     {
         this->value = value;
@@ -188,7 +203,7 @@ struct CharValue : BaseValue<char, types::PrimType::CHAR> {
     };
 };
 
-struct StringValue : Expr {
+struct StringValue : RExpr {
     LABEL("String");
     StringValue(StrRef ref) : ref(ref)
     {
@@ -207,7 +222,7 @@ struct StringValue : Expr {
     StrRef ref;
 };
 
-struct Variable : Expr {
+struct Variable : LRExpr {
     LABEL("Var");
     Variable(symtb::NameRef& ref) : ref(ref){};
     const std::string& get_name() const { return this->ref.get().name; };
@@ -222,8 +237,8 @@ struct Variable : Expr {
 };
 
 // Type coersion node
-struct Coersion : SingleChildBase<Expr> {
-    using SingleChildBase<Expr>::SingleChildBase;
+struct Coersion : SingleChildBase<Expr, RExpr> {
+    using SingleChildBase::SingleChildBase;
 };
 using CoersionBuilder = std::function<Expr*(Expr*)>;
 
@@ -280,8 +295,19 @@ struct V2P : Coersion {
 
 // Unary operator
 template <typename T>
-struct UnOp : SingleChildBase<Expr> {
-    UnOp(Expr* child) : SingleChildBase<Expr>(child)
+struct UnOp : SingleChildBase<Expr, RExpr> {
+    UnOp(Expr* child) : SingleChildBase(child)
+    {
+        this->type = child->get_type();
+        this->merge_pos_from(child);
+    }
+    static Expr* builder(Expr* child) { return new T(child); };
+};
+
+// Unary lr-value operator
+template <typename T>
+struct LRUnOp : SingleChildBase<Expr, LRExpr> {
+    LRUnOp(Expr* child) : SingleChildBase(child)
     {
         this->type = child->get_type();
         this->merge_pos_from(child);
@@ -293,9 +319,26 @@ using UnBuilder = Expr* (*)(Expr* child);
 
 // Binary operator
 template <typename T>
-struct BinOp : MultiChildrenBase<Expr> {
+struct BinOp : MultiChildrenBase<Expr, RExpr> {
     // TODO ensure T = derived class (CRTP)
     BinOp(Expr* left, Expr* right)
+    {
+        assert(left != NULL);
+        assert(right != NULL);
+        this->children = std::vector<Expr*>{left, right};
+        this->merge_pos_from(left);
+        this->merge_pos_from(right);
+    };
+    static Expr* builder(Expr* left, Expr* right)
+    {
+        return new T(left, right);
+    };
+};
+
+// Binary lr-value operator
+template <typename T>
+struct LRBinOp : MultiChildrenBase<Expr, LRExpr> {
+    LRBinOp(Expr* left, Expr* right)
     {
         assert(left != NULL);
         assert(right != NULL);
@@ -404,20 +447,25 @@ struct AddressOf : UnOp<AddressOf> {
     LABEL("&x");
     using UnOp::UnOp;
 };
-struct Derreference : UnOp<Derreference> {
+
+struct Derreference : LRUnOp<Derreference> {
     LABEL("*x");
-    using UnOp::UnOp;
+    using LRUnOp::LRUnOp;
 };
 
-struct IndexAccess : BinOp<IndexAccess> {
+struct IndexAccess : LRBinOp<IndexAccess> {
     LABEL("v[x]");
-    using BinOp::BinOp;
+    using LRBinOp::LRBinOp;
 };
 
-struct Call : TwoChildrenBase<Expr, Exprs, Expr> {
+struct Call : TwoChildrenBase<Expr, Exprs, RExpr> {
     LABEL("\"f(x)\"");
-    using TwoChildrenBase<Expr, Exprs, Expr>::TwoChildrenBase;
+    using TwoChildrenBase::TwoChildrenBase;
 };
+
+//
+// Statements
+//
 
 struct Statement : Node {
     LABEL("Statement");

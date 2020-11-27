@@ -47,7 +47,7 @@ int main()
     // struct ponto ponto = {.x = 10.0, .y = 0.0}; // TODO tratar especificador
     // de struct? ponto.y = 20;
 
-    int vec[4][4] = {{0}};
+    int vec[4][4]; // = {{0}};
     -vec[1][1]++;
 
     // char k = 'A';
@@ -74,7 +74,7 @@ int main()
 
     int e = 1;
     int j = 2;
-    int v[3] = {e, j, 3};
+    int v[3]; // = {e, j, 3};
 
     int i = 0;
     -i++;
@@ -103,13 +103,13 @@ int main()
         i++;
     while (i < 10);
 
-//     int flag = 0;
-// // start:
-//     if (flag) {
-//         // goto end;
-//     }
-//     flag = 1;
-// // end:;
+    //     int flag = 0;
+    // // start:
+    //     if (flag) {
+    //         // goto end;
+    //     }
+    //     flag = 1;
+    // // end:;
 
     return 0;
 }

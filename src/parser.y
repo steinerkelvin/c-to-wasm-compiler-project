@@ -361,28 +361,28 @@ direct-abstract-declarator
 
 initializer     // TODO assignment
     : assignment-expression
-    | LCB initializer-list trailing-comma RCB   { $$ = new ast::Expr(); }
+    // | LCB initializer-list trailing-comma RCB   { $$ = new ast::Expr(); }
     ;
 
-initializer-list
-    : designation-opt initializer
-    | initializer-list COMMA designation-opt initializer
-    ;
+// initializer-list
+//     : designation-opt initializer
+//     | initializer-list COMMA designation-opt initializer
+//     ;
 
-designation-opt
-    : designator-list ASSIGN
-    | %empty
-    ;
+// designation-opt
+//     : designator-list ASSIGN
+//     | %empty
+//     ;
 
-designator-list
-    : designator
-    | designator-list designator
-    ;
+// designator-list
+//     : designator
+//     | designator-list designator
+//     ;
 
-designator
-    : LB constant-expression RB
-    | DOT ID
-    ;
+// designator
+//     : LB constant-expression RB
+//     | DOT ID
+//     ;
 
 
 function-definition

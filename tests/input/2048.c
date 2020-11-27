@@ -17,7 +17,7 @@ const char TABLE_WIDTH = 5 + 4 * 8;
 int score = 0;
 int record = 0;
 
-int table[4][4] = {0};
+int table[4][4]; // = {0};
 
 // int DEFAULT_BG_256COLOR = 249;
 // int DEFAULT_FG_256COLOR = 235;
@@ -187,9 +187,7 @@ void clean_table() {
     // memset(table, 0, sizeof(table));
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            if (table[i][j] == 0) {
-                table[i][j] = 0;
-            }
+            table[i][j] = 0;
         }
     }
 }
@@ -212,7 +210,10 @@ int move_table_hor(int dir) {
     for (i = 0; i < 4; i++) {
         int n = 0, cur_tile = 0;
         // vetor para a nova linha
-        int new_row[4] = {0, 0, 0, 0};
+        int new_row[4]; // = {0, 0, 0, 0};
+        for (int i = 0; i < 4; i++) {
+            new_row[i] = 0;
+        }
         // para cada colula
         for (j = 0; j < 4; j++) {
             // determina o valor do �ndice da coluna baseado na direção do
@@ -268,7 +269,10 @@ int move_table_vert(int dir) {
     for (i = 0; i < 4; i++) {
         int n = 0, cur_tile = 0;
         // vetor para a nova linha
-        int new_col[4] = {0, 0, 0, 0};
+        int new_col[4]; // = {0, 0, 0, 0};
+        for (int i = 0; i < 4; i++) {
+            new_col[i] = 0;
+        }
         // para linha colula
         for (j = 0; j < 4; j++) {
             // determina o valor do �ndice da linha baseado na direção do

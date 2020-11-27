@@ -144,12 +144,6 @@ RB : ]
 LB : [
 INT_VAL : 4
 RB : ]
-ASSIGN : =
-LCB : {
-LCB : {
-INT_VAL : 0
-RCB : }
-RCB : }
 SEMI : ;
 MINUS : -
 ID : vec
@@ -225,14 +219,6 @@ ID : v
 LB : [
 INT_VAL : 3
 RB : ]
-ASSIGN : =
-LCB : {
-ID : e
-COMMA : ,
-ID : j
-COMMA : ,
-INT_VAL : 3
-RCB : }
 SEMI : ;
 INT : int
 ID : i
