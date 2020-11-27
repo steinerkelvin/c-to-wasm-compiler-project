@@ -10,6 +10,23 @@ if (!input_file_name) {
 
 const utf8_decoder = new TextDecoder('utf-8')
 
+const make_imports = (global) => {
+  return {
+    "std": {
+      println: (po) => {
+        const {exports, memory} = global
+        // TODO do without wasm-implementd str_len ??
+        const len = exports.str_len(po)
+        const arr = new Uint8Array(memory.buffer, po, len)
+        const txt = utf8_decoder.decode(arr)
+        console.log(txt)
+      },
+      println_int: (i) => console.log(i),
+      println_real: (r) => console.log(r),
+    }
+  }
+}
+
 const run = async (file_name) => {
   const program_buffer = readFileSync(file_name)
   const module = await WebAssembly.compile(program_buffer)
@@ -19,25 +36,12 @@ const run = async (file_name) => {
     memory: null,
   }
 
-  const env = {
-    runtime: {
-      println: (po) => {
-        const len = exports.str_len(po)
-        const arr = new Uint8Array(global.memory.buffer, po, len)
-        // console.log(`printing string at position ${po} with length ${len}`)
-        // console.log(`${arr}`)
-        const txt = utf8_decoder.decode(arr)
-        console.log(txt)
-      },
-      println_int: (i) => console.log(i),
-      println_real: (r) => console.log(r),
-    }
-  }
+  const imports = make_imports(global)
 
-  const instance = await WebAssembly.instantiate(module, env)
+  const instance = await WebAssembly.instantiate(module, imports)
 
   const exports = instance.exports
-  // console.log(exports)
+  // console.error(exports)  // DEBUG
 
   if (!exports.memory) {
     console.error("wasm program does not export memory")
@@ -52,13 +56,11 @@ const run = async (file_name) => {
   global.memory = exports.memory
 
   exports.main()
-
-  // let arr = new Uint8Array(exports.memory.buffer)
-  // console.log(arr)
 }
 
 run(input_file_name).catch((err) => {
   if (err) {
     console.error(err)
+    process.exit(1)
   }
 })
