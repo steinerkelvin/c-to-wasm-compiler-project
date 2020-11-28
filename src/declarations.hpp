@@ -228,7 +228,7 @@ void declare(const DeclarationSpecs& specs, const InitDeclarators& decls);
  * Declares a funcion and opens a new scope, inserting the function parameters
  * in this new scope.
  */
-std::pair<symtb::NameRef, ScopeId>*
+std::pair<symtb::VarRef, ScopeId>*
 declare_function(const DeclarationSpecs* specs, Declarator* declarator);
 
 }; // namespace decl

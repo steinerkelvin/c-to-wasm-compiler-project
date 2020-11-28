@@ -56,7 +56,7 @@ bool Vector::is_compatible_with(const Type* other)
     if (auto casted = dynamic_cast<const Vector*>(other)) {
         // Check of compatibility of base type and vector size
         return this->get_base()->is_compatible_with(casted->get_base()) &&
-               this->size == casted->size;
+               this->num_elem == casted->num_elem;
     }
     return false;
 }
@@ -124,7 +124,7 @@ std::ostream& Pointer::write_repr(std::ostream& stream) const
 
 std::ostream& Vector::write_repr(std::ostream& stream) const
 {
-    stream << "[" << size << "]";
+    stream << "[" << this->num_elem << "]";
     this->get_base()->write_repr(stream);
     return stream;
 }

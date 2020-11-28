@@ -390,7 +390,7 @@ function-definition
         declarator[decl]
         // declaration-list-opt     // obscure arcane syntax
         LCB
-        <std::pair<symtb::NameRef,ScopeId>*>{
+        <std::pair<symtb::VarRef,ScopeId>*>{
             // Declares the function in the outer scope,
             // and opens a new scope
             $$ = decl::declare_function($specs, $decl);

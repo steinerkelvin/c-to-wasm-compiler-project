@@ -19,11 +19,24 @@ namespace symtb {
 struct Row {
     std::string name;
     types::Type* type;
+
+  protected:
+    Row(const std::string& name, types::Type* type) : name(name), type(type) {}
 };
 
-struct TagRow : Row {};
-struct TypeRow : Row {};
-struct NameRow : Row {};
+struct TagRow : Row {
+    TagRow(const std::string& name, types::Type* type) : Row(name, type) {}
+};
+struct TypeRow : Row {
+    TypeRow(const std::string& name, types::Type* type) : Row(name, type) {}
+};
+struct VarRow : Row {
+    bool is_param = false;
+    std::optional<size_t> offset;
+    VarRow(const std::string& name, types::Type* type, bool is_param)
+        : Row(name, type), is_param(is_param)
+    {}
+};
 
 struct SymRef {
     ScopeId scope_id;
@@ -35,8 +48,8 @@ struct TagRef : SymRef {
 struct TypeRef : SymRef {
     TypeRow& get() const;
 };
-struct NameRef : SymRef {
-    NameRow& get() const;
+struct VarRef : SymRef {
+    VarRow& get() const;
 };
 
 /**
@@ -50,7 +63,7 @@ ScopeId init();
  * Creates a new scope for symbols to be declared into.
  * Symbols will be added in the last opened spoce.
  */
-ScopeId open_scope();
+ScopeId open_scope(bool is_func_scope = false);
 
 /** Closes the last opened scope. */
 void close_scope();
@@ -60,21 +73,27 @@ TagRef insert_tag(const std::string& namep, types::Type* type);
 /** Inserts typedef'ed name into the last opened scope. */
 TypeRef insert_typename(const std::string& namep, types::Type* type);
 /** Inserts variable name into the last opened scope. */
-NameRef insert_name(const std::string& namep, types::Type* type);
+VarRef
+insert_var(const std::string& namep, types::Type* type, bool is_param = false);
 
 TagRow& get(const TagRef& ref);
 TypeRow& get(const TypeRef& ref);
-NameRow& get(const NameRef& ref);
+VarRow& get(const VarRef& ref);
 
 std::optional<TagRef>
 lookup_tag(const std::string& name, bool last_scope = false);
 std::optional<TypeRef>
 lookup_type(const std::string& name, bool last_scope = false);
-std::optional<NameRef>
-lookup_name(const std::string& name, bool last_scope = false);
+std::optional<VarRef>
+lookup_var(const std::string& name, bool last_scope = false);
 
 /* Verifica se um nome de tipo está em escopo (em qualquer nível) */
 bool is_typename(const char* name);
+
+/**
+ * Computes scope sizes and offsets of all variables on all scopes
+ */
+void compute_offsets(size_t base_activ_record_size);
 
 } // namespace symtb
 

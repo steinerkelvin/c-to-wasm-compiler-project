@@ -4,33 +4,47 @@
 #include <string>
 #include <vector>
 
-using symtb::NameRef;
-using symtb::NameRow;
+#include <iostream>
+
 using symtb::TagRef;
 using symtb::TagRow;
 using symtb::TypeRef;
 using symtb::TypeRow;
+using symtb::VarRef;
+using symtb::VarRow;
 using types::Type;
 
 struct Scope {
-    using IdMap = std::map<std::string, SymId>;
+    const ScopeId id;
+    const std::optional<ScopeId> parent_id;
+    const bool is_func_scope;
 
+    std::optional<size_t> base_offset;
+    std::optional<size_t> size;
+
+    using IdMap = std::map<std::string, SymId>;
     IdMap tags_map;
     IdMap types_map;
-    IdMap names_map;
+    IdMap vars_map;
 
     std::vector<TagRow> tags;
     std::vector<TypeRow> types;
-    std::vector<NameRow> names;
+    std::vector<VarRow> vars;
 
-    Scope(const ScopeId id, const std::optional<ScopeId> parent)
-        : id(id), parent(parent){};
+    Scope(
+        const ScopeId id,
+        const std::optional<ScopeId> parent_id,
+        bool is_func_scope = false)
+        : id(id), parent_id(parent_id), is_func_scope(is_func_scope){};
+
+    const ScopeId get_id() const { return this->id; };
+    const std::optional<ScopeId> get_parent() const { return this->parent_id; };
 
     SymId add_tag(const std::string& name, Type* type)
     {
         assert(tags_map.find(name) == tags_map.end());
         const SymId idx = tags.size();
-        TagRow row = {{name, type}};
+        TagRow row(name, type);
         tags.push_back(row);
         tags_map[name] = idx;
         return idx;
@@ -39,24 +53,20 @@ struct Scope {
     {
         assert(types_map.find(name) == types_map.end());
         const SymId idx = types.size();
-        TypeRow row = {{name, type}};
+        TypeRow row(name, type);
         types.push_back(row);
         types_map[name] = idx;
         return idx;
     }
-    SymId add_name(const std::string& name, Type* type)
+    SymId add_var(const std::string& name, Type* type, bool is_param = false)
     {
-        assert(names_map.find(name) == names_map.end());
-        const SymId idx = names.size();
-        NameRow row = {{name, type}};
-        names.push_back(row);
-        names_map[name] = idx;
+        assert(vars_map.find(name) == vars_map.end());
+        const SymId idx = vars.size();
+        VarRow row(name, type, is_param);
+        vars.push_back(row);
+        vars_map[name] = idx;
         return idx;
     }
-
-  protected:
-    const ScopeId id;
-    const std::optional<ScopeId> parent;
 };
 
 static std::vector<Scope> scopes;
@@ -74,7 +84,7 @@ ScopeId init()
     return idx;
 }
 
-ScopeId open_scope()
+ScopeId open_scope(bool is_func_scope)
 {
     assert(scope_stack.size() > 0);
     const size_t parent = *(scope_stack.end() - 1);
@@ -104,12 +114,12 @@ TypeRow& TypeRef::get() const
     assert(scope.types.size() > this->sym_id);
     return scope.types[this->sym_id];
 }
-NameRow& NameRef::get() const
+VarRow& VarRef::get() const
 {
     assert(scopes.size() > this->scope_id);
     Scope& scope = scopes[this->scope_id];
-    assert(scope.names.size() > this->sym_id);
-    return scope.names[this->sym_id];
+    assert(scope.vars.size() > this->sym_id);
+    return scope.vars[this->sym_id];
 }
 
 TagRef insert_tag(const std::string& name, Type* type)
@@ -130,13 +140,13 @@ TypeRef insert_typename(const std::string& name, Type* type)
     return TypeRef{{scope_id, sym_id}};
 }
 
-NameRef insert_name(const std::string& name, Type* type)
+VarRef insert_var(const std::string& name, Type* type, bool is_param)
 {
     assert(scope_stack.size() > 0);
     const ScopeId scope_id = *(scope_stack.end() - 1);
     Scope& scope = scopes[scope_id];
-    const SymId sym_id = scope.add_name(name, type);
-    return NameRef{{scope_id, sym_id}};
+    const SymId sym_id = scope.add_var(name, type, is_param);
+    return VarRef{{scope_id, sym_id}};
 }
 
 std::optional<TagRef> lookup_tag(const std::string& name, bool last_scope)
@@ -191,27 +201,27 @@ std::optional<TypeRef> lookup_type(const std::string& name, bool last_scope)
     return {};
 }
 
-std::optional<NameRef> lookup_name(const std::string& name, bool last_scope)
+std::optional<VarRef> lookup_var(const std::string& name, bool last_scope)
 {
     assert(scope_stack.size() > 0);
     if (!last_scope)
         for (const auto scope_id : scope_stack) {
             Scope& scope = scopes[scope_id];
-            const auto& map = scope.names_map;
+            const auto& map = scope.vars_map;
             const auto& it = map.find(name);
             if (it != map.end()) {
                 const SymId sym_id = it->second;
-                return {(NameRef){{scope_id, sym_id}}};
+                return {(VarRef){{scope_id, sym_id}}};
             }
         }
     else {
         const ScopeId scope_id = *(scope_stack.end() - 1);
         Scope& scope = scopes[scope_id];
-        const auto& map = scope.names_map;
+        const auto& map = scope.vars_map;
         const auto& it = map.find(name);
         if (it != map.end()) {
             const SymId sym_id = it->second;
-            return {(NameRef){{scope_id, sym_id}}};
+            return {(VarRef){{scope_id, sym_id}}};
         }
     }
     return {};
@@ -229,6 +239,36 @@ bool is_typename(const char* namep)
         }
     }
     return false;
+}
+
+void compute_offsets(size_t base_activ_record_size)
+{
+    for (auto& scope : scopes) {
+        if (!scope.parent_id) {
+            scope.base_offset = 0;
+        } else {
+            size_t par_id = *(scope.parent_id);
+            auto& parent = scopes[par_id];
+            auto parent_base = assert_derref(parent.base_offset);
+            auto parent_size = assert_derref(parent.size);
+            scope.base_offset = parent_base + parent_size;
+        }
+
+        const size_t base_offset = *scope.base_offset;
+        scope.size = 0;
+        auto &scope_size = *scope.size;
+
+        // TODO compute space and offset for arguments before?
+        scope_size += base_activ_record_size;
+
+        for (auto& var_row : scope.vars) {
+            var_row.offset = base_offset + scope_size;
+            const size_t var_size = var_row.type->get_size();
+            scope_size += var_size;
+            // std::cerr << var_row.name << " : " << *(var_row.type) << " : "
+            //           << var_size << " : " << *(var_row.offset) << std::endl;
+        }
+    }
 }
 
 } // namespace symtb

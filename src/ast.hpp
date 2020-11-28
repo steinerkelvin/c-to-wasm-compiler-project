@@ -224,7 +224,7 @@ struct StringValue : RExpr {
 
 struct Variable : LRExpr {
     LABEL("Var");
-    Variable(symtb::NameRef& ref) : ref(ref){};
+    Variable(symtb::VarRef& ref) : ref(ref){};
     const std::string& get_name() const { return this->ref.get().name; };
     void write_data_repr(std::ostream& stream) const
     {
@@ -233,7 +233,7 @@ struct Variable : LRExpr {
     };
 
   protected:
-    const symtb::NameRef ref;
+    const symtb::VarRef ref;
 };
 
 // Type coersion node

@@ -2,9 +2,9 @@
 
 namespace parsing {
 
-symtb::NameRef get_var(const std::string& name)
+symtb::VarRef get_var(const std::string& name)
 {
-    auto pos = symtb::lookup_name(name);
+    auto pos = symtb::lookup_var(name);
     if (pos) {
         return *pos;
     } else {

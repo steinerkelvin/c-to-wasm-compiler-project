@@ -16,7 +16,7 @@ extern int yylineno;
 namespace parsing {
 
 /// Gets a reference to a declared variable.
-symtb::NameRef get_var(const std::string& name);
+symtb::VarRef get_var(const std::string& name);
 
 } // namespace parsing
 

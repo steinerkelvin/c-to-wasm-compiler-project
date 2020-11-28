@@ -26,6 +26,9 @@ struct Type {
     virtual bool is_compatible_with(const Type* other) = 0;
     /// Write s-expression representation of this subtree to `stream`
     virtual std::ostream& write_repr(std::ostream& stream) const = 0;
+
+    /// Returns the size of this type. Should be implemented in the backend.
+    virtual size_t get_size() const = 0;
 };
 
 /// Represents a primitive type
@@ -42,14 +45,17 @@ struct PrimType : Type {
     PrimKind get_kind() const { return kind; }
     virtual bool is_compatible_with(const Type* other);
     virtual std::ostream& write_repr(std::ostream& stream) const;
+
+    virtual size_t get_size() const;
 };
 
 /// A type that "contains" another type, e.g. pointer, vector, etc.
 class ContainerType : public Type {
     Type* base_type;
 
-  public:
+  protected:
     ContainerType(Type* base_type) : base_type(base_type){};
+  public:
     /// Returns base type of this compound type
     Type* get_base() const { return this->base_type; }
 };
@@ -79,18 +85,23 @@ struct Pointer : ContainerType {
     virtual std::optional<Pointer*> to_pointer_implicit();
     virtual bool is_compatible_with(const Type* other);
     virtual std::ostream& write_repr(std::ostream& stream) const;
+
+    virtual size_t get_size() const;
 };
 
 /// Represents a vector type.
 struct Vector : ContainerType {
     /// Vector size
-    size_t size;
+    size_t num_elem;
 
-    Vector(Type* base, size_t size) : ContainerType(base), size(size){};
+    Vector(Type* base, size_t num_elem)
+        : ContainerType(base), num_elem(num_elem){};
 
     virtual std::optional<Pointer*> to_pointer_implicit();
     virtual bool is_compatible_with(const Type* other);
     virtual std::ostream& write_repr(std::ostream& stream) const;
+
+    virtual size_t get_size() const;
 };
 
 /**
@@ -109,6 +120,8 @@ struct Function : ContainerType {
     virtual std::optional<Pointer*> to_pointer_implicit();
     virtual bool is_compatible_with(const Type* other);
     virtual std::ostream& write_repr(std::ostream& stream) const;
+
+    virtual size_t get_size() const;
 };
 
 }; // namespace types
