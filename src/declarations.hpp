@@ -219,7 +219,7 @@ function_type_builder(decl::ParameterDeclarations* param_decls);
 //
 
 /**
- * Consumes a list of declarations specifiers and a lista of declarators,
+ * Consumes a list of declarations specifiers and a list of declarators,
  * inserting the name in the last opened scope acordingly.
  */
 void declare(const DeclarationSpecs& specs, const InitDeclarators& decls);

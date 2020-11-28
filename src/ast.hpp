@@ -593,23 +593,15 @@ struct ExpressionStmt : SingleChildBase<Expr, Statement> {
 
 struct Declaration : Node {
     LABEL("Declaration");
-    string name;
 };
 
-struct FunctionDefinition : Declaration {
-    LABEL("FunctionDefinition");
-    FunctionDefinition(Block* body)
-    {
-        assert(body);
-        this->body = body;
-    }
-    virtual const std::vector<Node*> get_children_nodes() const
-    {
-        return std::vector<Node*>{this->body};
-    }
+struct FuncDef : SingleChildBase<Block, Declaration> {
+    LABEL("FuncDef");
+    const symtb::VarRef ref;
 
-  protected:
-    Block* body;
+    FuncDef(Block* body, symtb::VarRef ref)
+        : SingleChildBase(body), ref(ref)
+    {}
 };
 
 struct Program : MultiChildrenBase<Declaration, Node> {

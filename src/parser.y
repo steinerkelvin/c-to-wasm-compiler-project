@@ -401,7 +401,7 @@ function-definition
         {
             auto [func_ref, scope_id] = *$func_ref_scope;
             $body->set_scope(scope_id);
-            $$ = new ast::FunctionDefinition($body);
+            $$ = new ast::FuncDef($body, func_ref);
             delete $func_ref_scope;
         }
     ;

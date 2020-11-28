@@ -26,11 +26,7 @@ int main(void)
     // std::cout << (*root) << std::endl;
     // strtb::repr(std::cerr);
 
-    // for (auto decl : root->get_children()) {
-    //     if (auto func_def = dynamic_cast<ast::FunctionDefinition*>(decl)) {
-    //         std::cerr << *func_def << std::endl;
-    //     }
-    // }
+    // back::generate_code(std::cout, root);
 
     return 0;
 }
