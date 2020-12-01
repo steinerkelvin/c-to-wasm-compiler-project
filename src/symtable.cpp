@@ -18,6 +18,7 @@ struct Scope {
     const ScopeId id;
     const std::optional<ScopeId> parent_id;
     const bool is_func_scope;
+    const bool is_global_scope;
 
     std::optional<size_t> base_offset;
     std::optional<size_t> size;
@@ -34,8 +35,10 @@ struct Scope {
     Scope(
         const ScopeId id,
         const std::optional<ScopeId> parent_id,
-        bool is_func_scope = false)
-        : id(id), parent_id(parent_id), is_func_scope(is_func_scope){};
+        bool is_func_scope = false,
+        bool is_global_scope = false)
+        : id(id), parent_id(parent_id), is_func_scope(is_func_scope),
+          is_global_scope(is_global_scope){};
 
     const ScopeId get_id() const { return this->id; };
     const std::optional<ScopeId> get_parent() const { return this->parent_id; };
@@ -61,8 +64,8 @@ struct Scope {
     SymId add_var(const std::string& name, Type* type, bool is_param = false)
     {
         assert(vars_map.find(name) == vars_map.end());
+        VarRow row(name, type, is_param, this->is_global_scope);
         const SymId idx = vars.size();
-        VarRow row(name, type, is_param);
         vars.push_back(row);
         vars_map[name] = idx;
         return idx;
@@ -78,7 +81,7 @@ ScopeId init()
 {
     assert(scope_stack.size() == 0);
     const size_t idx = scopes.size();
-    const Scope new_scope = Scope(idx, std::optional<ScopeId>());
+    const Scope new_scope = Scope(idx, std::optional<ScopeId>(), false, true);
     scopes.push_back(new_scope);
     scope_stack.push_back(idx);
     return idx;
@@ -89,7 +92,8 @@ ScopeId open_scope(bool is_func_scope)
     assert(scope_stack.size() > 0);
     const size_t parent = *(scope_stack.end() - 1);
     const size_t idx = scopes.size();
-    const Scope new_scope = Scope(idx, std::optional<ScopeId>(parent));
+    const Scope new_scope =
+        Scope(idx, std::optional<ScopeId>(parent), is_func_scope);
     scopes.push_back(new_scope);
     scope_stack.push_back(idx);
     return idx;
@@ -256,10 +260,12 @@ void compute_offsets(size_t base_activ_record_size)
 
         const size_t base_offset = *scope.base_offset;
         scope.size = 0;
-        auto &scope_size = *scope.size;
+        auto& scope_size = *scope.size;
 
         // TODO compute space and offset for arguments before?
-        scope_size += base_activ_record_size;
+        if (scope.is_func_scope) {
+            scope_size += base_activ_record_size;
+        }
 
         for (auto& var_row : scope.vars) {
             var_row.offset = base_offset + scope_size;

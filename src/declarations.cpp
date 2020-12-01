@@ -330,7 +330,8 @@ declare_function(const DeclarationSpecs* specs, Declarator* declarator)
         concrete_parameters.push_back({*param_name, param_type});
     }
 
-    ScopeId scope_id = symtb::open_scope();
+    // Open function scope
+    ScopeId scope_id = symtb::open_scope(true);
 
     // Declare the functions parameters in the new scope
     for (auto [param_name, param_type] : concrete_parameters) {

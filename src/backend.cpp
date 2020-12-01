@@ -10,6 +10,13 @@ namespace back {
 const size_t null_size = 0;
 const size_t word_size = 4;
 const size_t base_activ_record_size = 1 * word_size;
+
+const char* wasm_type_ptr = "i32";
+const char* wasm_type_inte = "i32";
+const char* wasm_type_real = "f32";
+
+const char* label_fp = "$fp";
+const char* label_sp = "$sp";
 }; // namespace back
 
 //
@@ -52,13 +59,6 @@ size_t Function::get_size() const { return null_size; }
 // Code generation
 //
 
-// TODO move to util.hpp
-template <typename T>
-T div_ceil(T a, T b)
-{
-    return a / b + (a % b != 0);
-}
-
 namespace back {
 
 const char* prim_type_text(const types::PrimType* type)
@@ -67,15 +67,16 @@ const char* prim_type_text(const types::PrimType* type)
     assert(type);
     switch (type->kind) {
         case PrimType::CHAR:
-            return "i32";
+            return wasm_type_inte;
         case PrimType::INTEGER:
-            return "i32";
+            return wasm_type_inte;
         case PrimType::REAL:
-            return "f32";
+            return wasm_type_real;
         case PrimType::VOID:
         default:
+            std::cerr << "failed getting wasm type text" << std::endl;
             std::cerr << *type << std::endl;
-            assert("failed getting type wasm text" && 0);
+            abort();
     }
 }
 
@@ -83,14 +84,15 @@ const char* prim_type_text(const types::PrimType* type)
 const char* type_text(const types::Type* type)
 {
     assert(type);
-    if (dynamic_cast<const types::Pointer*>(type)) {
-        return "i32";
-    } else if (auto prim = dynamic_cast<const types::PrimType*>(type)) {
+    if (auto prim = dynamic_cast<const types::PrimType*>(type)) {
         return prim_type_text(prim);
+    } else if (dynamic_cast<const types::Pointer*>(type)) {
+        return wasm_type_ptr;
     }
-    return "i32";
+    return wasm_type_ptr;
+    // std::cerr <<"failed getting type text" << std::endl;
     // std::cerr << *type << std::endl;
-    // assert("failed getting type text" && 0);
+    // abort();
 }
 
 struct {
@@ -100,128 +102,166 @@ struct {
     Counter block;
 } labels_numbers;
 
-void emit_program(std::ostream& out, ast::Program* root);
-void emit_funcdef(std::ostream& out, ast::FuncDef* func_def);
-void emit_stmt(std::ostream& out, ast::Statement* root);
-void emit_expr(std::ostream& out, ast::Expr* expr);
-void emit_binop(std::ostream& out, ast::BinOp* expr);
-void emit_var(std::ostream& out, ast::Variable* var);
+class Emitter {
+    std::ostream& out;
 
-//
-// Emiting wasm instructions
-//
+  public:
+    Emitter(std::ostream& out) : out(out) {}
 
-void emit_const(std::ostream& out, const std::string& tptxt, uint64_t value)
-{
-    out << "(i32.const " << value << ")" << std::endl;
-}
+    //
+    // Emiting wasm instructions
+    //
 
-void emit_load(
-    std::ostream& out, const std::string& tptxt, bool is_byte = false)
-{
-    out << "(" << tptxt << ".load";
-    if (is_byte) {
-        out << "8_s";
+    void emit_const_ptr(uint64_t value)
+    {
+        out << "(" << wasm_type_ptr << ".const " << value << ")" << std::endl;
     }
-    out << ")" << std::endl;
-}
 
-void emit_drop(std::ostream& out, size_t num = 1)
-{
-    for (size_t i = 0; i < num; ++i) {
-        out << "(drop)" << std::endl;
+    void emit_const_int(const std::string& tptxt, uint64_t value)
+    {
+        out << "(" << tptxt << ".const " << value << ")" << std::endl;
     }
-}
 
-//
-// AST handling
-//
+    void emit_get_global(const std::string& label)
+    {
+        out << "(get_global " << label << ")" << std::endl;
+    }
+    void emit_set_global(const std::string& label)
+    {
+        out << "(set_global " << label << ")" << std::endl;
+    }
+
+    void emit_get_local(const std::string& tptxt, const std::string& label)
+    {
+        out << "(get_local " << label << ")" << std::endl;
+    }
+
+    void emit_load(const std::string& tptxt, bool is_byte = false)
+    {
+        out << "(" << tptxt << ".load";
+        if (is_byte) {
+            out << "8_s";
+        }
+        out << ")" << std::endl;
+    }
+
+    void emit_drop(size_t num = 1)
+    {
+        for (size_t i = 0; i < num; ++i) {
+            out << "(drop)" << std::endl;
+        }
+    }
+
+    void emit_get_fp() { emit_get_global(label_fp); }
+    void emit_get_sp() { emit_get_global(label_sp); }
+
+    void emit_set_fp() { emit_set_global(label_fp); }
+    void emit_set_sp() { emit_set_global(label_sp); }
+
+    void emit_add(const std::string& tptxt)
+    {
+        out << "(" << tptxt << "."
+            << "add"
+            << ")" << std::endl;
+    }
+
+    //
+    // AST handling
+    //
+
+    void emit_program(ast::Program* root)
+    {
+        for (auto child : root->get_children()) {
+            if (auto func_def = dynamic_cast<ast::FuncDef*>(child)) {
+                labels_numbers.local.reset();
+                labels_numbers.block.reset();
+
+                auto name = func_def->ref.get().name;
+                out << "(func ";
+                out << "$" << name << std::endl;
+                auto block = func_def->get_child();
+                emit_stmt(block);
+                out << ")" << std::endl;
+            }
+        }
+    }
+
+    void emit_stmt(ast::Statement* stmt)
+    {
+        if (auto block = dynamic_cast<ast::Block*>(stmt)) {
+            for (auto child_stmt : block->get_children()) {
+                emit_stmt(child_stmt);
+            }
+        } else if (auto exprstmt = dynamic_cast<ast::ExpressionStmt*>(stmt)) {
+            auto expr = exprstmt->get_child();
+            emit_expr(expr);
+            auto type = expr->get_type();
+            auto size = type->get_size();
+            if (size > 0) {
+                emit_drop();
+                // emit_drop(div_ceil(size, word_size));
+            }
+        }
+    }
+
+    void emit_expr(ast::Expr* expr)
+    {
+        if (auto var = dynamic_cast<ast::Variable*>(expr)) {
+            emit_var(var);
+        } else if (auto binop = dynamic_cast<ast::BinOp*>(expr)) {
+            emit_binop(binop);
+        }
+    }
+
+    static const char* binop_instr(ast::BinOp* binop)
+    {
+        assert(binop);
+        if (dynamic_cast<ast::Plus*>(binop)) {
+            return "add";
+        }
+        std::cerr << "unknown operator " << (*binop) << std::endl;
+        abort();
+    }
+
+    void emit_binop(ast::BinOp* expr)
+    {
+        assert(expr);
+        emit_expr(expr->get_left());
+        emit_expr(expr->get_right());
+        auto type = expr->get_type();
+        auto type_txt = type_text(type);
+        auto instr = binop_instr(expr);
+        out << "(" << type_txt << "." << instr << ")" << std::endl;
+    }
+
+    void emit_var(ast::Variable* var)
+    {
+        assert(var);
+        auto& var_row = var->ref.get();
+        auto type = var_row.type;
+        auto type_txt = type_text(type);
+        auto offset = assert_derref(var_row.offset);
+        bool is_byte = type->is_compatible_with(types::prim_char);
+
+        emit_const_int(wasm_type_ptr, offset);
+        // If it is a local variable, sum frame pointer
+        if (!var_row.is_global) {
+            emit_get_fp();
+            emit_add(wasm_type_ptr);
+        }
+        emit_load(type_txt, is_byte);
+    }
+};
 
 void generate_code(std::ostream& out, ast::Program* root)
 {
     out << "(module" << std::endl;
     out << "(memory 1)" << std::endl;
-    emit_program(out, root);
+    out << "(global " << label_fp << " i32 (i32.const 0))" << std::endl;
+    out << "(global " << label_sp << " i32 (i32.const 0))" << std::endl;    // TODO initial value
+    Emitter emt(out);
+    emt.emit_program(root);
     out << ")" << std::endl;
-}
-
-void emit_program(std::ostream& out, ast::Program* root)
-{
-    for (auto child : root->get_children()) {
-        if (auto func_def = dynamic_cast<ast::FuncDef*>(child)) {
-            labels_numbers.local.reset();
-            labels_numbers.block.reset();
-
-            auto name = func_def->ref.get().name;
-            out << "(func ";
-            out << "$" << name << std::endl;
-            auto block = func_def->get_child();
-            emit_stmt(out, block);
-            out << ")" << std::endl;
-        }
-    }
-}
-
-void emit_stmt(std::ostream& out, ast::Statement* stmt)
-{
-    if (auto block = dynamic_cast<ast::Block*>(stmt)) {
-        for (auto child_stmt : block->get_children()) {
-            emit_stmt(out, child_stmt);
-        }
-    } else if (auto exprstmt = dynamic_cast<ast::ExpressionStmt*>(stmt)) {
-        auto expr = exprstmt->get_child();
-        emit_expr(out, expr);
-        auto type = expr->get_type();
-        auto size = type->get_size();
-        if (size > 0) {
-            emit_drop(out);
-            // emit_drop(out, div_ceil(size, word_size));
-        }
-    }
-}
-
-void emit_expr(std::ostream& out, ast::Expr* expr)
-{
-    if (auto var = dynamic_cast<ast::Variable*>(expr)) {
-        emit_var(out, var);
-    } else if (auto binop = dynamic_cast<ast::BinOp*>(expr)) {
-        emit_binop(out, binop);
-    }
-}
-
-static const char* binop_instr(ast::BinOp* binop)
-{
-    assert(binop);
-    auto type = binop->get_type();
-    auto type_str = type_text(type);
-    if (auto plus = dynamic_cast<ast::Plus*>(binop)) {
-        return "add";
-    }
-    // return "";
-    abort();
-}
-
-void emit_binop(std::ostream& out, ast::BinOp* expr)
-{
-    assert(expr);
-    emit_expr(out, expr->get_left());
-    emit_expr(out, expr->get_right());
-    auto type = expr->get_type();
-    auto type_txt = type_text(type);
-    auto instr = binop_instr(expr);
-    out << "(" << type_txt << "." << instr << ")" << std::endl;
-}
-
-void emit_var(std::ostream& out, ast::Variable* var)
-{
-    assert(var);
-    auto& row = var->ref.get();
-    auto type = row.type;
-    auto type_str = type_text(type);
-    auto offset = assert_derref(row.offset);
-    bool is_byte = type->is_compatible_with(types::prim_char);
-    emit_const(out, type_str, offset);
-    emit_load(out, type_str, is_byte);
 }
 
 } // namespace back

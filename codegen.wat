@@ -1,9 +1,18 @@
 (module
 (memory 1)
+(global $fp i32 (i32.const 0))
+(global $sp i32 (i32.const 0))
 (func $main
+(i32.const 0)
+(i32.load)
+(drop)
 (i32.const 8)
+(get_global $fp)
+(i32.add)
 (i32.load)
 (i32.const 8)
+(get_global $fp)
+(i32.add)
 (i32.load)
 (i32.add)
 (drop)

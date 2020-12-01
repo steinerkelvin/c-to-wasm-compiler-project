@@ -31,10 +31,15 @@ struct TypeRow : Row {
     TypeRow(const std::string& name, types::Type* type) : Row(name, type) {}
 };
 struct VarRow : Row {
-    bool is_param = false;
+    const bool is_param;
+    const bool is_global;
     std::optional<size_t> offset;
-    VarRow(const std::string& name, types::Type* type, bool is_param)
-        : Row(name, type), is_param(is_param)
+    VarRow(
+        const std::string& name,
+        types::Type* type,
+        bool is_param = false,
+        bool is_global = false)
+        : Row(name, type), is_param(is_param), is_global(is_global)
     {}
 };
 

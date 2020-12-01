@@ -16,7 +16,13 @@
 #define assert_derref(val) (*(val))
 #endif
 
-// Estrutura que resolve para verdadeiro apenas a primeira vez
+template <typename T>
+T div_ceil(T a, T b)
+{
+    return a / b + (a % b != 0);
+}
+
+// Resolves to true only once
 struct Once {
     operator bool()
     {
