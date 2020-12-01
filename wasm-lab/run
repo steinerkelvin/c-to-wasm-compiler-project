@@ -1,5 +1,7 @@
 #!/bin/bash
 
+base_dir="$(dirname "$0")"
+
 name=$1
 shift 1
 if [ -z "$name" ]; then
@@ -7,4 +9,4 @@ if [ -z "$name" ]; then
 fi
 
 wat2wasm "${name}.wat" -o "${name}.wasm" &&
-    node ./runtime.js "${name}.wasm"
+    node "${base_dir}/runtime.js" "${name}.wasm"

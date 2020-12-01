@@ -1,7 +1,5 @@
-int glob;
+void println_int(int);
 
 int main() {
-    int x;
-    glob;
-    x + x;
+    println_int(42 + 1);
 }
