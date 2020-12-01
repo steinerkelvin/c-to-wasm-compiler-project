@@ -1,7 +1,7 @@
 #if !defined(BACKEND_H)
 #define BACKEND_H
 
-#include <stddef.h>
+#include <cstddef>
 #include <ostream>
 
 #include "ast.hpp"

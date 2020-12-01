@@ -26,7 +26,7 @@ int main(void)
     // std::cout << (*root) << std::endl;
     // strtb::repr(std::cerr);
 
-    // back::generate_code(std::cout, root);
+    back::generate_code(std::cout, root);
 
     return 0;
 }

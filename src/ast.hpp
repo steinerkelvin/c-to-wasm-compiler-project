@@ -22,10 +22,10 @@
 
 namespace ast {
 
-struct Node : pos::HasPosition {
+class Node : public pos::HasPosition {
     LABEL("NODE");
 
-    virtual bool is_typed() const { return false; }
+  public:
     virtual const std::vector<Node*> get_children_nodes() const
     {
         return std::vector<Node*>();
@@ -56,40 +56,58 @@ using std::variant;
 
 // Node templates
 
-// Root node of type R with single child of type T
-template <typename T, typename R = T>
-struct SingleChildBase : R {
-    SingleChildBase(T* child) : child(child) { assert(child); }
+// Node with single child of type T
+template <typename T>
+class SingleChildBase : public virtual Node {
+  protected:
+    T* child;
+
+  public:
+    SingleChildBase(T* child) : child(child)
+    {
+        assert(child);
+        this->merge_pos_from(child);
+    }
+
+    T*& get_child() { return this->child; }
+
     virtual const std::vector<Node*> get_children_nodes() const
     {
         return std::vector<Node*>{this->child};
     }
-
-  protected:
-    T* child;
 };
 
-// Root node of type R with two children of types T1 and T2
-template <typename T1, typename T2, typename R>
-struct TwoChildrenBase : R {
+// Node with two children of types T1 and T2
+template <typename T1, typename T2>
+class TwoChildrenBase : public virtual Node {
+    T1* left;
+    T2* right;
+
+  public:
     TwoChildrenBase(T1* left, T2* right) : left(left), right(right)
     {
         assert(left);
         assert(right);
+        this->merge_pos_from(left);
+        this->merge_pos_from(right);
     }
+
+    T1* get_left() { return left; }
+    T2* get_right() { return right; }
+
     virtual const std::vector<Node*> get_children_nodes() const
     {
         return std::vector<Node*>{this->left, this->right};
     }
-
-  protected:
-    T1* left;
-    T2* right;
 };
 
-// Root node of type R with multiple children of type T
-template <typename T, typename R = T>
-struct MultiChildrenBase : R {
+// Node with multiple children of type T
+template <typename T>
+class MultiChildrenBase : public virtual Node {
+  protected:
+    std::vector<T*> children;
+
+  public:
     virtual void add(T* child)
     {
         assert(child);
@@ -97,7 +115,7 @@ struct MultiChildrenBase : R {
         this->merge_pos_from(child);
     };
 
-    std::vector<T*>& get_children() { return this->children; }
+    const std::vector<T*>& get_children() { return this->children; }
 
     virtual const std::vector<Node*> get_children_nodes() const
     {
@@ -108,17 +126,14 @@ struct MultiChildrenBase : R {
             std::back_inserter(result));
         return result;
     }
-
-    //   protected:
-    std::vector<T*> children;
 };
 
 //
 // Expressions
 //
 
-struct TypedNode : Node {
-    virtual bool is_typed() const { return true; }
+struct TypedNode : virtual Node {
+    // virtual bool is_typed() const { return true; }
     types::Type* get_type() const
     {
         assert(this->type);
@@ -130,9 +145,13 @@ struct TypedNode : Node {
     types::Type* type = new types::PrimType{types::PrimType::VOID};
 };
 
-struct Expr : TypedNode {
-    virtual bool is_lvalue(bool flag) const = 0;
-    virtual bool is_rvalue(bool flag) const = 0;
+class Expr : public TypedNode {
+  protected:
+    Expr() {}
+
+  public:
+    virtual bool is_lvalue(bool flag) const { return false; };
+    virtual bool is_rvalue(bool flag) const { return false; };
 
     virtual void write_data_repr(std::ostream& stream) const
     {
@@ -142,22 +161,23 @@ struct Expr : TypedNode {
     static Expr* retsame(Expr* child) { return child; };
 };
 
-struct LExpr : Expr {
+class LExpr : public virtual Expr {
     virtual bool is_lvalue(bool flag) const { return true; };
-    virtual bool is_rvalue(bool flag) const { return false; };
+    // virtual bool is_rvalue(bool flag) const { return false; };
 };
 
-struct RExpr : Expr {
-    virtual bool is_lvalue(bool flag) const { return false; };
+class RExpr : public virtual Expr {
+  public:
+    // virtual bool is_lvalue(bool flag) const { return false; };
     virtual bool is_rvalue(bool flag) const { return true; };
 };
 
-struct LRExpr : Expr {
-    virtual bool is_lvalue(bool flag) const { return true; };
-    virtual bool is_rvalue(bool flag) const { return true; };
+class LRExpr : public virtual LExpr, public virtual RExpr {
+    // virtual bool is_lvalue(bool flag) const { return true; };
+    // virtual bool is_rvalue(bool flag) const { return true; };
 };
 
-struct Exprs : MultiChildrenBase<Expr, Node> {
+struct Exprs : MultiChildrenBase<Expr>, virtual Node {
     LABEL("");
 };
 
@@ -224,6 +244,8 @@ struct StringValue : RExpr {
 
 struct Variable : LRExpr {
     LABEL("Var");
+    const symtb::VarRef ref;
+
     Variable(symtb::VarRef& ref) : ref(ref){};
     const std::string& get_name() const { return this->ref.get().name; };
     void write_data_repr(std::ostream& stream) const
@@ -231,13 +253,10 @@ struct Variable : LRExpr {
         stream << " \"" << this->get_name() << "\"";
         this->Expr::write_data_repr(stream);
     };
-
-  protected:
-    const symtb::VarRef ref;
 };
 
 // Type coersion node
-struct Coersion : SingleChildBase<Expr, RExpr> {
+struct Coersion : SingleChildBase<Expr>, RExpr {
     using SingleChildBase::SingleChildBase;
 };
 using CoersionBuilder = std::function<Expr*(Expr*)>;
@@ -295,7 +314,7 @@ struct V2P : Coersion {
 
 // Unary operator
 template <typename T>
-struct UnOp : SingleChildBase<Expr, RExpr> {
+struct UnOp : SingleChildBase<Expr>, RExpr {
     UnOp(Expr* child) : SingleChildBase(child)
     {
         this->type = child->get_type();
@@ -306,7 +325,7 @@ struct UnOp : SingleChildBase<Expr, RExpr> {
 
 // Unary lr-value operator
 template <typename T>
-struct LRUnOp : SingleChildBase<Expr, LRExpr> {
+struct LRUnOp : SingleChildBase<Expr>, LRExpr {
     LRUnOp(Expr* child) : SingleChildBase(child)
     {
         this->type = child->get_type();
@@ -318,34 +337,22 @@ struct LRUnOp : SingleChildBase<Expr, LRExpr> {
 using UnBuilder = Expr* (*)(Expr* child);
 
 // Binary operator
-template <typename T>
-struct BinOp : MultiChildrenBase<Expr, RExpr> {
-    // TODO ensure T = derived class (CRTP)
-    BinOp(Expr* left, Expr* right)
-    {
-        assert(left != NULL);
-        assert(right != NULL);
-        this->children = std::vector<Expr*>{left, right};
-        this->merge_pos_from(left);
-        this->merge_pos_from(right);
-    };
-    static Expr* builder(Expr* left, Expr* right)
-    {
-        return new T(left, right);
-    };
+
+class TwoExpr : public TwoChildrenBase<Expr, Expr> {
+    using TwoChildrenBase::TwoChildrenBase;
 };
 
-// Binary lr-value operator
-template <typename T>
-struct LRBinOp : MultiChildrenBase<Expr, LRExpr> {
-    LRBinOp(Expr* left, Expr* right)
-    {
-        assert(left != NULL);
-        assert(right != NULL);
-        this->children = std::vector<Expr*>{left, right};
-        this->merge_pos_from(left);
-        this->merge_pos_from(right);
-    };
+/// binary operator
+struct BinOp : TwoExpr, virtual Expr {};
+/// r-value binary operator
+struct RBinOp : RExpr, virtual BinOp {};
+/// lr-value binary operator
+struct LRBinOp : LRExpr, virtual BinOp {};
+
+template <typename T, typename R = RExpr>
+class BinOpBase : public BinOp, public R {
+  public:
+    using TwoExpr::TwoExpr;
     static Expr* builder(Expr* left, Expr* right)
     {
         return new T(left, right);
@@ -383,64 +390,64 @@ struct PrefixMinusMinus : UnOp<PrefixMinusMinus> {
     using UnOp::UnOp;
 };
 
-struct Plus : BinOp<Plus> {
+struct Plus : BinOpBase<Plus> {
     LABEL("+");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
-struct Minus : BinOp<Minus> {
+struct Minus : BinOpBase<Minus> {
     LABEL("-");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
-struct Times : BinOp<Times> {
+struct Times : BinOpBase<Times> {
     LABEL("*");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
-struct Over : BinOp<Over> {
+struct Over : BinOpBase<Over> {
     LABEL("/");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
-struct Mod : BinOp<Mod> {
+struct Mod : BinOpBase<Mod> {
     LABEL("%");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
 
-struct Less : BinOp<Less> {
+struct Less : BinOpBase<Less> {
     LABEL("<");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
-struct Greater : BinOp<Greater> {
+struct Greater : BinOpBase<Greater> {
     LABEL(">");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
-struct LessEqual : BinOp<LessEqual> {
+struct LessEqual : BinOpBase<LessEqual> {
     LABEL("<=");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
-struct GreaterEqual : BinOp<GreaterEqual> {
+struct GreaterEqual : BinOpBase<GreaterEqual> {
     LABEL(">=");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
-struct Equal : BinOp<Equal> {
+struct Equal : BinOpBase<Equal> {
     LABEL("==");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
-struct NotEqual : BinOp<NotEqual> {
+struct NotEqual : BinOpBase<NotEqual> {
     LABEL("==");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
 
-struct And : BinOp<And> {
+struct And : BinOpBase<And> {
     LABEL("&&");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
-struct Or : BinOp<Or> {
+struct Or : BinOpBase<Or> {
     LABEL("||");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
 
-struct Assign : BinOp<Assign> {
+struct Assign : BinOpBase<Assign> {
     LABEL("=");
-    using BinOp::BinOp;
+    using BinOpBase::BinOpBase;
 };
 
 struct AddressOf : UnOp<AddressOf> {
@@ -453,12 +460,12 @@ struct Derreference : LRUnOp<Derreference> {
     using LRUnOp::LRUnOp;
 };
 
-struct IndexAccess : LRBinOp<IndexAccess> {
+struct IndexAccess : BinOpBase<IndexAccess, LRExpr> {
     LABEL("v[x]");
-    using LRBinOp::LRBinOp;
+    using BinOpBase::BinOpBase;
 };
 
-struct Call : TwoChildrenBase<Expr, Exprs, RExpr> {
+struct Call : TwoChildrenBase<Expr, Exprs>, RExpr {
     LABEL("\"f(x)\"");
     using TwoChildrenBase::TwoChildrenBase;
 };
@@ -467,7 +474,7 @@ struct Call : TwoChildrenBase<Expr, Exprs, RExpr> {
 // Statements
 //
 
-struct Statement : Node {
+struct Statement : virtual Node {
     LABEL("Statement");
 };
 
@@ -480,7 +487,7 @@ struct Continue : Statement {
 struct Return : Statement {
     LABEL("return");
 };
-struct ReturnValue : SingleChildBase<Expr, Statement> {
+struct ReturnValue : SingleChildBase<Expr>, Statement {
     LABEL("return");
     using SingleChildBase::SingleChildBase;
 };
@@ -564,7 +571,7 @@ struct DoWhileStmt : Statement {
     Statement* stmt;
 };
 
-struct Block : MultiChildrenBase<Statement> {
+struct Block : MultiChildrenBase<Statement>, Statement {
     LABEL("Block");
     std::optional<ScopeId> scope_id;
 
@@ -586,25 +593,23 @@ struct Block : MultiChildrenBase<Statement> {
     }
 };
 
-struct ExpressionStmt : SingleChildBase<Expr, Statement> {
+struct ExpressionStmt : SingleChildBase<Expr>, Statement {
     LABEL("ExpressionStmt");
-    using SingleChildBase<Expr, Statement>::SingleChildBase;
+    using SingleChildBase::SingleChildBase;
 };
 
-struct Declaration : Node {
+struct Declaration : virtual Node {
     LABEL("Declaration");
 };
 
-struct FuncDef : SingleChildBase<Block, Declaration> {
+struct FuncDef : SingleChildBase<Block>, Declaration {
     LABEL("FuncDef");
     const symtb::VarRef ref;
 
-    FuncDef(Block* body, symtb::VarRef ref)
-        : SingleChildBase(body), ref(ref)
-    {}
+    FuncDef(Block* body, symtb::VarRef ref) : SingleChildBase(body), ref(ref) {}
 };
 
-struct Program : MultiChildrenBase<Declaration, Node> {
+struct Program : MultiChildrenBase<Declaration> {
     LABEL("Program");
 };
 

@@ -2,6 +2,11 @@
 
 namespace types {
 
+const Type* prim_void = new PrimType(PrimType::VOID);
+const Type* prim_char = new PrimType(PrimType::CHAR);
+const Type* prim_inte = new PrimType(PrimType::INTEGER);
+const Type* prim_real = new PrimType(PrimType::REAL);
+
 Type* Pointer::derreference() const
 {
     assert(this->n >= 1);
