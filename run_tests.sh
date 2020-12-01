@@ -3,7 +3,7 @@ set -e
 
 dump_tokens_exe="./bin/custom/dump-tokens"
 render_ast_exe="./bin/render-ast"
-compiler_exe="./bin/compiler"
+parser_exe="./bin/just-parse"
 tests_base="./tests"
 
 mkdir -p "${tests_base}/input"
@@ -39,8 +39,8 @@ for test_file in "${tests_base}"/input/*.c; do
         dot <"${ast_dot_file}" -T png >"${ast_png_file}" ||
         true
 
-    # "${compiler_exe}" <"${test_file}" 2> >(tee "${err_file}" >&2) > >(tee "${output_file}") || true
-    "${compiler_exe}" <"${test_file}" 2>"${err_file}" >"${output_file}" || true
+    # "${parser_exe}" <"${test_file}" 2> >(tee "${err_file}" >&2) > >(tee "${output_file}") || true
+    "${parser_exe}" <"${test_file}" >"${output_file}" 2>"${err_file}" || true
 
     touch "${tokens_expected_file}"
     touch "${output_expected_file}"
