@@ -248,7 +248,7 @@ bool is_typename(const char* namep)
 void compute_offsets(size_t base_activ_record_size)
 {
     for (auto& scope : scopes) {
-        if (!scope.parent_id) {
+        if (!scope.parent_id || scope.is_func_scope) {
             scope.base_offset = 0;
         } else {
             size_t par_id = *(scope.parent_id);
