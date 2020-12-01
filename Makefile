@@ -42,9 +42,10 @@ zip:
 	git archive --prefix=$(name)/ -o $(name).zip HEAD
 
 clean:
-	rm -f -r ./.deps
+	rm -f -r ./.dep
 	rm -f -r ./bin
 	rm -f -r ./build
+	rm -f -r ./doxy
 	rm -f $(generated_files)
 
 show-versions:

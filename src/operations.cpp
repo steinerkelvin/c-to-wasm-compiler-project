@@ -489,7 +489,7 @@ Expr* function_call(Expr* value, ast::Exprs* args_node, pos::Pos posi)
     if (!args_node) {
         args_node = new ast::Exprs();
     }
-    auto& args = args_node->children;
+    auto args = args_node->get_children();
 
     Type* value_type = value->get_type();
 

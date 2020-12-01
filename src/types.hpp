@@ -27,7 +27,9 @@ struct Type {
     /// Write s-expression representation of this subtree to `stream`
     virtual std::ostream& write_repr(std::ostream& stream) const = 0;
 
-    /// Returns the size of this type. Should be implemented in the backend.
+    // Backend implemented stuff
+
+    /// Returns the size of this type.
     virtual size_t get_size() const = 0;
 };
 
@@ -48,6 +50,11 @@ struct PrimType : Type {
 
     virtual size_t get_size() const;
 };
+
+extern const Type* prim_void;
+extern const Type* prim_char;
+extern const Type* prim_inte;
+extern const Type* prim_real;
 
 /// A type that "contains" another type, e.g. pointer, vector, etc.
 class ContainerType : public Type {
@@ -83,6 +90,7 @@ struct Pointer : ContainerType {
     static Pointer* add_indiretion(Type* type, size_t n = 1);
 
     virtual std::optional<Pointer*> to_pointer_implicit();
+    // TODO get better name for this function
     virtual bool is_compatible_with(const Type* other);
     virtual std::ostream& write_repr(std::ostream& stream) const;
 
