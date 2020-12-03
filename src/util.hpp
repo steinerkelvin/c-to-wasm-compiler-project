@@ -6,8 +6,11 @@
  */
 
 #include <cstddef>
+// #include <functional>
 
 #define ALLOC(VAR) ((typeof(VAR))malloc(sizeof(typeof(*(VAR)))))
+
+#define return_if(val) if (val) return;
 
 #define assert_ret(val) (assert(val), val)
 #define assert_derref(val) (assert(val), *(val))

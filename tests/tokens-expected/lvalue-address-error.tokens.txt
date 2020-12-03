@@ -1,0 +1,15 @@
+INT : int
+ID : main
+LPAR : (
+RPAR : )
+LCB : {
+INT : int
+STAR : *
+ID : p
+SEMI : ;
+ID : p
+ASSIGN : =
+AMPER : &
+INT_VAL : 2
+SEMI : ;
+RCB : }

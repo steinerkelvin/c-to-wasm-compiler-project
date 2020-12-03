@@ -1,5 +1,4 @@
 - Check return value type
 - Allow define already declared function
-- lvalue/rvalue
 - for
-- positions on error messages at declarations.cpp
+- detect expressions with no side effects

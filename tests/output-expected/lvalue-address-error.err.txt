@@ -1,0 +1,1 @@
+SEMANTIC ERROR (3:9-11): trying to take address of non l-value expression.

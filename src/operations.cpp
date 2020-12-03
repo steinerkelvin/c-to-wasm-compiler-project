@@ -253,9 +253,16 @@ Expr* unify_assign(Expr* target, Expr* value, pos::Pos posi)
     assert(target);
     auto target_type = target->get_type();
     auto new_value = check_assign(target_type, value, posi);
-    auto result = new ast::Assign(target, new_value);
-    result->set_type(target_type);
-    return result;
+    auto ltarget = dynamic_cast<ast::LExpr*>(target);
+    if (ltarget && ltarget->is_lvalue()) {
+        auto result = new ast::Assign(ltarget, new_value);
+        result->set_type(target_type);
+        return result;
+    } else {
+        std::cerr << "SEMANTIC ERROR (" << posi << "): ";
+        std::cerr << "non l-value on left side of assignment." << std::endl;
+        exit(EXIT_FAILURE);
+    }
 }
 
 std::pair<Type*, CoersionBuilderPair> unify_bin_prim(
@@ -421,12 +428,17 @@ Expr* unify_logic(
 Expr* address_of(Expr* value, pos::Pos posi)
 {
     Type* type = value->get_type();
-    // TODO check rvalue
-
-    types::Pointer* new_type = types::Pointer::add_indiretion(type);
-    Expr* new_node = new ast::AddressOf(value);
-    new_node->set_type(new_type);
-    return new_node;
+    auto lvalue = dynamic_cast<ast::LExpr*>(value);
+    if (lvalue && lvalue->is_lvalue()) {
+        types::Pointer* new_type = types::Pointer::add_indiretion(type);
+        Expr* new_node = new ast::AddressOf(value);
+        new_node->set_type(new_type);
+        return new_node;
+    }
+    std::cerr << "SEMANTIC ERROR (" << posi << "): ";
+    std::cerr << "trying to take address of non l-value expression."
+              << std::endl;
+    exit(EXIT_FAILURE);
 }
 
 Expr* derreference(Expr* value, pos::Pos posi)

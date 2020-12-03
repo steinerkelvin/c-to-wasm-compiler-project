@@ -644,7 +644,7 @@ primary-expression
             delete $1;
         }
     | INT_VAL       { $$ = new ast::IntegerValue($1);  $$->set_pos(@$); }
-    | REAL_VAL      { $$ = new ast::FloatingValue($1); $$->set_pos(@$); }
+    | REAL_VAL      { $$ = new ast::RealValue($1); $$->set_pos(@$); }
     | CHAR_VAL      { $$ = new ast::CharValue($1);     $$->set_pos(@$); }
     | STR_VAL       { $$ = new ast::StringValue($1);   $$->set_pos(@$); }
     | LPAR expression RPAR      { $$ = $2; }
