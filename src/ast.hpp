@@ -479,23 +479,9 @@ struct ReturnValue : SingleChildBase<Expr>, Statement {
     using SingleChildBase::SingleChildBase;
 };
 
-struct IfStmt : Statement {
+struct IfStmt : TwoChildrenBase<Expr, Statement>, Statement {
     LABEL("IfStmt");
-    IfStmt(Expr* expr, Statement* stmt)
-    {
-        assert(expr);
-        assert(stmt);
-        this->expr = expr;
-        this->stmt = stmt;
-    }
-    virtual const std::vector<Node*> get_children_nodes() const
-    {
-        return std::vector<Node*>{this->expr, this->stmt};
-    }
-
-  protected:
-    Expr* expr;
-    Statement* stmt;
+    using TwoChildrenBase::TwoChildrenBase;
 };
 
 struct IfElseStmt : Statement {

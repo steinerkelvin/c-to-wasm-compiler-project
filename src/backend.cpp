@@ -99,19 +99,22 @@ class Emitter {
     std::ostream& out;
 
     struct LabelCounter : Counter {
+        const std::string prefix;
+        LabelCounter(const std::string prefix) : prefix(prefix) {}
         std::string next_label()
         {
             std::string txt("$");
-            txt += this->next();
+            txt += prefix;
+            txt += std::to_string(this->next());
             return txt;
         }
     };
 
     struct {
-        LabelCounter func;
-        LabelCounter global;
-        LabelCounter local;
-        LabelCounter block;
+        LabelCounter func{"f"};
+        LabelCounter global{"g"};
+        LabelCounter local{"v"};
+        LabelCounter block{"b"};
     } labels;
 
   public:
@@ -121,7 +124,8 @@ class Emitter {
     // Emiting Wasm instructions
     //
 
-    void emmit_comment(const std::string& txt) {
+    void emmit_comment(const std::string& txt)
+    {
         out << ";; " << txt << std::endl;
     }
 
@@ -214,6 +218,30 @@ class Emitter {
             << ")" << std::endl;
     }
 
+    void emit_eq(const std::string& tptxt)
+    {
+        out << "(" << tptxt << "."
+            << "eq"
+            << ")" << std::endl;
+    }
+    void emit_ne(const std::string& tptxt)
+    {
+        out << "(" << tptxt << "."
+            << "ne"
+            << ")" << std::endl;
+    }
+    void emit_eqz(const std::string& tptxt)
+    {
+        out << "(" << tptxt << "."
+            << "eqz"
+            << ")" << std::endl;
+    }
+
+    void emit_br_if(const std::string& label)
+    {
+        out << "(br_if " << label << ")" << std::endl;
+    }
+
     //
     // AST handling
     //
@@ -241,18 +269,36 @@ class Emitter {
             for (auto child_stmt : block->get_children()) {
                 emit_stmt(child_stmt);
             }
+        } else if (auto if_stmt = dynamic_cast<ast::IfStmt*>(stmt)) {
+            emit_if(if_stmt);
         } else if (auto expr_stmt = dynamic_cast<ast::ExpressionStmt*>(stmt)) {
-            out << ";; ";
-            stmt->write_repr(out);
-            out << std::endl;
-            auto expr = expr_stmt->get_child();
-            emit_expr(expr);
-            auto type = expr->get_type();
-            auto size = type->get_size();
-            if (size > 0) {
-                emit_drop();
-                // emit_drop(div_ceil(size, word_size));
-            }
+            emit_expr_stmt(expr_stmt);
+        }
+    }
+
+    void emit_if(ast::IfStmt* if_stmt)
+    {
+        auto if_label = labels.block.next_label();
+        auto cond = if_stmt->get_left();
+        auto body = if_stmt->get_right();
+        out << "(block " << if_label << std::endl;
+        emit_expr(cond);
+        emit_eqz(wasm_type_inte);
+        emit_br_if(if_label);
+        emit_stmt(body);
+        out << ")" << std::endl;
+    }
+
+    void emit_expr_stmt(ast::ExpressionStmt* expr_stmt)
+    {
+        out << ";; " << *expr_stmt << std::endl;
+        auto expr = expr_stmt->get_child();
+        emit_expr(expr);
+        auto type = expr->get_type();
+        auto size = type->get_size();
+        if (size > 0) {
+            emit_drop();
+            // emit_drop(div_ceil(size, word_size));
         }
     }
 

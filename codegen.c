@@ -15,5 +15,8 @@ int main()
 
     float r;
     r = 4.2;
+    if (global) {
+        r = 77.7;
+    }
     println_real(r);
 }
