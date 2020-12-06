@@ -5,6 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Launch Wasm Runtime with codegen.wasm",
+            "program": "${workspaceFolder}/runtime/runtime.js",
+            "args": ["codegen.wasm"],
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "pwa-node"
+        },
+        {
             "name": "(gdb) Launch condegen.c",
             "type": "cppdbg",
             "request": "launch",

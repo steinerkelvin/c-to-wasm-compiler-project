@@ -1,0 +1,24 @@
+#!/bin/bash
+
+debug=
+debug_brk=1
+
+base_dir="$(dirname "$0")"
+
+name=$1
+shift 1
+if [ -z "${name}" ]; then
+    echo 1>&2
+fi
+
+node_args=()
+if [ -n "${debug}" ]; then
+    inspect_arg="--inspect"
+    if [ -n "${debug_brk}" ]; then
+        inspect_arg="${inspect_arg}-brk"
+    fi
+    node_args+=("${inspect_arg}")
+fi
+
+wat2wasm "${name}.wat" -o "${name}.wasm" &&
+    node "${node_args[@]}" "${base_dir}/runtime.js" "${name}.wasm"
