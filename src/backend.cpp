@@ -1,6 +1,7 @@
 #include "backend.hpp"
 #include <cstdint>
-#include <iostream> // TODO DEBUG
+#include <iostream>
+#include <stack>
 
 #include "ast.hpp"
 #include "types.hpp"
@@ -95,20 +96,58 @@ const char* type_text(const types::Type* type)
     // abort();
 }
 
+struct LabelCounter : Counter {
+    const std::string prefix;
+    LabelCounter(const std::string prefix) : prefix(prefix) {}
+    std::string next_label()
+    {
+        std::string txt("$");
+        txt += prefix;
+        txt += std::to_string(this->next());
+        return txt;
+    }
+};
+
+struct LoopsCounter {
+    Counter loop_counter;
+    std::stack<size_t> loop_stack;
+    void reset()
+    {
+        loop_counter.reset();
+        while (!loop_stack.empty()) {
+            loop_stack.pop();
+        }
+    }
+    void push()
+    {
+        auto num = loop_counter.next();
+        loop_stack.push(num);
+    }
+    void pop()
+    {
+        loop_stack.pop();
+        loop_counter.prev();
+    }
+    std::string get_label_loop()
+    {
+        assert(!loop_stack.empty());
+        auto num = loop_stack.top();
+        std::string txt("$loop");
+        txt += std::to_string(num);
+        return txt;
+    }
+    std::string get_label_block()
+    {
+        assert(!loop_stack.empty());
+        auto num = loop_stack.top();
+        std::string txt("$loopbk");
+        txt += std::to_string(num);
+        return txt;
+    }
+};
+
 class Emitter {
     std::ostream& out;
-
-    struct LabelCounter : Counter {
-        const std::string prefix;
-        LabelCounter(const std::string prefix) : prefix(prefix) {}
-        std::string next_label()
-        {
-            std::string txt("$");
-            txt += prefix;
-            txt += std::to_string(this->next());
-            return txt;
-        }
-    };
 
     struct {
         LabelCounter func{"f"};
@@ -116,6 +155,15 @@ class Emitter {
         LabelCounter local{"v"};
         LabelCounter block{"b"};
     } labels;
+
+    LoopsCounter loops;
+
+    void reset_func_labels()
+    {
+        labels.local.reset();
+        labels.block.reset();
+        loops.reset();
+    }
 
   public:
     Emitter(std::ostream& out) : out(out) {}
@@ -282,8 +330,12 @@ class Emitter {
             }
         } else if (auto if_stmt = dynamic_cast<ast::IfStmt*>(stmt)) {
             emit_if(if_stmt);
-        } else if (auto while_loop = dynamic_cast<ast::WhileStmt*>(stmt)) {
-            emit_while(while_loop);
+        } else if (auto while_stmt = dynamic_cast<ast::WhileStmt*>(stmt)) {
+            emit_while(while_stmt);
+        } else if (auto break_stmt = dynamic_cast<ast::Break*>(stmt)) {
+            emit_break(break_stmt);
+        } else if (auto continue_stmt = dynamic_cast<ast::Continue*>(stmt)) {
+            emit_continue(continue_stmt);
         } else if (auto expr_stmt = dynamic_cast<ast::ExpressionStmt*>(stmt)) {
             emit_expr_stmt(expr_stmt);
         } else {
@@ -307,8 +359,9 @@ class Emitter {
 
     void emit_while(ast::WhileStmt* while_stmt)
     {
-        auto block_label = labels.block.next_label();
-        auto loop_label = labels.block.next_label();
+        loops.push();
+        auto block_label = loops.get_label_block();
+        auto loop_label = loops.get_label_loop();
         auto cond = while_stmt->get_left();
         auto body = while_stmt->get_right();
         out << "(block " << block_label << std::endl;
@@ -320,6 +373,19 @@ class Emitter {
         emit_br(loop_label);
         out << ")" << std::endl;
         out << ")" << std::endl;
+        loops.pop();
+    }
+
+    void emit_break(ast::Break* break_stmt)
+    {
+        auto block_label = loops.get_label_block();
+        emit_br(block_label);
+    }
+
+    void emit_continue(ast::Continue* continue_stmt)
+    {
+        auto block_label = loops.get_label_loop();
+        emit_br(block_label);
     }
 
     void emit_expr_stmt(ast::ExpressionStmt* expr_stmt)
@@ -447,6 +513,16 @@ class Emitter {
             return "add";
         } else if (dynamic_cast<ast::Minus*>(binop)) {
             return "sub";
+        } else if (dynamic_cast<ast::Times*>(binop)) {
+            return "mul";
+        } else if (dynamic_cast<ast::Over*>(binop)) {
+            return "div_s"; // TODO handle real
+        } else if (dynamic_cast<ast::Mod*>(binop)) {
+            return "rem_s"; // TODO handle real
+        } else if (dynamic_cast<ast::Equal*>(binop)) {
+            return "eq";
+        } else if (dynamic_cast<ast::NotEqual*>(binop)) {
+            return "neq";
         }
         std::cerr << "unknown bin operator " << (*binop) << std::endl;
         abort();

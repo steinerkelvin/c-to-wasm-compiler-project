@@ -1,11 +1,14 @@
-- break, continue
 - for loop
-- multiplicação, divisão e mod %
 - if else
+- strings e print
+- tratar alguma operações específicar em real
 
 - comparison
-  -  ==
+  - !=
   - <
+  - <=
+  - >
+  - >=
 
 - acesso de vetor [ ]
 

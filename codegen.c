@@ -21,9 +21,19 @@ int main()
     println_real(r);
 
     int num;
-    num = 3;
+    num = 12;
     while (num) {
-        println_int(num);
         num = num - 1;
+        if (num % 2) {
+            continue;
+        }
+        if (num == 4) {
+            while (1) {
+                break;
+            }
+            println_int(777);
+            break;
+        }
+        println_int(num);
     }
 }

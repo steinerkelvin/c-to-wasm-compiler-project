@@ -40,8 +40,9 @@ struct Once {
 };
 
 struct Counter {
-    size_t next() { return (n++); };
-    size_t reset() { return (n = 0); };
+    size_t next() { return (n++); }
+    void prev() { n--; }
+    size_t reset() { return (n = 0); }
     operator size_t() { return n; }
 
   protected:
