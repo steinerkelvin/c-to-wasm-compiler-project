@@ -537,35 +537,35 @@ struct DoWhileStmt : Statement {
 };
 
 class ForStmt : public Statement {
-    LABEL("IfElseStmt");
+    LABEL("ForStmt");
 
   protected:
-    Statement* init_expr;
-    Statement* cond_expr;
-    Statement* incr_expr;
+    Statement* init;
+    Statement* cond; // TODO
+    Statement* incr;
     Statement* body;
 
   public:
-    ForStmt(
-        Statement* init_expr,
-        Statement* cond_expr,
-        Statement* incr_expr,
-        Statement* body)
-        : init_expr(init_expr), cond_expr(cond_expr), incr_expr(incr_expr),
-          body(body)
+    ForStmt(Statement* init, Statement* cond, Statement* incr, Statement* body)
+        : init(init), cond(cond), incr(incr), body(body)
     {
-        assert(init_expr);
-        assert(cond_expr);
-        assert(incr_expr);
+        assert(init);
+        assert(cond);
+        assert(incr);
         assert(body);
-        this->merge_pos_from(init_expr);
-        this->merge_pos_from(cond_expr);
-        this->merge_pos_from(incr_expr);
+        this->merge_pos_from(init);
+        this->merge_pos_from(cond);
+        this->merge_pos_from(incr);
         this->merge_pos_from(body);
     }
+    Statement* get_init() { return init; }
+    Statement* get_cond() { return cond; }
+    Statement* get_incr() { return incr; }
+    Statement* get_body() { return body; }
+
     virtual const std::vector<Node*> get_children_nodes() const
     {
-        return std::vector<Node*>{init_expr, cond_expr, incr_expr, body};
+        return std::vector<Node*>{init, cond, incr, body};
     }
 };
 

@@ -36,4 +36,14 @@ int main()
         }
         println_int(num);
     }
+    int i;
+    for (i = 0; ; i = i + 1) {
+        if (i % 3 == 0) {
+            continue;
+        }
+        println_int(i);
+        if (i == 10) {
+            break;
+        }
+    }
 }

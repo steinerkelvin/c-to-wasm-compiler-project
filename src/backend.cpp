@@ -128,7 +128,7 @@ struct LoopsCounter {
         loop_stack.pop();
         loop_counter.prev();
     }
-    std::string get_label_loop()
+    std::string get_label_continue()
     {
         assert(!loop_stack.empty());
         auto num = loop_stack.top();
@@ -136,11 +136,18 @@ struct LoopsCounter {
         txt += std::to_string(num);
         return txt;
     }
-    std::string get_label_block()
+    std::string get_label_break()
     {
         assert(!loop_stack.empty());
         auto num = loop_stack.top();
-        std::string txt("$loopbk");
+        std::string txt("$loopbrk");
+        txt += std::to_string(num);
+        return txt;
+    }
+    std::string get_label_aux() {
+        assert(!loop_stack.empty());
+        auto num = loop_stack.top();
+        std::string txt("$loopaux");
         txt += std::to_string(num);
         return txt;
     }
@@ -324,14 +331,18 @@ class Emitter {
     void emit_stmt(ast::Statement* stmt)
     {
         assert(stmt);
-        if (auto block = dynamic_cast<ast::Block*>(stmt)) {
+        if (dynamic_cast<ast::EmptyStmt*>(stmt)) {
+            // empty statement
+        } else if (auto block = dynamic_cast<ast::Block*>(stmt)) {
             for (auto child_stmt : block->get_children()) {
                 emit_stmt(child_stmt);
             }
         } else if (auto if_stmt = dynamic_cast<ast::IfStmt*>(stmt)) {
             emit_if(if_stmt);
         } else if (auto while_stmt = dynamic_cast<ast::WhileStmt*>(stmt)) {
-            emit_while(while_stmt);
+            emit_while_loop(while_stmt);
+        } else if (auto for_stmt = dynamic_cast<ast::ForStmt*>(stmt)) {
+            emit_for_loop(for_stmt);
         } else if (auto break_stmt = dynamic_cast<ast::Break*>(stmt)) {
             emit_break(break_stmt);
         } else if (auto continue_stmt = dynamic_cast<ast::Continue*>(stmt)) {
@@ -357,34 +368,60 @@ class Emitter {
         out << ")" << std::endl;
     }
 
-    void emit_while(ast::WhileStmt* while_stmt)
+    void emit_while_loop(ast::WhileStmt* while_stmt)
     {
         loops.push();
-        auto block_label = loops.get_label_block();
-        auto loop_label = loops.get_label_loop();
+        auto break_label = loops.get_label_break();
+        auto continue_label = loops.get_label_continue();
         auto cond = while_stmt->get_left();
         auto body = while_stmt->get_right();
-        out << "(block " << block_label << std::endl;
-        out << "(loop " << loop_label << std::endl;
+        out << "(block " << break_label << std::endl;
+        out << "(loop " << continue_label << std::endl;
         emit_expr(cond);
         emit_eqz(wasm_type_inte);
-        emit_br_if(block_label);
+        emit_br_if(break_label);
         emit_stmt(body);
-        emit_br(loop_label);
+        emit_br(continue_label);
         out << ")" << std::endl;
         out << ")" << std::endl;
         loops.pop();
     }
 
+    void emit_for_loop(ast::ForStmt* for_stmt)
+    {
+        loops.push();
+        auto break_label = loops.get_label_break();
+        auto continue_label = loops.get_label_continue();
+        auto aux_label = loops.get_label_aux();
+        auto init = for_stmt->get_init();
+        auto cond = for_stmt->get_cond();
+        auto incr = for_stmt->get_incr();
+        auto body = for_stmt->get_body();
+        emit_stmt(init);
+        out << "(block " << break_label << std::endl;
+        out << "(loop " << aux_label << std::endl;
+        out << "(block " << continue_label << std::endl;
+        // emit_expr(cond); // TODO
+        // emit_eqz(wasm_type_inte);
+        // emit_br_if(block_label);
+        emit_stmt(body);
+        out << ")" << std::endl; // inner block
+        emit_stmt(incr);
+        emit_br(aux_label);
+        out << ")" << std::endl; // loop
+        out << ")" << std::endl; // outer block
+        loops.pop();
+    }
+
     void emit_break(ast::Break* break_stmt)
     {
-        auto block_label = loops.get_label_block();
+        auto block_label = loops.get_label_break();
         emit_br(block_label);
     }
 
     void emit_continue(ast::Continue* continue_stmt)
     {
-        auto block_label = loops.get_label_loop();
+        auto block_label = loops.get_label_continue();
         emit_br(block_label);
     }
 
