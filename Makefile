@@ -21,9 +21,12 @@ customs=$(patsubst custom/%.cpp,bin/custom/%,$(src_custom))
 
 all: exe
 
-test: exe
-	@ echo; echo TESTING; echo
-	@ ./run_tests.sh
+# TODO separate dependencies on binaries
+test-parsing: exe
+	@./run_parsing_tests.sh
+
+render-asts: exe
+	@./run_render_asts.sh
 
 format:
 	clang-format -i src/**.cpp src/**.hpp
