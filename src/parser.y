@@ -491,7 +491,7 @@ do-while-stmt
 
 for-stmt
     : FOR LPAR expression-opt SEMI expression-opt SEMI expression-opt RPAR stmt[body]   { $$ = $body; }
-    | FOR LPAR declaration         expression-opt SEMI expression-opt RPAR stmt[body]   { $$ = $body; }
+    // | FOR LPAR declaration         expression-opt SEMI expression-opt RPAR stmt[body]   { $$ = $body; }
     ;
 
 switch-stmt

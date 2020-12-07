@@ -185,8 +185,10 @@ void init_table() {
 
 void clean_table() {
     // memset(table, 0, sizeof(table));
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
+    int i;
+    for (i = 0; i < 4; i++) {
+        int j;
+        for (j = 0; j < 4; j++) {
             table[i][j] = 0;
         }
     }
@@ -203,21 +205,23 @@ void add_score(int n) {
 }
 
 int move_table_hor(int dir) {
-    int i, j, c;
     int moved = 0;
 
     // para cada linha da tabela
+    int i;
     for (i = 0; i < 4; i++) {
         int n = 0, cur_tile = 0;
         // vetor para a nova linha
         int new_row[4]; // = {0, 0, 0, 0};
-        for (int i = 0; i < 4; i++) {
-            new_row[i] = 0;
+        int j;
+        for (j = 0; j < 4; j++) {
+            new_row[j] = 0;
         }
         // para cada colula
         for (j = 0; j < 4; j++) {
             // determina o valor do �ndice da coluna baseado na direção do
             // movimento
+            int c;
             if (dir == +1) { // direita
                 c = 3 - j;
             } else if (dir == -1) { // esquerda
@@ -249,6 +253,7 @@ int move_table_hor(int dir) {
         }
         // escreve a nova coluna na tabela de acordo com a dirte��o do movimento
         for (j = 0; j < 4; j++) {
+            int c;
             if (dir == +1)
                 c = 3 - j;
             else if (dir == -1)
@@ -262,19 +267,21 @@ int move_table_hor(int dir) {
 }
 
 int move_table_vert(int dir) {
-    int i, j, r;
     int moved = 0;
 
     // para cada coluna da tabela
+    int i;
     for (i = 0; i < 4; i++) {
         int n = 0, cur_tile = 0;
         // vetor para a nova linha
         int new_col[4]; // = {0, 0, 0, 0};
-        for (int i = 0; i < 4; i++) {
-            new_col[i] = 0;
+        int j;
+        for (j = 0; j < 4; j++) {
+            new_col[j] = 0;
         }
         // para linha colula
         for (j = 0; j < 4; j++) {
+            int r;
             // determina o valor do �ndice da linha baseado na direção do
             // movimento
             if (dir == +1) // cima
@@ -308,6 +315,7 @@ int move_table_vert(int dir) {
 
         // escreve a nova coluna na tabela de acordo com a direçãos do movimento
         for (j = 0; j < 4; j++) {
+            int r;
             if (dir == +1) {
                 r = j;
             } else if (dir == -1) {
