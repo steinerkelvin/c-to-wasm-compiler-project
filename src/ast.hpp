@@ -194,9 +194,7 @@ struct IntegerValue : BaseValue<uint64_t, types::PrimType::INTEGER> {
 };
 struct RealValue : BaseValue<double, types::PrimType::REAL> {
     LABEL("Real");
-    RealValue(double value)
-        : BaseValue<double, types::PrimType::REAL>(value)
-    {}
+    RealValue(double value) : BaseValue<double, types::PrimType::REAL>(value) {}
 };
 struct CharValue : BaseValue<char, types::PrimType::CHAR> {
     LABEL("Char");
@@ -465,6 +463,10 @@ struct Statement : virtual Node {
     LABEL("Statement");
 };
 
+struct EmptyStmt : Statement {
+    LABEL(";");
+};
+
 struct Break : Statement {
     LABEL("break");
 };
@@ -534,6 +536,39 @@ struct DoWhileStmt : Statement {
     Statement* stmt;
 };
 
+class ForStmt : public Statement {
+    LABEL("IfElseStmt");
+
+  protected:
+    Statement* init_expr;
+    Statement* cond_expr;
+    Statement* incr_expr;
+    Statement* body;
+
+  public:
+    ForStmt(
+        Statement* init_expr,
+        Statement* cond_expr,
+        Statement* incr_expr,
+        Statement* body)
+        : init_expr(init_expr), cond_expr(cond_expr), incr_expr(incr_expr),
+          body(body)
+    {
+        assert(init_expr);
+        assert(cond_expr);
+        assert(incr_expr);
+        assert(body);
+        this->merge_pos_from(init_expr);
+        this->merge_pos_from(cond_expr);
+        this->merge_pos_from(incr_expr);
+        this->merge_pos_from(body);
+    }
+    virtual const std::vector<Node*> get_children_nodes() const
+    {
+        return std::vector<Node*>{init_expr, cond_expr, incr_expr, body};
+    }
+};
+
 struct Block : MultiChildrenBase<Statement>, Statement {
     LABEL("Block");
     std::optional<ScopeId> scope_id;
@@ -556,8 +591,8 @@ struct Block : MultiChildrenBase<Statement>, Statement {
     }
 };
 
-struct ExpressionStmt : SingleChildBase<Expr>, Statement {
-    LABEL("ExpressionStmt");
+struct ExprStmt : SingleChildBase<Expr>, Statement {
+    LABEL("ExprStmt");
     using SingleChildBase::SingleChildBase;
 };
 

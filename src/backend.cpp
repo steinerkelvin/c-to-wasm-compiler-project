@@ -336,7 +336,7 @@ class Emitter {
             emit_break(break_stmt);
         } else if (auto continue_stmt = dynamic_cast<ast::Continue*>(stmt)) {
             emit_continue(continue_stmt);
-        } else if (auto expr_stmt = dynamic_cast<ast::ExpressionStmt*>(stmt)) {
+        } else if (auto expr_stmt = dynamic_cast<ast::ExprStmt*>(stmt)) {
             emit_expr_stmt(expr_stmt);
         } else {
             std::cerr << "NOT IMPLEMENTED: " << (*stmt) << std::endl;
@@ -388,7 +388,7 @@ class Emitter {
         emit_br(block_label);
     }
 
-    void emit_expr_stmt(ast::ExpressionStmt* expr_stmt)
+    void emit_expr_stmt(ast::ExprStmt* expr_stmt)
     {
         out << ";; " << *expr_stmt << std::endl;
         auto expr = expr_stmt->get_child();

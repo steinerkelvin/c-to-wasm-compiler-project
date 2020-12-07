@@ -74,7 +74,11 @@ void yyerror(char const *s);
 %type <ast::Statement*> while-stmt
 %type <ast::Statement*> do-while-stmt
 %type <ast::Statement*> for-stmt
-%type <ast::ExpressionStmt*> expr-stmt
+%type <ast::ExprStmt*> expr-stmt
+
+%type <ast::Expr*> expr-opt
+%type <ast::Statement*> expr-opt-stmt
+%type <ast::Statement*> for-init
 
 %type <ast::Expr*> expression
 %type <ast::Expr*> comma-expression
@@ -431,7 +435,7 @@ stmt
     ;
 
 empty-stmt
-    : SEMI              { $$ = NULL; }  // TODO
+    : SEMI              { $$ = new ast::EmptyStmt(); }
     ;
 
 // labeled-stmt
@@ -475,10 +479,10 @@ break-stmt
     : BREAK SEMI        { $$ = new ast::Break(); }
     ;
 case-stmt
-    : CASE constant-expression COLON stmt[body]     { $$ = $body; }
+    : CASE constant-expression COLON stmt[body]     { $$ = $body; } // TODO
     ;
 default-stmt
-    : DEFAULT COLON stmt[body]                      { $$ = $body; }
+    : DEFAULT COLON stmt[body]                      { $$ = $body; } // TODO
     ;
 
 while-stmt
@@ -490,8 +494,18 @@ do-while-stmt
     ;
 
 for-stmt
-    : FOR LPAR expression-opt SEMI expression-opt SEMI expression-opt RPAR stmt[body]   { $$ = $body; }
-    // | FOR LPAR declaration         expression-opt SEMI expression-opt RPAR stmt[body]   { $$ = $body; }
+    : FOR LPAR for-init[init] expr-opt[cond] SEMI expr-opt-stmt[incr] RPAR stmt[body]
+        {
+            ast::Statement* cond = $cond
+                ? static_cast<ast::Statement*>(new ast::ExprStmt(ops::check_bool($cond, @cond)))
+                : static_cast<ast::Statement*>(new ast::EmptyStmt());
+            $$ = new ast::ForStmt($init, cond, $incr, $body);
+        }
+    ;
+
+for-init
+    : expr-opt-stmt SEMI
+    // | declaration
     ;
 
 switch-stmt
@@ -499,10 +513,25 @@ switch-stmt
     ;
 
 expr-stmt
-    : expression SEMI   { $$ = new ast::ExpressionStmt($1); }
+    : expression SEMI   { $$ = new ast::ExprStmt($1); }
     ;
 
-expression-opt : expression | %empty ;
+expr-opt-stmt
+    : expr-opt
+        {
+            auto expr = $1;
+            if (expr) {
+                $$ = new ast::ExprStmt(expr);
+            } else {
+                $$ = new ast::EmptyStmt();
+            }
+        }
+    ;
+
+expr-opt
+    : expression
+    | %empty    { $$ = NULL; }
+    ;
 
 expression : comma-expression       { $$ = $1; last_expr = $$; } ;
 
