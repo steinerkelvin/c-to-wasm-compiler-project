@@ -19,4 +19,11 @@ int main()
         r = 77.7;
     }
     println_real(r);
+
+    int num;
+    num = 3;
+    while (num) {
+        println_int(num);
+        num = num - 1;
+    }
 }

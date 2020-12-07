@@ -506,19 +506,9 @@ struct IfElseStmt : Statement {
     Statement* stmt;
 };
 
-struct WhileStmt : Statement {
+struct WhileStmt : TwoChildrenBase<Expr, Statement>, Statement {
     LABEL("WhileStmt");
-    WhileStmt(Expr* expr, Statement* stmt)
-    {
-        assert(expr);
-        assert(stmt);
-        this->expr = expr;
-        this->stmt = stmt;
-    }
-    virtual const std::vector<Node*> get_children_nodes() const
-    {
-        return std::vector<Node*>{this->expr, this->stmt};
-    }
+    using TwoChildrenBase::TwoChildrenBase;
 
   protected:
     Expr* expr;

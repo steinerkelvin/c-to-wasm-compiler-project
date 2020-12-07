@@ -217,6 +217,12 @@ class Emitter {
             << "add"
             << ")" << std::endl;
     }
+    void emit_sub(const std::string& tptxt)
+    {
+        out << "(" << tptxt << "."
+            << "sub"
+            << ")" << std::endl;
+    }
 
     void emit_eq(const std::string& tptxt)
     {
@@ -237,6 +243,10 @@ class Emitter {
             << ")" << std::endl;
     }
 
+    void emit_br(const std::string& label)
+    {
+        out << "(br " << label << ")" << std::endl;
+    }
     void emit_br_if(const std::string& label)
     {
         out << "(br_if " << label << ")" << std::endl;
@@ -265,14 +275,20 @@ class Emitter {
 
     void emit_stmt(ast::Statement* stmt)
     {
+        assert(stmt);
         if (auto block = dynamic_cast<ast::Block*>(stmt)) {
             for (auto child_stmt : block->get_children()) {
                 emit_stmt(child_stmt);
             }
         } else if (auto if_stmt = dynamic_cast<ast::IfStmt*>(stmt)) {
             emit_if(if_stmt);
+        } else if (auto while_loop = dynamic_cast<ast::WhileStmt*>(stmt)) {
+            emit_while(while_loop);
         } else if (auto expr_stmt = dynamic_cast<ast::ExpressionStmt*>(stmt)) {
             emit_expr_stmt(expr_stmt);
+        } else {
+            std::cerr << "NOT IMPLEMENTED: " << (*stmt) << std::endl;
+            assert(0);
         }
     }
 
@@ -286,6 +302,23 @@ class Emitter {
         emit_eqz(wasm_type_inte);
         emit_br_if(if_label);
         emit_stmt(body);
+        out << ")" << std::endl;
+    }
+
+    void emit_while(ast::WhileStmt* while_stmt)
+    {
+        auto block_label = labels.block.next_label();
+        auto loop_label = labels.block.next_label();
+        auto cond = while_stmt->get_left();
+        auto body = while_stmt->get_right();
+        out << "(block " << block_label << std::endl;
+        out << "(loop " << loop_label << std::endl;
+        emit_expr(cond);
+        emit_eqz(wasm_type_inte);
+        emit_br_if(block_label);
+        emit_stmt(body);
+        emit_br(loop_label);
+        out << ")" << std::endl;
         out << ")" << std::endl;
     }
 
@@ -412,6 +445,8 @@ class Emitter {
         assert(binop);
         if (dynamic_cast<ast::Plus*>(binop)) {
             return "add";
+        } else if (dynamic_cast<ast::Minus*>(binop)) {
+            return "sub";
         }
         std::cerr << "unknown bin operator " << (*binop) << std::endl;
         abort();
