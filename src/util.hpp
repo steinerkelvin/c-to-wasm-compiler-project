@@ -10,7 +10,9 @@
 
 #define ALLOC(VAR) ((typeof(VAR))malloc(sizeof(typeof(*(VAR)))))
 
-#define return_if(val) if (val) return;
+#define return_if(val)                                                         \
+    if (val)                                                                   \
+        return;
 
 #define assert_ret(val) (assert(val), val)
 #define assert_derref(val) (assert(val), *(val))
@@ -19,10 +21,18 @@
 #define assert_derref(val) (*(val))
 #endif
 
+namespace util {
+
 template <typename T>
 T div_ceil(T a, T b)
 {
     return a / b + (a % b != 0);
+}
+
+template <typename T>
+T ceil(T num, T step)
+{
+    return step * div_ceil(num, step);
 }
 
 // Resolves to true only once
@@ -59,5 +69,7 @@ void action_if(B* value, std::function<void(T*)> action)
     }
 }
 */
+
+}; // namespace util
 
 #endif // UTIL_H

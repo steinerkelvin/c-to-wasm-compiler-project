@@ -100,6 +100,11 @@ bool is_typename(const char* name);
  */
 void compute_offsets(size_t base_activ_record_size);
 
+/**
+ * Gets size of the global scope (first scope)
+ */
+size_t get_global_scope_size();
+
 } // namespace symtb
 
 #endif // SYMTABLE_H

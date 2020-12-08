@@ -209,6 +209,8 @@ struct CharValue : BaseValue<char, types::PrimType::CHAR> {
 
 struct StringValue : Expr {
     LABEL("String");
+    const StrRef ref;
+
     StringValue(StrRef ref) : ref(ref)
     {
         this->set_type(
@@ -220,10 +222,6 @@ struct StringValue : Expr {
         stream << " \"" << this->ref.id << "\"";
     };
     StrRef get_ref() const { return this->ref; }
-    const std::string& get_str() const { return this->ref.get(); }
-
-  protected:
-    StrRef ref;
 };
 
 struct Variable : LExpr {
