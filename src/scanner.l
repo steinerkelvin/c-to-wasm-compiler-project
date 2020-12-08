@@ -134,7 +134,7 @@ while                   { HANDLE_TOKEN(WHILE, {}); }
 {real}                  { HANDLE_TOKEN(REAL_VAL, { yylval.REAL_VAL = atof(yytext); }); }
     /* TODO corrigir e adicionar outras representações */
 
-\'([^\r\n\']|"\\\'")*\'     { HANDLE_TOKEN(CHAR_VAL, {}); }
+\'([^\r\n\']|"\\\'")*\'     { HANDLE_TOKEN(CHAR_VAL, {yyval.CHAR_VAL = atoi(yytext[1])}); }
 \"([^\r\n\"]|"\\\"")*\"     { HANDLE_TOKEN(STR_VAL, { yylval.STR_VAL = strtb::add(yytext); }); }
 
 [a-zA-Z_][0-9a-zA-Z_]*  { HANDLE_TOKEN_ID({}); }
