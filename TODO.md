@@ -1,22 +1,16 @@
-- for loop
-- if else
-- strings e print
-- tratar alguma operações específicar em real
-
-- comparison
-  - !=
-  - <
-  - <=
-  - >
-  - >=
-
-- acesso de vetor [ ]
-
-- prints sem line break
+- string table code generation and printing strings
+- prints without line breaks
 - rand
+- if-else
+- handle specific instructions for some arithmetic on floats
 
-- inicialização de variável
+- vector access [ ]
 
-- Check return value type
-- Allow define already declared function
-- detect expressions with no side effects
+- variable initialization on declarations
+
+- int / float type coersion
+
+- type check return value
+- allow defining already declared function
+
+- detect expressions with no side effects?

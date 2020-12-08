@@ -36,14 +36,19 @@ int main()
         }
         println_int(num);
     }
+
     int i;
-    for (i = 0; ; i = i + 1) {
-        if (i % 3 == 0) {
+    for (i = 0; i < 12; i = i + 1) {
+        if (i % 3 != 0) {
             continue;
         }
         println_int(i);
-        if (i == 10) {
-            break;
-        }
+    }
+
+    int acc;
+    acc = 1;
+    for (i = 1; i <= 6; i = i + 1) {
+        acc = acc * i;
+        println_int(acc);
     }
 }

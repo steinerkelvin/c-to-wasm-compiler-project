@@ -496,10 +496,12 @@ do-while-stmt
 for-stmt
     : FOR LPAR for-init[init] expr-opt[cond] SEMI expr-opt-stmt[incr] RPAR stmt[body]
         {
-            ast::Statement* cond = $cond
-                ? static_cast<ast::Statement*>(new ast::ExprStmt(ops::check_bool($cond, @cond)))
-                : static_cast<ast::Statement*>(new ast::EmptyStmt());
-            $$ = new ast::ForStmt($init, cond, $incr, $body);
+            using opt_expr_t = std::optional<ast::Expr*>;
+            std::optional<ast::Expr*> cond_opt =
+                $cond
+                    ? opt_expr_t(ops::check_bool($cond, @cond))
+                    : opt_expr_t();
+            $$ = new ast::ForStmt($init, cond_opt, $incr, $body);
         }
     ;
 

@@ -394,16 +394,18 @@ class Emitter {
         auto continue_label = loops.get_label_continue();
         auto aux_label = loops.get_label_aux();
         auto init = for_stmt->get_init();
-        auto cond = for_stmt->get_cond();
+        auto cond_opt = for_stmt->get_cond();
         auto incr = for_stmt->get_incr();
         auto body = for_stmt->get_body();
         emit_stmt(init);
         out << "(block " << break_label << std::endl;
         out << "(loop " << aux_label << std::endl;
         out << "(block " << continue_label << std::endl;
-        // emit_expr(cond); // TODO
-        // emit_eqz(wasm_type_inte);
-        // emit_br_if(block_label);
+        if (cond_opt) {
+            emit_expr(*cond_opt);
+            emit_eqz(wasm_type_inte);
+            emit_br_if(break_label);
+        }
         emit_stmt(body);
         out << ")" << std::endl; // inner block
         emit_stmt(incr);
@@ -559,7 +561,15 @@ class Emitter {
         } else if (dynamic_cast<ast::Equal*>(binop)) {
             return "eq";
         } else if (dynamic_cast<ast::NotEqual*>(binop)) {
-            return "neq";
+            return "ne";
+        } else if (dynamic_cast<ast::Less*>(binop)) {
+            return "lt_s"; // TODO handle real
+        } else if (dynamic_cast<ast::Greater*>(binop)) {
+            return "gt_s";
+        } else if (dynamic_cast<ast::LessEqual*>(binop)) {
+            return "le_s";
+        } else if (dynamic_cast<ast::GreaterEqual*>(binop)) {
+            return "ge_s";
         }
         std::cerr << "unknown bin operator " << (*binop) << std::endl;
         abort();

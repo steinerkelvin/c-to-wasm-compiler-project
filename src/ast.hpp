@@ -541,31 +541,41 @@ class ForStmt : public Statement {
 
   protected:
     Statement* init;
-    Statement* cond; // TODO
+    std::optional<Expr*> cond;
     Statement* incr;
     Statement* body;
 
   public:
-    ForStmt(Statement* init, Statement* cond, Statement* incr, Statement* body)
+    ForStmt(
+        Statement* init,
+        std::optional<Expr*> cond,
+        Statement* incr,
+        Statement* body)
         : init(init), cond(cond), incr(incr), body(body)
     {
         assert(init);
-        assert(cond);
+        if (cond) {
+            assert(*cond);
+        }
         assert(incr);
         assert(body);
         this->merge_pos_from(init);
-        this->merge_pos_from(cond);
-        this->merge_pos_from(incr);
+        // this->merge_pos_from(cond);
+        // this->merge_pos_from(incr);
         this->merge_pos_from(body);
     }
     Statement* get_init() { return init; }
-    Statement* get_cond() { return cond; }
+    std::optional<Expr*> get_cond() { return cond; }
     Statement* get_incr() { return incr; }
     Statement* get_body() { return body; }
 
     virtual const std::vector<Node*> get_children_nodes() const
     {
-        return std::vector<Node*>{init, cond, incr, body};
+        if (cond) {
+            return std::vector<Node*>{init, *cond, incr, body};
+        } else {
+            return std::vector<Node*>{init, incr, body};
+        }
     }
 };
 
