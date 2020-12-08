@@ -624,9 +624,15 @@ class Emitter {
 
 const char* header = R"BLOCK(
 (module
-    (import "std" "println" (func $println (param i32)))
+    (import "std" "_ln" (func $_ln))
+    (import "std" "_print" (func $_print (param i32) (param i32)))
+    (import "std" "_println" (func $_println (param i32) (param i32)))
+    (import "std" "print_int" (func $print_int (param i32)))
+    (import "std" "print_real" (func $print_real (param f32)))
     (import "std" "println_int" (func $println_int (param i32)))
     (import "std" "println_real" (func $println_real (param f32)))
+    (import "std" "print_int_pad" (func $print_int_pad (param i32) (param i32)))
+    (import "std" "print_real_pad" (func $print_real_pad (param f32) (param i32)))
 
     (export "memory" (memory $mem))
     (export "str_len" (func $str_len))

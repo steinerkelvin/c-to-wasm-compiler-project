@@ -1,5 +1,10 @@
+void _ln();
+void print_int(int);
+void print_real(float);
 void println_int(int);
 void println_real(float);
+void print_int_pad(int, int);
+void print_real_pad(float, int);
 
 int global;
 
@@ -42,13 +47,15 @@ int main()
         if (i % 3 != 0) {
             continue;
         }
-        println_int(i);
+        print_int_pad(i, 8);
     }
+    _ln();
 
     int acc;
     acc = 1;
     for (i = 1; i <= 6; i = i + 1) {
         acc = acc * i;
-        println_int(acc);
+        print_int_pad(acc, 0-6);
     }
+    _ln();
 }

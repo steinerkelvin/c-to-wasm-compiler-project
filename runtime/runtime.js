@@ -11,20 +11,62 @@ if (!input_file_name) {
 const utf8_decoder = new TextDecoder('utf-8')
 
 const make_imports = (global) => {
-  return {
-    "std": {
-      println: (po) => {
-        const {exports, memory} = global
-        // TODO do without wasm-implementd str_len ??
-        const len = exports.str_len(po)
-        const arr = new Uint8Array(memory.buffer, po, len)
-        const txt = utf8_decoder.decode(arr)
-        console.log(txt)
-      },
-      println_int: (i) => console.log(i),
-      println_real: (r) => console.log(r),
-    }
+  const std = {
+    _ln: () => { process.stdout.write("\n") },
+    _print: (po, len) => {
+      const { exports, memory } = global
+      const arr = new Uint8Array(memory.buffer, po, len)
+      const txt = utf8_decoder.decode(arr)
+      process.stdout.write(txt)
+    },
+    _println: (po, len) => {
+      std._print(po, len)
+      std._ln()
+    },
+    print_int: (i) => {
+      process.stdout.write(i.toString())
+    },
+    print_real: (r) => {
+      process.stdout.write(r.toString())
+    },
+    println_int: (i) => {
+      process.stdout.write(i.toString())
+      std._ln()
+    },
+    println_real: (r) => {
+      process.stdout.write(r.toString())
+      std._ln()
+    },
+    print_int_pad: (i, full_len) => {
+      let is_left = false;
+      if (full_len < 0) {
+        full_len = Math.abs(full_len)
+        is_left = true
+      }
+      let txt = i.toString()
+      if (is_left) {
+        txt = txt.padStart(full_len)
+      } else {
+        txt = txt.padEnd(full_len)
+      }
+      process.stdout.write(txt)
+    },
+    print_real_pad: (r, full_len) => {
+      let is_left = false
+      if (full_len < 0) {
+        full_len = Math.abs(full_len)
+        is_left = true
+      }
+      let txt = i.toString()
+      if (is_left) {
+        txt = txt.padStart(full_len)
+      } else {
+        txt = txt.padEnd(full_len)
+      }
+      process.stdout.write(txt)
+    },
   }
+  return { "std": std }
 }
 
 const run = async (file_name) => {

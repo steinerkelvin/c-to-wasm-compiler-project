@@ -1,9 +1,11 @@
 (module
-    (import "std" "println" (func $println (param i32)))
+    (import "std" "_print" (func $_print (param i32) (param i32)))
+    (import "std" "_println" (func $_println (param i32) (param i32)))
     (import "std" "println_int" (func $println_int (param i32)))
     (import "std" "println_real" (func $println_real (param f32)))
 
     (export "memory" (memory $mem))
+
     (export "str_len" (func $str_len))
     (export "str_copy" (func $str_copy))
     (export "str_end" (func $str_end))
@@ -78,7 +80,7 @@
         call $str_copy
     )
 
-    (data (i32.const 32) " World")
+    (data (i32.const 64) " World")
 
     (func $main
         (i32.store8 (i32.const 0) (i32.const 72))
@@ -87,7 +89,7 @@
         (i32.store8 (i32.const 3) (i32.const 108))
         (i32.store8 (i32.const 4) (i32.const 111))
         (i32.store8 (i32.const 5) (i32.const 0))
-        (call $str_cat (i32.const 0) (i32.const 32))
-        (call $println (i32.const 0))
+        (call $str_cat (i32.const 0) (i32.const 64))
+        (call $_println (i32.const 0) (call $str_len (i32.const 0)))
     )
 )
