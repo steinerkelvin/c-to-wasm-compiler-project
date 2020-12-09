@@ -6,6 +6,7 @@
  */
 
 #include <cstddef>
+#include <map>
 #include <optional>
 #include <string>
 
@@ -57,6 +58,43 @@ struct VarRef : SymRef {
     VarRow& get() const;
 };
 
+struct Scope {
+    const ScopeId id;
+    const std::optional<ScopeId> parent_id;
+    const bool is_func_scope;
+    const bool is_global_scope;
+
+    std::optional<size_t> base_offset;
+    std::optional<size_t> size;
+
+    using IdMap = std::map<std::string, SymId>;
+    IdMap tags_map;
+    IdMap types_map;
+    IdMap vars_map;
+
+    std::vector<TagRow> tags;
+    std::vector<TypeRow> types;
+    std::vector<VarRow> vars;
+
+    Scope(
+        const ScopeId id,
+        const std::optional<ScopeId> parent_id,
+        bool is_func_scope = false,
+        bool is_global_scope = false)
+        : id(id), parent_id(parent_id), is_func_scope(is_func_scope),
+          is_global_scope(is_global_scope){};
+
+    const ScopeId get_id() const { return this->id; };
+    const std::optional<ScopeId> get_parent() const { return this->parent_id; };
+
+    SymId add_tag(const std::string& name, types::Type* type);
+    SymId add_type(const std::string& name, types::Type* type);
+    SymId
+    add_var(const std::string& name, types::Type* type, bool is_param = false);
+
+    std::optional<VarRef> lookup_var(const std::string& name);
+};
+
 /**
  * Init symbol table.
  * Should be called once before the symbol table is used.
@@ -72,6 +110,12 @@ ScopeId open_scope(bool is_func_scope = false);
 
 /** Closes the last opened scope. */
 void close_scope();
+
+/**
+ * Gets a scope given its id.
+ *
+ */
+Scope& get_scope(ScopeId id);
 
 /** Inserts enum/struct/union tag into the last opened scope. */
 TagRef insert_tag(const std::string& namep, types::Type* type);

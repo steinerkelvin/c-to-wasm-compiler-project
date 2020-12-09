@@ -12,7 +12,7 @@ const size_t null_size = 0;
 const size_t word_size = 4;
 const size_t table_align = 8;
 const size_t base_activ_record_size = 1 * word_size;
-const size_t stack_size = 1 << 20;
+const size_t stack_size = 1 << 20; // 1 MiB
 
 const char* wasm_type_ptr = "i32";
 const char* wasm_type_inte = "i32";
@@ -195,17 +195,18 @@ class Emitter {
     {
         out << "(" << wasm_type_ptr << ".const " << value << ")" << std::endl;
     }
-
     void emit_const_int(const std::string& tptxt, uint64_t value)
     {
         out << "(" << tptxt << ".const " << value << ")" << std::endl;
     }
-
     void emit_const_real(const std::string& tptxt, double value)
     {
         out << "(" << tptxt << ".const " << value << ")" << std::endl;
     }
 
+    void emit_get_local(size_t idx) {
+        out << "(get_local " << idx << ")" << std::endl;
+    }
     void emit_get_local(const std::string& label)
     {
         out << "(get_local $" << label << ")" << std::endl;
@@ -252,7 +253,6 @@ class Emitter {
         }
         out << ")" << std::endl;
     }
-
     void emit_store(const std::string& tptxt, bool is_byte = false)
     {
         out << "(" << tptxt << ".store";
@@ -314,6 +314,8 @@ class Emitter {
         out << "(br_if " << label << ")" << std::endl;
     }
 
+    void emit_return() { out << "(return)" << std::endl; }
+
     //
     // AST handling
     //
@@ -322,17 +324,65 @@ class Emitter {
     {
         for (auto child : root->get_children()) {
             if (auto func_def = dynamic_cast<ast::FuncDef*>(child)) {
-                labels.local.reset();
-                labels.block.reset();
-
-                auto name = func_def->ref.get().name;
-                out << "(func ";
-                out << "$" << name << std::endl;
-                auto block = func_def->get_child();
-                emit_stmt(block);
-                out << ")" << std::endl;
+                emit_func_def(func_def);
+            } else {
+                std::cerr << "NOT IMPLEMENTED: " << (*child) << std::endl;
+                abort();
             }
         }
+    }
+
+    void emit_func_def(ast::FuncDef* func_def)
+    {
+        labels.local.reset();
+        labels.block.reset();
+
+        auto& func_row = func_def->ref.get();
+        auto func_type =
+            assert_ret(dynamic_cast<types::Function*>(func_row.type));
+
+        auto name = func_row.name;
+        out << "(func " << "$" << name << std::endl;
+
+        for (auto [o_pr_name, pr_type] : func_type->parameters) {
+            out << "(param " << type_text(pr_type) << ")" << std::endl;
+        }
+
+        auto ret_type = func_type->get_base();
+        if (ret_type->get_size() > 0) {
+            out << "(result " << type_text(ret_type) << ")" << std::endl;
+        }
+
+        auto block = func_def->get_child();
+        auto o_scope_id = block->scope_id;
+        auto& scope = symtb::get_scope(assert_derref(o_scope_id));
+
+        {
+            // emit parameter variables initialization code
+            size_t i = 0;
+            for (auto [o_name, type] : func_type->parameters) {
+                auto name = assert_derref(o_name);
+                emmit_comment(name);
+                auto type_txt = type_text(type);
+                auto is_byte = type->is_compatible_with(types::prim_char);
+                auto o_ref = scope.lookup_var(name);
+                auto ref = assert_derref(o_ref);
+                emit_var_loc_by_ref(ref);
+                emit_get_local(i++);
+                emit_store(type_txt, is_byte);
+                // TODO var loc
+            }
+        }
+
+        emit_stmt(block);
+        out << ")" << std::endl << std::endl;
+    }
+
+    void emit_return_value(ast::ReturnValue* ret)
+    {
+        auto expr = ret->get_child();
+        emit_expr(expr);
+        emit_return();
     }
 
     void emit_stmt(ast::Statement* stmt)
@@ -344,6 +394,10 @@ class Emitter {
             for (auto child_stmt : block->get_children()) {
                 emit_stmt(child_stmt);
             }
+        } else if (dynamic_cast<ast::Return*>(stmt)) {
+            emit_return();
+        } else if (auto ret_stmt = dynamic_cast<ast::ReturnValue*>(stmt)) {
+            emit_return_value(ret_stmt);
         } else if (auto if_stmt = dynamic_cast<ast::IfStmt*>(stmt)) {
             emit_if(if_stmt);
         } else if (auto while_stmt = dynamic_cast<ast::WhileStmt*>(stmt)) {
@@ -441,6 +495,7 @@ class Emitter {
         emit_expr(expr);
         auto type = expr->get_type();
         auto size = type->get_size();
+
         if (size > 0) {
             emit_drop();
             // emit_drop(util::div_ceil(size, word_size));
@@ -478,7 +533,11 @@ class Emitter {
     void emit_var_loc(ast::Variable* var)
     {
         assert(var);
-        auto& var_row = var->ref.get();
+        emit_var_loc_by_ref(var->ref);
+    }
+
+    void emit_var_loc_by_ref(const symtb::VarRef& var_ref){
+        auto& var_row = var_ref.get();
         auto offset = assert_derref(var_row.offset);
 
         // If it is a local variable, sum frame pointer
@@ -738,23 +797,25 @@ const char* header = R"BLOCK(
 
 )BLOCK";
 
-const char* footer = "\n)\n";
+const char* footer = ")\n";
 
 void generate_code(
     std::ostream& out, ast::Program* root, size_t strtb_size, size_t data_size)
 {
     const size_t base_pos = 0;
     const size_t strtb_pos = base_pos;
-    const size_t data_pos = util::ceil<size_t>(strtb_pos + strtb_size, table_align);
-    const size_t stack_pos = util::ceil<size_t>(data_pos + data_size, table_align);
+    const size_t data_pos =
+        util::ceil<size_t>(strtb_pos + strtb_size, table_align);
+    const size_t stack_pos =
+        util::ceil<size_t>(data_pos + data_size, table_align);
 
     std::cerr << "strtb => "
               << "pos: " << strtb_pos << " "
               << "size: " << strtb_size << std::endl;
 
     std::cerr << "data => "
-            << "pos: " << data_pos << " "
-            << "size: " << data_size << std::endl;
+              << "pos: " << data_pos << " "
+              << "size: " << data_size << std::endl;
 
     out << header;
     // TODO initial stack pointer value

@@ -1,11 +1,12 @@
 #include "symtable.hpp"
 #include <cassert>
-#include <map>
-#include <string>
+#include <iostream>
 #include <vector>
 
-#include <iostream>
+static std::vector<symtb::Scope> scopes;
+static std::vector<ScopeId> scope_stack;
 
+namespace symtb {
 using symtb::TagRef;
 using symtb::TagRow;
 using symtb::TypeRef;
@@ -14,68 +15,44 @@ using symtb::VarRef;
 using symtb::VarRow;
 using types::Type;
 
-struct Scope {
-    const ScopeId id;
-    const std::optional<ScopeId> parent_id;
-    const bool is_func_scope;
-    const bool is_global_scope;
+SymId Scope::add_tag(const std::string& name, Type* type)
+{
+    assert(tags_map.find(name) == tags_map.end());
+    const SymId idx = tags.size();
+    TagRow row(name, type);
+    tags.push_back(row);
+    tags_map[name] = idx;
+    return idx;
+}
+SymId Scope::add_type(const std::string& name, Type* type)
+{
+    assert(types_map.find(name) == types_map.end());
+    const SymId idx = types.size();
+    TypeRow row(name, type);
+    types.push_back(row);
+    types_map[name] = idx;
+    return idx;
+}
+SymId Scope::add_var(const std::string& name, Type* type, bool is_param)
+{
+    assert(vars_map.find(name) == vars_map.end());
+    VarRow row(name, type, is_param, this->is_global_scope);
+    const SymId idx = vars.size();
+    vars.push_back(row);
+    vars_map[name] = idx;
+    return idx;
+}
 
-    std::optional<size_t> base_offset;
-    std::optional<size_t> size;
-
-    using IdMap = std::map<std::string, SymId>;
-    IdMap tags_map;
-    IdMap types_map;
-    IdMap vars_map;
-
-    std::vector<TagRow> tags;
-    std::vector<TypeRow> types;
-    std::vector<VarRow> vars;
-
-    Scope(
-        const ScopeId id,
-        const std::optional<ScopeId> parent_id,
-        bool is_func_scope = false,
-        bool is_global_scope = false)
-        : id(id), parent_id(parent_id), is_func_scope(is_func_scope),
-          is_global_scope(is_global_scope){};
-
-    const ScopeId get_id() const { return this->id; };
-    const std::optional<ScopeId> get_parent() const { return this->parent_id; };
-
-    SymId add_tag(const std::string& name, Type* type)
-    {
-        assert(tags_map.find(name) == tags_map.end());
-        const SymId idx = tags.size();
-        TagRow row(name, type);
-        tags.push_back(row);
-        tags_map[name] = idx;
-        return idx;
+std::optional<VarRef> Scope::lookup_var(const std::string& name)
+{
+    auto& map = this->vars_map;
+    const auto& it = map.find(name);
+    if (it != map.end()) {
+        const SymId sym_id = it->second;
+        return {(VarRef){{this->id, sym_id}}};
     }
-    SymId add_type(const std::string& name, Type* type)
-    {
-        assert(types_map.find(name) == types_map.end());
-        const SymId idx = types.size();
-        TypeRow row(name, type);
-        types.push_back(row);
-        types_map[name] = idx;
-        return idx;
-    }
-    SymId add_var(const std::string& name, Type* type, bool is_param = false)
-    {
-        assert(vars_map.find(name) == vars_map.end());
-        VarRow row(name, type, is_param, this->is_global_scope);
-        const SymId idx = vars.size();
-        vars.push_back(row);
-        vars_map[name] = idx;
-        return idx;
-    }
-};
-
-static std::vector<Scope> scopes;
-static std::vector<ScopeId> scope_stack;
-
-namespace symtb {
+    return std::nullopt;
+}
 
 ScopeId init()
 {
@@ -102,6 +79,12 @@ void close_scope()
 {
     assert(scope_stack.size() > 0);
     scope_stack.pop_back();
+}
+
+Scope& get_scope(ScopeId id)
+{
+    assert(id < scopes.size());
+    return scopes[id];
 }
 
 TagRow& TagRef::get() const
@@ -277,7 +260,8 @@ void compute_offsets(size_t base_activ_record_size)
     }
 }
 
-size_t get_global_scope_size() {
+size_t get_global_scope_size()
+{
     assert(scopes.size() > 0);
     auto size_opt = scopes[0].size;
     assert(size_opt);
