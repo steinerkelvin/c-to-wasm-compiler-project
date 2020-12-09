@@ -25,12 +25,13 @@ Hopefully, a C to WebAssemply compiler.
 
 ### Test
 
-    make test
+    make test-parsing
 
 ### File structure
 
     src/ - "library" sources
     main/ - .cpp files that compile to executables
+    runtime/ - JavScript runtime
     tests/ - test files
         input/ - inputs
         ast-dot/ - rendered ASTs

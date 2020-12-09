@@ -1,4 +1,6 @@
 void _ln();
+void print(const char*);
+void println(const char*);
 void print_int(int);
 void print_real(float);
 void println_int(int);
@@ -51,6 +53,7 @@ int main()
     }
     _ln();
 
+    println("FATORIAL");
     int acc;
     acc = 1;
     for (i = 1; i <= 6; i = i + 1) {

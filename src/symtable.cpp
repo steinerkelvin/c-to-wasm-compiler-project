@@ -277,4 +277,11 @@ void compute_offsets(size_t base_activ_record_size)
     }
 }
 
+size_t get_global_scope_size() {
+    assert(scopes.size() > 0);
+    auto size_opt = scopes[0].size;
+    assert(size_opt);
+    return *size_opt;
+}
+
 } // namespace symtb

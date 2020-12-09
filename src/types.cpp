@@ -138,7 +138,7 @@ std::ostream& Function::write_repr(std::ostream& stream) const
 {
     stream << "(";
 
-    Once first;
+    util::Once first;
     for (auto [name, type] : parameters) {
         if (!first) {
             stream << ", ";

@@ -10,7 +10,9 @@
 namespace back {
 const size_t null_size = 0;
 const size_t word_size = 4;
+const size_t table_align = 8;
 const size_t base_activ_record_size = 1 * word_size;
+const size_t stack_size = 1 << 20;
 
 const char* wasm_type_ptr = "i32";
 const char* wasm_type_inte = "i32";
@@ -96,7 +98,7 @@ const char* type_text(const types::Type* type)
     // abort();
 }
 
-struct LabelCounter : Counter {
+struct LabelCounter : util::Counter {
     const std::string prefix;
     LabelCounter(const std::string prefix) : prefix(prefix) {}
     std::string next_label()
@@ -109,7 +111,7 @@ struct LabelCounter : Counter {
 };
 
 struct LoopsCounter {
-    Counter loop_counter;
+    util::Counter loop_counter;
     std::stack<size_t> loop_stack;
     void reset()
     {
@@ -144,7 +146,8 @@ struct LoopsCounter {
         txt += std::to_string(num);
         return txt;
     }
-    std::string get_label_aux() {
+    std::string get_label_aux()
+    {
         assert(!loop_stack.empty());
         auto num = loop_stack.top();
         std::string txt("$loopaux");
@@ -155,6 +158,8 @@ struct LoopsCounter {
 
 class Emitter {
     std::ostream& out;
+    const size_t strtb_pos;
+    const size_t data_pos;
 
     struct {
         LabelCounter func{"f"};
@@ -173,7 +178,9 @@ class Emitter {
     }
 
   public:
-    Emitter(std::ostream& out) : out(out) {}
+    Emitter(std::ostream& out, size_t strtb_pos, size_t data_pos)
+        : out(out), strtb_pos(strtb_pos), data_pos(data_pos)
+    {}
 
     //
     // Emiting Wasm instructions
@@ -436,7 +443,7 @@ class Emitter {
         auto size = type->get_size();
         if (size > 0) {
             emit_drop();
-            // emit_drop(div_ceil(size, word_size));
+            // emit_drop(util::div_ceil(size, word_size));
         }
     }
 
@@ -448,6 +455,8 @@ class Emitter {
             emit_int_val(int_val);
         } else if (auto real_val = dynamic_cast<ast::RealValue*>(expr)) {
             emit_real_val(real_val);
+        } else if (auto str_val = dynamic_cast<ast::StringValue*>(expr)) {
+            emit_str_val(str_val);
         } else if (auto assign_stmt = dynamic_cast<ast::Assign*>(expr)) {
             emit_assign(assign_stmt);
         } else if (auto binop = dynamic_cast<ast::BinOp*>(expr)) {
@@ -472,11 +481,13 @@ class Emitter {
         auto& var_row = var->ref.get();
         auto offset = assert_derref(var_row.offset);
 
-        emit_const_int(wasm_type_ptr, offset);
         // If it is a local variable, sum frame pointer
         if (!var_row.is_global) {
             emit_get_fp();
+            emit_const_int(wasm_type_ptr, offset);
             emit_add(wasm_type_ptr);
+        } else {
+            emit_const_int(wasm_type_ptr, data_pos + offset);
         }
     }
 
@@ -495,13 +506,18 @@ class Emitter {
     void emit_int_val(const ast::IntegerValue* val_node)
     {
         auto val = val_node->get_value();
-        emit_const_int(wasm_type_ptr, val);
+        emit_const_int(wasm_type_inte, val);
     }
-
     void emit_real_val(const ast::RealValue* val_node)
     {
         auto val = val_node->get_value();
         emit_const_real(wasm_type_real, val);
+    }
+    void emit_str_val(const ast::StringValue* val_node)
+    {
+        auto offse_opt = val_node->get_ref().get().offset;
+        auto offset = assert_derref(offse_opt);
+        emit_const_int(wasm_type_ptr, strtb_pos + offset);
     }
 
     void emit_assign(ast::Assign* assign_stmt)
@@ -702,6 +718,17 @@ const char* header = R"BLOCK(
         )
         local.get $po
     )
+    (func $print (param $po i32)
+        local.get $po
+        local.get $po
+        call $str_len
+        call $_print
+    )
+    (func $println (param $po i32)
+        local.get $po
+        call $print
+        call $_ln
+    )
     (func $str_cat (param $dest i32) (param $src i32)
         local.get $dest
         call $str_end
@@ -713,15 +740,31 @@ const char* header = R"BLOCK(
 
 const char* footer = "\n)\n";
 
-void generate_code(std::ostream& out, ast::Program* root)
+void generate_code(
+    std::ostream& out, ast::Program* root, size_t strtb_size, size_t data_size)
 {
+    const size_t base_pos = 0;
+    const size_t strtb_pos = base_pos;
+    const size_t data_pos = util::ceil<size_t>(strtb_pos + strtb_size, table_align);
+    const size_t stack_pos = util::ceil<size_t>(data_pos + data_size, table_align);
+
+    std::cerr << "strtb => "
+              << "pos: " << strtb_pos << " "
+              << "size: " << strtb_size << std::endl;
+
+    std::cerr << "data => "
+            << "pos: " << data_pos << " "
+            << "size: " << data_size << std::endl;
+
     out << header;
     // TODO initial stack pointer value
-    out << "(global $" << label_fp << " i32 (i32.const 0))" << std::endl;
-    out << "(global $" << label_sp << " i32 (i32.const 0))" << std::endl;
+    out << "(global $" << label_fp << " i32 (i32.const " << stack_pos << "))"
+        << std::endl;
+    out << "(global $" << label_sp << " i32 (i32.const " << stack_pos << "))"
+        << std::endl;
     out << std::endl;
 
-    Emitter emt(out);
+    Emitter emt(out, strtb_pos, data_pos);
     emt.emit_program(root);
     out << footer;
 }
