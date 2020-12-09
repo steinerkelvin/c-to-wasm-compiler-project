@@ -35,7 +35,8 @@ void yyerror(char const *s);
 %}
 
 %type <ast::Program*> program
-%type <ast::Declaration*> program-part function-definition declaration
+%type <ast::Declaration*> function-definition
+%type <ast::Block*> declaration
 
 %type <decl::TypeQualifier*> type-qualifier
 %type <decl::TypeSpecifier*> type-specifier
@@ -131,25 +132,34 @@ void yyerror(char const *s);
 all : program { root = $1; } ;
 
 program
-    : %empty                { $$ = new ast::Program(); }
-    | program program-part  { $$ = $1; $$->add($2); }
-    ;
-program-part
-    : function-definition
-    | declaration
+    : %empty                        { $$ = new ast::Program(); }
+    | program function-definition   { $$ = $1; $$->add($2); }
+    | program declaration
+        {
+            $$ = $1;
+            auto init_block = $2;
+            if (!init_block->get_children().empty()) {
+                auto init_node = new ast::Initialization(init_block);
+                $$->add(init_node);
+            }
+        }
     ;
 
 declaration
     : declaration-specifiers SEMI
         {
-            $$ = new ast::Declaration();
+            $$ = new ast::Block();
         }
     | declaration-specifiers[specs] init-declarator-list[inits] SEMI
         {
-            declare(*$specs, *$inits);
+            auto inits = declare(*$specs, *$inits);
             delete $specs;
             delete $inits;
-            $$ = new ast::Declaration();
+            $$ = new ast::Block();
+            for (auto init_expr : inits) {
+                auto stmt = new ast::ExprStmt(init_expr);
+                $$->add(stmt);
+            }
         }
     ;
 
@@ -458,7 +468,7 @@ block-list-opt
     | block-list-opt block-item     { $$ = $1; $$->add($2); }
     ;
 block-item
-    : declaration                   { $$ = NULL; }  // TODO
+    : declaration                   { $$ = $1; }
     | stmt
     ;
 

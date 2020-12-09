@@ -4,6 +4,7 @@
 #include <iostream>
 #include <variant>
 
+#include "operations.hpp"
 #include "symtable.hpp"
 
 namespace decl {
@@ -211,7 +212,8 @@ ContainerTypeBuilder function_type_builder(ParameterDeclarations* param_decls)
     return ContainerTypeBuilder::function(parameters);
 }
 
-std::vector<ast::Assign*> declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
+std::vector<ast::Expr*>
+declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 {
     TypeQualOrTypeSpecList typedecl_specs;
 
@@ -236,7 +238,8 @@ std::vector<ast::Assign*> declare(const DeclarationSpecs& pspecs, const InitDecl
 
     types::PrimType base_type = make_type(typedecl_specs);
 
-    std::vector<ast::Assign*> vars;
+    std::vector<ast::Expr*> init_exprs;
+
     for (auto& decl : decls) {
         types::Type* type = new types::PrimType(base_type);
 
@@ -266,14 +269,17 @@ std::vector<ast::Assign*> declare(const DeclarationSpecs& pspecs, const InitDecl
             }
             symtb::VarRef var_ref = symtb::insert_var(name, type);
             std::optional<ast::Expr*> init_opt = decl->init_expr;
-            if(init_opt){
+            if (init_opt) {
                 ast::Variable* var = new ast::Variable(var_ref);
-                ast::Assign* assign = new ast::Assign(var, *init_opt);
-                vars.push_back(assign);
+                auto var_type = var_ref.get().type;
+                var->set_type(var_type);
+                auto posi = assert_derref((*init_opt)->get_pos());
+                ast::Expr* assign = ops::unify_assign(var, *init_opt, posi);
+                init_exprs.push_back(assign);
             }
         }
     }
-    return vars;
+    return init_exprs;
 }
 
 // TODO nome mais legível para esse tipo de retorno

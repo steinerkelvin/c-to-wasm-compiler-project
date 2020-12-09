@@ -612,7 +612,16 @@ struct FuncDef : SingleChildBase<Block>, Declaration {
     LABEL("FuncDef");
     const symtb::VarRef ref;
 
-    FuncDef(Block* body, symtb::VarRef ref) : SingleChildBase(body), ref(ref) {}
+    FuncDef(Block* body, symtb::VarRef ref) : SingleChildBase(body), ref(ref)
+    {
+        assert(body);
+    }
+};
+
+struct Initialization : SingleChildBase<Block>, Declaration {
+    LABEL("Initialization");
+
+    Initialization(Block* body) : SingleChildBase(body) { assert(body); }
 };
 
 struct Program : MultiChildrenBase<Declaration> {

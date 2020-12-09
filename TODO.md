@@ -1,11 +1,9 @@
 - string table code generation and printing strings
-- rand
 - if-else
+- vector access [ ]
+- rand
 - handle specific instructions for some arithmetic on floats
 
-- vector access [ ]
-
-- variable initialization on declarations
 
 - int / float type coersion
 

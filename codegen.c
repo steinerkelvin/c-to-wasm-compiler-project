@@ -13,22 +13,18 @@ int global;
 int main()
 {
     global = 1;
-    int x;
-    int y;
-    x = 1;
-    y = 2;
+    int x = 1;
+    int y = 2;
     global = x + y;
     println_int(global);
 
-    float r;
-    r = 4.2;
+    float r = 4.2;
     if (global) {
         r = 77.7;
     }
     println_real(r);
 
-    int num;
-    num = 12;
+    int num = 12;
     while (num) {
         num = num - 1;
         if (num % 2) {
@@ -54,8 +50,7 @@ int main()
     _ln();
 
     println("FATORIAL");
-    int acc;
-    acc = 1;
+    int acc = 1;
     for (i = 1; i <= 6; i = i + 1) {
         acc = acc * i;
         print_int_pad(acc, 0-6);
