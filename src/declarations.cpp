@@ -249,7 +249,6 @@ std::vector<ast::Assign*> declare(const DeclarationSpecs& pspecs, const InitDecl
         }
 
         const std::string name = decl->name;
-        std::optional<ast::Expr*> initD = decl->init_expr;
         if (is_typedef) {
             if (symtb::lookup_type(name, true)) {
                 std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
@@ -265,11 +264,12 @@ std::vector<ast::Assign*> declare(const DeclarationSpecs& pspecs, const InitDecl
                           << std::endl;
                 assert(0); // TODO
             }
-            if(initD){
-                symtb::VarRef vr = symtb::insert_var(name, type);
-                ast::Variable* v = new ast::Variable(vr);
-                ast::Assign* a = new ast::Assign(v,*initD);
-                vars.push_back(a);
+            symtb::VarRef var_ref = symtb::insert_var(name, type);
+            std::optional<ast::Expr*> init_opt = decl->init_expr;
+            if(init_opt){
+                ast::Variable* var = new ast::Variable(var_ref);
+                ast::Assign* assign = new ast::Assign(var, *init_opt);
+                vars.push_back(assign);
             }
         }
     }
