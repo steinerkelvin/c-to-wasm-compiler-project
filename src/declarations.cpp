@@ -211,7 +211,7 @@ ContainerTypeBuilder function_type_builder(ParameterDeclarations* param_decls)
     return ContainerTypeBuilder::function(parameters);
 }
 
-void declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
+std::vector<ast::Assign*> declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 {
     TypeQualOrTypeSpecList typedecl_specs;
 
@@ -236,6 +236,7 @@ void declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
 
     types::PrimType base_type = make_type(typedecl_specs);
 
+    std::vector<ast::Assign*> vars;
     for (auto& decl : decls) {
         types::Type* type = new types::PrimType(base_type);
 
@@ -248,6 +249,7 @@ void declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
         }
 
         const std::string name = decl->name;
+        std::optional<ast::Expr*> initD = decl->init_expr;
         if (is_typedef) {
             if (symtb::lookup_type(name, true)) {
                 std::cerr << "SEMANTIC ERROR (" << 0 << "): ";
@@ -263,9 +265,15 @@ void declare(const DeclarationSpecs& pspecs, const InitDeclarators& decls)
                           << std::endl;
                 assert(0); // TODO
             }
-            symtb::insert_var(name, type);
+            if(initD){
+                symtb::VarRef vr = symtb::insert_var(name, type);
+                ast::Variable* v = new ast::Variable(vr);
+                ast::Assign* a = new ast::Assign(v,*initD);
+                vars.push_back(a);
+            }
         }
     }
+    return vars;
 }
 
 // TODO nome mais legível para esse tipo de retorno
