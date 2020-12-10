@@ -1,4 +1,3 @@
-- file structure for testing compiling and running
 - string table code generation and printing strings
 - if-else
 - vector access [ ]

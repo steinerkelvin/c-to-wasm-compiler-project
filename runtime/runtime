@@ -1,0 +1,3 @@
+#!/bin/bash
+base_dir="$(dirname "$0")"
+node "${base_dir}/runtime.js" "$@"
