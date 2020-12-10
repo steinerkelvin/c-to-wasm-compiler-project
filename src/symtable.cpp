@@ -261,15 +261,15 @@ void compute_offsets(size_t base_activ_record_size)
 
 void compute_frame_sizes() {
     for (size_t i = scopes.size() - 1; i >= 1; i--) {
+        std::cerr << "scope: " << i << std::endl;
         auto& scope = scopes[i];
-        auto size = assert_derref(scope.size);
-        if (!scope.is_func_scope) {
+        auto full_size = assert_derref(scope.size) + scope.max_inner_size;
+        if (scope.is_func_scope) {
+            scope.frame_size = full_size;
+        } else {
             auto parent_id = assert_derref(scope.parent_id);
             auto& parent = scopes[parent_id];
-            parent.max_inner_size = std::max(parent.max_inner_size, size);
-        } else {
-            auto size = assert_derref(scope.size);
-            scope.frame_size = scope.max_inner_size + size;
+            parent.max_inner_size = std::max(parent.max_inner_size, full_size);
         }
     }
 }
@@ -280,6 +280,27 @@ size_t get_global_scope_size()
     auto size_opt = scopes[0].size;
     assert(size_opt);
     return *size_opt;
+}
+
+void show() {
+    for (auto& scope : scopes) {
+        std::cerr << "scope " << scope.id;
+
+        std::cerr << "  size: " << *(scope.size);
+        if (scope.parent_id) {
+            std::cerr << "  parent: " << *scope.parent_id;
+        }
+        std::cerr << std::endl;
+        size_t i = 0;
+        for (auto& var_row : scope.vars) {
+            auto name = var_row.name;
+            std::cerr << "  var: " << i++ << "  " << name << std::endl;
+            if (var_row.offset) {
+                std::cerr << "  offset: " << *var_row.offset;
+            }
+            std::cerr << std::endl;
+        }
+    }
 }
 
 } // namespace symtb

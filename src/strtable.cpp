@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "strtable.hpp"
+#include "util.hpp"
 
 namespace strtb {
 
@@ -54,6 +55,7 @@ size_t compute_offsets()
     for (auto& str_row : str_list) {
         str_row.offset = size;
         size += str_row.content.size() + 1;
+        size = util::ceil<size_t>(size, 8);
     }
     return size;
 }

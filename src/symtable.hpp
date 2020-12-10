@@ -157,6 +157,8 @@ void compute_frame_sizes();
  */
 size_t get_global_scope_size();
 
+void show();
+
 } // namespace symtb
 
 #endif // SYMTABLE_H

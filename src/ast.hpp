@@ -239,6 +239,7 @@ struct Variable : LExpr {
     void write_data_repr(std::ostream& stream) const
     {
         stream << " \"" << this->get_name() << "\"";
+        stream << " \"" << ref.scope_id << "," << ref.sym_id << "\"";
         this->Expr::write_data_repr(stream);
     };
 };
