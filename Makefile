@@ -29,7 +29,11 @@ render-asts: exe
 	@./run_render_asts.sh
 
 test-codegen: exe
-	@./run_codegen_tests.sh
+	./run_codegen_tests.sh factorial
+	./run_codegen_tests.sh if-else
+	./run_codegen_tests.sh and-or
+	./run_codegen_tests.sh matrix
+	./run_codegen_tests.sh vector-access
 
 format:
 	clang-format -i src/**.cpp src/**.hpp

@@ -109,11 +109,11 @@
   (i32.const 36)
   (i32.add)
   (set_global $sp)
-  ;; (Block 1 (Block (ExprStmt (= "[integer]" (Var "len" "[integer]") (Integer "[integer]" 5)))) (Block (ExprStmt (= "[integer]" (Var "i" "[integer]") (Integer "[integer]" 0)))) (ForStmt (ExprStmt (= "[integer]" (Var "i" "[integer]") (Integer "[integer]" 0))) (< "[integer]" (Var "i" "[integer]") (Var "len" "[integer]")) (ExprStmt (= "[integer]" (Var "i" "[integer]") (+ "[integer]" (Var "i" "[integer]") (Integer "[integer]" 1)))) (Block 2 (Block (ExprStmt (= "[integer]" (Var "n" "[integer]") (+ "[integer]" (Var "i" "[integer]") (Integer "[integer]" 2))))) (ExprStmt (= "[integer]" (v[x] "[integer]" (Var "i" "[integer]") (Var "vec" "[[5]integer]")) (* "[integer]" (Var "n" "[integer]") (Var "n" "[integer]")))))) (ForStmt (ExprStmt (= "[integer]" (Var "i" "[integer]") (- "[integer]" (Var "len" "[integer]") (Integer "[integer]" 1)))) (>= "[integer]" (Var "i" "[integer]") (Integer "[integer]" 0)) (ExprStmt (= "[integer]" (Var "i" "[integer]") (- "[integer]" (Var "i" "[integer]") (Integer "[integer]" 1)))) (Block 3 (ExprStmt ("f(x)" "[void]" (Var "println_int" "[(integer)void]") ( (v[x] "[integer]" (Var "i" "[integer]") (Var "vec" "[[5]integer]"))))))) (return (Integer "[integer]" 0)))
+  ;; (Block 1 (Block (ExprStmt (= "[integer]" (Var "len" "1,1" "[integer]") (Integer "[integer]" 5)))) (Block (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 0)))) (ForStmt (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 0))) (< "[integer]" (Var "i" "1,2" "[integer]") (Var "len" "1,1" "[integer]")) (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (+ "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 1)))) (Block 2 (Block (ExprStmt (= "[integer]" (Var "n" "2,0" "[integer]") (+ "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 2))))) (ExprStmt (= "[integer]" (v[x] "[integer]" (Var "i" "1,2" "[integer]") (Var "vec" "1,0" "[[5]integer]")) (* "[integer]" (Var "n" "2,0" "[integer]") (Var "n" "2,0" "[integer]")))))) (ForStmt (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (- "[integer]" (Var "len" "1,1" "[integer]") (Integer "[integer]" 1)))) (>= "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 0)) (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (- "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 1)))) (Block 3 (ExprStmt ("f(x)" "[void]" (Var "println_int" "0,5" "[(integer)void]") ( (v[x] "[integer]" (Var "i" "1,2" "[integer]") (Var "vec" "1,0" "[[5]integer]"))))))) (return (Integer "[integer]" 0)))
   ;; {
-    ;; (Block (ExprStmt (= "[integer]" (Var "len" "[integer]") (Integer "[integer]" 5))))
+    ;; (Block (ExprStmt (= "[integer]" (Var "len" "1,1" "[integer]") (Integer "[integer]" 5))))
     ;; {
-      ;; (ExprStmt (= "[integer]" (Var "len" "[integer]") (Integer "[integer]" 5)))
+      ;; (ExprStmt (= "[integer]" (Var "len" "1,1" "[integer]") (Integer "[integer]" 5)))
       (get_global $fp)
       (i32.const 24)
       (i32.add)
@@ -124,9 +124,9 @@
       (get_global $temp_i32)
       (drop)
     ;; }
-    ;; (Block (ExprStmt (= "[integer]" (Var "i" "[integer]") (Integer "[integer]" 0))))
+    ;; (Block (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 0))))
     ;; {
-      ;; (ExprStmt (= "[integer]" (Var "i" "[integer]") (Integer "[integer]" 0)))
+      ;; (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 0)))
       (get_global $fp)
       (i32.const 28)
       (i32.add)
@@ -137,8 +137,8 @@
       (get_global $temp_i32)
       (drop)
     ;; }
-    ;; (ForStmt (ExprStmt (= "[integer]" (Var "i" "[integer]") (Integer "[integer]" 0))) (< "[integer]" (Var "i" "[integer]") (Var "len" "[integer]")) (ExprStmt (= "[integer]" (Var "i" "[integer]") (+ "[integer]" (Var "i" "[integer]") (Integer "[integer]" 1)))) (Block 2 (Block (ExprStmt (= "[integer]" (Var "n" "[integer]") (+ "[integer]" (Var "i" "[integer]") (Integer "[integer]" 2))))) (ExprStmt (= "[integer]" (v[x] "[integer]" (Var "i" "[integer]") (Var "vec" "[[5]integer]")) (* "[integer]" (Var "n" "[integer]") (Var "n" "[integer]"))))))
-    ;; (ExprStmt (= "[integer]" (Var "i" "[integer]") (Integer "[integer]" 0)))
+    ;; (ForStmt (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 0))) (< "[integer]" (Var "i" "1,2" "[integer]") (Var "len" "1,1" "[integer]")) (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (+ "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 1)))) (Block 2 (Block (ExprStmt (= "[integer]" (Var "n" "2,0" "[integer]") (+ "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 2))))) (ExprStmt (= "[integer]" (v[x] "[integer]" (Var "i" "1,2" "[integer]") (Var "vec" "1,0" "[[5]integer]")) (* "[integer]" (Var "n" "2,0" "[integer]") (Var "n" "2,0" "[integer]"))))))
+    ;; (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 0)))
     (get_global $fp)
     (i32.const 28)
     (i32.add)
@@ -162,11 +162,11 @@
     (i32.lt_s)
     (i32.eqz)
     (br_if $loopbrk0)
-    ;; (Block 2 (Block (ExprStmt (= "[integer]" (Var "n" "[integer]") (+ "[integer]" (Var "i" "[integer]") (Integer "[integer]" 2))))) (ExprStmt (= "[integer]" (v[x] "[integer]" (Var "i" "[integer]") (Var "vec" "[[5]integer]")) (* "[integer]" (Var "n" "[integer]") (Var "n" "[integer]")))))
+    ;; (Block 2 (Block (ExprStmt (= "[integer]" (Var "n" "2,0" "[integer]") (+ "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 2))))) (ExprStmt (= "[integer]" (v[x] "[integer]" (Var "i" "1,2" "[integer]") (Var "vec" "1,0" "[[5]integer]")) (* "[integer]" (Var "n" "2,0" "[integer]") (Var "n" "2,0" "[integer]")))))
     ;; {
-      ;; (Block (ExprStmt (= "[integer]" (Var "n" "[integer]") (+ "[integer]" (Var "i" "[integer]") (Integer "[integer]" 2)))))
+      ;; (Block (ExprStmt (= "[integer]" (Var "n" "2,0" "[integer]") (+ "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 2)))))
       ;; {
-        ;; (ExprStmt (= "[integer]" (Var "n" "[integer]") (+ "[integer]" (Var "i" "[integer]") (Integer "[integer]" 2))))
+        ;; (ExprStmt (= "[integer]" (Var "n" "2,0" "[integer]") (+ "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 2))))
         (get_global $fp)
         (i32.const 32)
         (i32.add)
@@ -182,7 +182,7 @@
         (get_global $temp_i32)
         (drop)
       ;; }
-      ;; (ExprStmt (= "[integer]" (v[x] "[integer]" (Var "i" "[integer]") (Var "vec" "[[5]integer]")) (* "[integer]" (Var "n" "[integer]") (Var "n" "[integer]"))))
+      ;; (ExprStmt (= "[integer]" (v[x] "[integer]" (Var "i" "1,2" "[integer]") (Var "vec" "1,0" "[[5]integer]")) (* "[integer]" (Var "n" "2,0" "[integer]") (Var "n" "2,0" "[integer]"))))
       (get_global $fp)
       (i32.const 4)
       (i32.add)
@@ -209,7 +209,7 @@
       (drop)
     ;; }
     )
-    ;; (ExprStmt (= "[integer]" (Var "i" "[integer]") (+ "[integer]" (Var "i" "[integer]") (Integer "[integer]" 1))))
+    ;; (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (+ "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 1))))
     (get_global $fp)
     (i32.const 28)
     (i32.add)
@@ -227,8 +227,8 @@
     (br $loopaux0)
     )
     )
-    ;; (ForStmt (ExprStmt (= "[integer]" (Var "i" "[integer]") (- "[integer]" (Var "len" "[integer]") (Integer "[integer]" 1)))) (>= "[integer]" (Var "i" "[integer]") (Integer "[integer]" 0)) (ExprStmt (= "[integer]" (Var "i" "[integer]") (- "[integer]" (Var "i" "[integer]") (Integer "[integer]" 1)))) (Block 3 (ExprStmt ("f(x)" "[void]" (Var "println_int" "[(integer)void]") ( (v[x] "[integer]" (Var "i" "[integer]") (Var "vec" "[[5]integer]")))))))
-    ;; (ExprStmt (= "[integer]" (Var "i" "[integer]") (- "[integer]" (Var "len" "[integer]") (Integer "[integer]" 1))))
+    ;; (ForStmt (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (- "[integer]" (Var "len" "1,1" "[integer]") (Integer "[integer]" 1)))) (>= "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 0)) (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (- "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 1)))) (Block 3 (ExprStmt ("f(x)" "[void]" (Var "println_int" "0,5" "[(integer)void]") ( (v[x] "[integer]" (Var "i" "1,2" "[integer]") (Var "vec" "1,0" "[[5]integer]")))))))
+    ;; (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (- "[integer]" (Var "len" "1,1" "[integer]") (Integer "[integer]" 1))))
     (get_global $fp)
     (i32.const 28)
     (i32.add)
@@ -254,9 +254,9 @@
     (i32.ge_s)
     (i32.eqz)
     (br_if $loopbrk0)
-    ;; (Block 3 (ExprStmt ("f(x)" "[void]" (Var "println_int" "[(integer)void]") ( (v[x] "[integer]" (Var "i" "[integer]") (Var "vec" "[[5]integer]"))))))
+    ;; (Block 3 (ExprStmt ("f(x)" "[void]" (Var "println_int" "0,5" "[(integer)void]") ( (v[x] "[integer]" (Var "i" "1,2" "[integer]") (Var "vec" "1,0" "[[5]integer]"))))))
     ;; {
-      ;; (ExprStmt ("f(x)" "[void]" (Var "println_int" "[(integer)void]") ( (v[x] "[integer]" (Var "i" "[integer]") (Var "vec" "[[5]integer]")))))
+      ;; (ExprStmt ("f(x)" "[void]" (Var "println_int" "0,5" "[(integer)void]") ( (v[x] "[integer]" (Var "i" "1,2" "[integer]") (Var "vec" "1,0" "[[5]integer]")))))
       (get_global $fp)
       (i32.const 4)
       (i32.add)
@@ -279,7 +279,7 @@
       (set_global $fp)
     ;; }
     )
-    ;; (ExprStmt (= "[integer]" (Var "i" "[integer]") (- "[integer]" (Var "i" "[integer]") (Integer "[integer]" 1))))
+    ;; (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (- "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 1))))
     (get_global $fp)
     (i32.const 28)
     (i32.add)

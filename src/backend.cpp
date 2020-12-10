@@ -999,13 +999,13 @@ void generate_code(
     const size_t stack_pos =
         util::ceil<size_t>(data_pos + data_size, table_align);
 
-    std::cerr << "strtb => "
-              << "pos: " << strtb_pos << " "
-              << "size: " << strtb_size << std::endl;
-
-    std::cerr << "data => "
-              << "pos: " << data_pos << " "
-              << "size: " << data_size << std::endl;
+    // DEBUG
+    // std::cerr << "strtb => "
+    //           << "pos: " << strtb_pos << " "
+    //           << "size: " << strtb_size << std::endl;
+    // std::cerr << "data => "
+    //           << "pos: " << data_pos << " "
+    //           << "size: " << data_size << std::endl;
 
     out << header;
     // TODO initial stack pointer value
