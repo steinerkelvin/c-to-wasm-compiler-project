@@ -253,9 +253,9 @@ class Emitter {
     void emit_store(const std::string& tptxt, bool is_byte = false)
     {
         out << idt << "(" << tptxt << ".store";
-        if (is_byte) {
-            out << "8_s";
-        }
+        // if (is_byte) {
+        //     out << "8_s";
+        // }
         out << ")" << std::endl;
     }
 
@@ -770,7 +770,11 @@ class Emitter {
     void emit_invert_signal(ast::InvertSignal* inv_expr)
     {
         auto child = inv_expr->get_child();
+        auto type = child->get_type();
+        auto type_txt = type_text(type);
+        emit_const_int(type_txt, 0);
         emit_expr(child);
+        emit_sub(type_txt);
     }
     void emit_not(ast::Not* not_expr)
     {
