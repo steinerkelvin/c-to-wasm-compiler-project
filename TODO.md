@@ -1,5 +1,5 @@
-- if-else
 - vector access [ ]
+- if-else
 - rand
 - handle specific instructions for some arithmetic on floats
 - int / float type coersion

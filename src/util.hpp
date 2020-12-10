@@ -16,9 +16,11 @@
 
 #define assert_ret(val) (assert(val), val)
 #define assert_derref(val) (assert(val), *(val))
+#define assert_dyncast(type, val) assert_ret(dynamic_cast<type *>(val))
 #if NDEBUG
 #define assert_ret(val) (val)
 #define assert_derref(val) (*(val))
+#define assert_dyncast(type, val) (dynamic_cast<(type)*>(val))
 #endif
 
 namespace util {

@@ -157,6 +157,7 @@ struct LoopsCounter {
 
 class Emitter {
     std::ostream& out;
+    std::string idt;
     const size_t strtb_pos;
     const size_t data_pos;
 
@@ -180,6 +181,14 @@ class Emitter {
     Emitter(std::ostream& out, size_t strtb_pos, size_t data_pos)
         : out(out), strtb_pos(strtb_pos), data_pos(data_pos)
     {}
+
+    void indent() {
+        idt.resize(idt.size() + 2, ' ');
+    }
+
+    void dedent() {
+        idt.resize(idt.size() - 2);
+    }
 
     //
     // Emiting Wasm instructions
@@ -263,17 +272,20 @@ class Emitter {
     void emit_get_sp() { emit_get_global(label_sp); }
     void emit_set_sp() { emit_set_global(label_sp); }
 
-    void emit_get_temp(const std::string& tptxt) {
+    void emit_get_temp(const std::string& tptxt)
+    {
         std::string label("$temp_");
         label += tptxt;
         emit_get_global(label);
     }
-    void emit_set_temp(const std::string& tptxt) {
+    void emit_set_temp(const std::string& tptxt)
+    {
         std::string label("$temp_");
         label += tptxt;
         emit_set_global(label);
     }
-    void emit_tee_temp(const std::string& tptxt) {
+    void emit_tee_temp(const std::string& tptxt)
+    {
         emit_set_temp(tptxt);
         emit_get_temp(tptxt);
     }
@@ -288,6 +300,12 @@ class Emitter {
     {
         out << "(" << tptxt << "."
             << "sub"
+            << ")" << std::endl;
+    }
+    void emit_mul(const std::string& tptxt)
+    {
+        out << "(" << tptxt << "."
+            << "mul"
             << ")" << std::endl;
     }
 
@@ -410,6 +428,7 @@ class Emitter {
     void emit_stmt(ast::Statement* stmt)
     {
         assert(stmt);
+        out << ";; " << *stmt << std::endl;
         if (dynamic_cast<ast::EmptyStmt*>(stmt)) {
             // empty statement
         } else if (auto block = dynamic_cast<ast::Block*>(stmt)) {
@@ -529,6 +548,8 @@ class Emitter {
     {
         if (auto var = dynamic_cast<ast::Variable*>(expr)) {
             emit_var(var);
+        } else if (auto lexpr = dynamic_cast<ast::LExpr*>(expr)) {
+            emit_lexpr(lexpr);
         } else if (auto int_val = dynamic_cast<ast::IntegerValue*>(expr)) {
             emit_int_val(int_val);
         } else if (auto real_val = dynamic_cast<ast::RealValue*>(expr)) {
@@ -537,8 +558,6 @@ class Emitter {
             emit_str_val(str_val);
         } else if (auto assign_stmt = dynamic_cast<ast::Assign*>(expr)) {
             emit_assign(assign_stmt);
-        } else if (auto binop = dynamic_cast<ast::BinOp*>(expr)) {
-            emit_simple_binop(binop);
         } else if (auto func_call = dynamic_cast<ast::Call*>(expr)) {
             emit_func_call(func_call);
         } else if (auto derref = dynamic_cast<ast::Derreference*>(expr)) {
@@ -547,11 +566,9 @@ class Emitter {
             auto child = v2p->get_child();
             auto child_lex = assert_ret(dynamic_cast<ast::LExpr*>(child));
             emit_lexpr_loc(child_lex);
-        }
-        // else if (auto derref = dynamic_cast<ast::IndexAccess*>(expr)) {
-        // TODO
-        // }
-        else {
+        } else if (auto binop = dynamic_cast<ast::BinOp*>(expr)) {
+            emit_simple_binop(binop);
+        } else {
             std::cerr << "NOT IMPLEMENTED: " << (*expr) << std::endl;
             assert(0);
         }
@@ -588,6 +605,17 @@ class Emitter {
         auto type_txt = type_text(type);
         bool is_byte = type->is_compatible_with(types::prim_char);
         emit_load(type_txt, is_byte);
+    }
+
+    void emit_lexpr(ast::LExpr* expr)
+    {
+        assert(expr);
+        emit_lexpr_loc(expr);
+        auto type = expr->get_type();
+        auto type_txt = type_text(type);
+        bool is_byte = type->is_compatible_with(types::prim_char);
+        emit_load(type_txt, is_byte);
+        // TODO refactor into "emit_load_something"
     }
 
     void emit_int_val(const ast::IntegerValue* val_node)
@@ -719,23 +747,33 @@ class Emitter {
      */
     void emit_lexpr_loc(ast::LExpr* lexpr)
     {
-        // action_if<ast::Variable, ast::LExpr>(
-        //     lexpr, [this](ast::Variable* e) { emit_var_loc(e); });
         if (auto var = dynamic_cast<ast::Variable*>(lexpr)) {
             emit_var_loc(var);
         } else if (auto derref = dynamic_cast<ast::Derreference*>(lexpr)) {
             auto ptr_expr = derref->get_child();
             emit_expr(ptr_expr);
-        }
-        // else if (auto access = dynamic_cast<ast::IndexAccess*>(lexpr)) {
-        //     auto ptr_expr = access->get_left();
-        //     auto idx_expr = access->get_right();
-        //     // TODO calc offset
-        // }
-        else {
+        } else if (auto idx_access = dynamic_cast<ast::IndexAccess*>(lexpr)) {
+            emit_index_access_loc(idx_access);
+        } else {
             std::cerr << "NOT IMPLEMENTED: " << (*lexpr) << std::endl;
             assert(0);
         }
+    }
+
+    void emit_index_access_loc(ast::IndexAccess* idx_access)
+    {
+        auto idx_expr = idx_access->get_left();
+        auto ptr_expr = idx_access->get_right();
+        auto type = ptr_expr->get_type();
+        auto type_cont = assert_dyncast(types::ContainerType, type);
+        auto base_type = type_cont->get_base();
+        auto base_size = base_type->get_size();
+        auto ptr_lexpr = assert_dyncast(ast::LExpr, ptr_expr);
+        emit_lexpr_loc(ptr_lexpr);
+        emit_const_int(wasm_type_ptr, base_size);
+        emit_expr(idx_expr);
+        emit_mul(wasm_type_ptr);
+        emit_add(wasm_type_ptr);
     }
 };
 
