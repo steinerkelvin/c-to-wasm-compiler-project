@@ -61,7 +61,6 @@ void yyerror(char const *s);
 
 %type <ast::Statement*> stmt
 %type <ast::Block*> compound-stmt block-list-opt
-%type <ast::Statement*> block-item
 %type <ast::Statement*> empty-stmt
 // %type <ast::Statement*> labeled-stmt
 // %type <ast::Statement*> goto-stmt
@@ -465,11 +464,16 @@ compound-stmt
     ;
 block-list-opt
     : %empty                        { $$ = new ast::Block(); }
-    | block-list-opt block-item     { $$ = $1; $$->add($2); }
-    ;
-block-item
-    : declaration                   { $$ = $1; }
-    | stmt
+    | block-list-opt stmt           { $$ = $1; $$->add($2); }
+    | block-list-opt declaration
+        {
+            $$ = $1;
+            if (!$2->empty()) {
+                $$->add($2);
+            } else {
+                delete $2;
+            }
+        }
     ;
 
 if-stmt

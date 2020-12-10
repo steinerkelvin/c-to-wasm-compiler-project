@@ -238,7 +238,7 @@ Expr* check_assign(Type* target_type, Expr* source_node, pos::Pos posi)
                 return new_node;
                 // If source type is vector, add coersion node
             } else if (dynamic_cast<Vector*>(source_type)) {
-                auto new_node = new ast::F2P(source_node);
+                auto new_node = new ast::V2P(source_node);
                 new_node->set_type(src_pt);
                 return new_node;
             }
@@ -501,7 +501,7 @@ Expr* function_call(Expr* value, ast::Exprs* args_node, pos::Pos posi)
     if (!args_node) {
         args_node = new ast::Exprs();
     }
-    auto args = args_node->get_children();
+    auto& args = args_node->get_children();
 
     Type* value_type = value->get_type();
 
@@ -530,17 +530,20 @@ Expr* function_call(Expr* value, ast::Exprs* args_node, pos::Pos posi)
         exit(EXIT_FAILURE);
     }
 
+    auto new_args_node = new ast::Exprs();
     for (size_t i = 0; i < type_parameters.size(); ++i) {
         auto tpparam = type_parameters[i];
         auto [n1, t1] = tpparam;
         auto node = args[i];
         auto posi = node->get_pos();
         assert(posi);
-        args[i] = check_assign(t1, args[i], *posi);
+        auto new_arg = check_assign(t1, args[i], *posi);
+        new_args_node->add(new_arg);
     }
+    delete args_node;
 
     Type* base_type = value_type_func->get_base();
-    ast::Call* new_node = new ast::Call(value, args_node);
+    ast::Call* new_node = new ast::Call(value, new_args_node);
     new_node->set_type(base_type);
     return new_node;
 }

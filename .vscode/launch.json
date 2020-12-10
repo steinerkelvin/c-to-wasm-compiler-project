@@ -39,7 +39,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/bin/compiler",
-            "args": ["<", "${workspaceFolder}/tests/input/ez.c01.c"],
+            "args": ["<", "${workspaceFolder}/tests-codegen/read.c"],
             // "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [],

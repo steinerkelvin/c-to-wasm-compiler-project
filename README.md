@@ -7,17 +7,32 @@ Hopefully, a C to WebAssemply compiler.
 - Test files with well-formed input should compile with GCC and Clang. Those
   will be used here as reference implementations.
 
-## Requirements
+## Build requirements
 
 - Make
 - Flex
 - Bison
 - Clang
 
+## Runtime requirements
+
+- [WABT: The WebAssembly Binary Toolkit](https://github.com/WebAssembly/wabt)
+- Node.js
+
 ### How to install requirements
 
-- Ubuntu: `sudo apt install -y make flex bison clang`
-- Arch Linux: `sudo pacman -S make flex bison clang`
+#### Arch Linux
+
+    sudo pacman -S make flex bison clang
+    sudo pacman -S nodejs wabt
+
+#### Ubuntu
+
+    sudo apt install -y make flex bison clang
+    suto apt install -y nodejs
+
+Get `wabt` from https://github.com/WebAssembly/wabt/releases or install
+whatever. `wabt` is also avaiable on Nixpkgs.
 
 ### Build
 
@@ -48,6 +63,8 @@ Hopefully, a C to WebAssemply compiler.
 - Flex: `2.6.4-3` (Arch); `2.6.4-3` (Ubuntu Bionic)
 - Bison: `3.7.2-1` (Arch); `3.7.2` (Nix)
 - Clang: `11.0.0-1` (Arch); `6.0.0-1` (Ubuntu Bionic)
+- Nodejs: `12.20.0-1` (Arch); `10.19.0` (Ubuntu Bionic)
+- Wabt: `1.0.20-1 ` (Arch)
 
 You can see the versions that are being used in your environment with the
 following command:

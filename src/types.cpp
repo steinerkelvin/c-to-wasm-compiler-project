@@ -31,9 +31,8 @@ Pointer* Pointer::add_indiretion(Type* type, size_t n)
 std::optional<Pointer*> Pointer::to_pointer_implicit() { return this; }
 std::optional<Pointer*> Vector::to_pointer_implicit()
 {
-    // TODO
-    abort();
-    return new Pointer(this);
+    auto base_type = this->get_base();
+    return new Pointer(base_type);
 }
 std::optional<Pointer*> Function::to_pointer_implicit()
 {

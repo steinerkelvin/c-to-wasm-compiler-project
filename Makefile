@@ -63,6 +63,8 @@ show-versions:
 	@echo
 	clang --version
 	@echo
+	node --version
+	@echo
 
 flex: $(scanner_files)
 

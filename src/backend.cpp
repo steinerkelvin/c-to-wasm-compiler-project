@@ -1,6 +1,7 @@
 #include "backend.hpp"
 #include <cstdint>
 #include <iostream>
+#include <sstream>
 #include <stack>
 
 #include "ast.hpp"
@@ -12,14 +13,14 @@ const size_t null_size = 0;
 const size_t word_size = 4;
 const size_t table_align = 8;
 const size_t base_activ_record_size = 1 * word_size;
-const size_t stack_size = 1 << 20; // 1 MiB
+// const size_t stack_size = 1 << 20; // 1 MiB
 
 const char* wasm_type_ptr = "i32";
 const char* wasm_type_inte = "i32";
 const char* wasm_type_real = "f32";
 
-const char* label_fp = "fp";
-const char* label_sp = "sp";
+const char* label_fp = "$fp";
+const char* label_sp = "$sp";
 }; // namespace back
 
 //
@@ -62,7 +63,6 @@ size_t Function::get_size() const { return null_size; }
 // Code generation
 //
 
-
 namespace back {
 
 const char* prim_type_text(const types::PrimType* type)
@@ -93,10 +93,8 @@ const char* type_text(const types::Type* type)
     } else if (dynamic_cast<const types::Pointer*>(type)) {
         return wasm_type_ptr;
     }
-    return wasm_type_ptr;
-    // std::cerr <<"failed getting type text" << std::endl;
-    // std::cerr << *type << std::endl;
-    // abort();
+    std::cerr << "failed getting type text for: " << *type << std::endl;
+    abort();
 }
 
 struct LabelCounter : util::Counter {
@@ -187,7 +185,7 @@ class Emitter {
     // Emiting Wasm instructions
     //
 
-    void emmit_comment(const std::string& txt)
+    void emit_comment(const std::string& txt)
     {
         out << ";; " << txt << std::endl;
     }
@@ -211,33 +209,24 @@ class Emitter {
     }
     void emit_get_local(const std::string& label)
     {
-        out << "(get_local $" << label << ")" << std::endl;
+        out << "(get_local " << label << ")" << std::endl;
     }
     void emit_set_local(const std::string& label)
     {
-        out << "(set_local $" << label << ")" << std::endl;
+        out << "(set_local " << label << ")" << std::endl;
     }
     void emit_tee_local(const std::string& label)
     {
-        out << "(tee_local $" << label << ")" << std::endl;
+        out << "(tee_local " << label << ")" << std::endl;
     }
 
     void emit_get_global(const std::string& label)
     {
-        out << "(get_global $" << label << ")" << std::endl;
+        out << "(get_global " << label << ")" << std::endl;
     }
     void emit_set_global(const std::string& label)
     {
-        out << "(set_global $" << label << ")" << std::endl;
-    }
-    void emit_tee_global(const std::string& label)
-    {
-        out << "(tee_global $" << label << ")" << std::endl;
-    }
-
-    void emit_get_local(const std::string& tptxt, const std::string& label)
-    {
-        out << "(get_local $" << label << ")" << std::endl;
+        out << "(set_global " << label << ")" << std::endl;
     }
 
     void emit_drop(size_t num = 1)
@@ -270,10 +259,24 @@ class Emitter {
     }
 
     void emit_get_fp() { emit_get_global(label_fp); }
-    void emit_get_sp() { emit_get_global(label_sp); }
-
     void emit_set_fp() { emit_set_global(label_fp); }
+    void emit_get_sp() { emit_get_global(label_sp); }
     void emit_set_sp() { emit_set_global(label_sp); }
+
+    void emit_get_temp(const std::string& tptxt) {
+        std::string label("$temp_");
+        label += tptxt;
+        emit_get_global(label);
+    }
+    void emit_set_temp(const std::string& tptxt) {
+        std::string label("$temp_");
+        label += tptxt;
+        emit_set_global(label);
+    }
+    void emit_tee_temp(const std::string& tptxt) {
+        emit_set_temp(tptxt);
+        emit_get_temp(tptxt);
+    }
 
     void emit_add(const std::string& tptxt)
     {
@@ -374,7 +377,7 @@ class Emitter {
             size_t i = 0;
             for (auto [o_name, type] : func_type->parameters) {
                 auto name = assert_derref(o_name);
-                emmit_comment(name);
+                emit_comment(name);
                 auto type_txt = type_text(type);
                 auto is_byte = type->is_compatible_with(types::prim_char);
                 auto o_ref = scope.lookup_var(name);
@@ -410,9 +413,11 @@ class Emitter {
         if (dynamic_cast<ast::EmptyStmt*>(stmt)) {
             // empty statement
         } else if (auto block = dynamic_cast<ast::Block*>(stmt)) {
+            emit_comment("{");
             for (auto child_stmt : block->get_children()) {
                 emit_stmt(child_stmt);
             }
+            emit_comment("}");
         } else if (dynamic_cast<ast::Return*>(stmt)) {
             emit_return();
         } else if (auto ret_stmt = dynamic_cast<ast::ReturnValue*>(stmt)) {
@@ -509,7 +514,6 @@ class Emitter {
 
     void emit_expr_stmt(ast::ExprStmt* expr_stmt)
     {
-        out << ";; " << *expr_stmt << std::endl;
         auto expr = expr_stmt->get_child();
         emit_expr(expr);
         auto type = expr->get_type();
@@ -539,6 +543,10 @@ class Emitter {
             emit_func_call(func_call);
         } else if (auto derref = dynamic_cast<ast::Derreference*>(expr)) {
             emit_derref(derref);
+        } else if (auto v2p = dynamic_cast<ast::V2P*>(expr)) {
+            auto child = v2p->get_child();
+            auto child_lex = assert_ret(dynamic_cast<ast::LExpr*>(child));
+            emit_lexpr_loc(child_lex);
         }
         // else if (auto derref = dynamic_cast<ast::IndexAccess*>(expr)) {
         // TODO
@@ -601,8 +609,6 @@ class Emitter {
 
     void emit_assign(ast::Assign* assign_stmt)
     {
-        // auto label = this->labels.local.next_label();  // TODO
-
         auto target = assign_stmt->get_left();
 
         auto type = target->get_type();
@@ -615,10 +621,11 @@ class Emitter {
 
         auto source = assign_stmt->get_right();
         emit_expr(source);
+        emit_tee_temp(type_txt);
 
         emit_store(type_txt, is_byte);
 
-        emit_expr(source); // TODO use variable
+        emit_get_temp(type_txt);
     }
 
     void emit_func_call(ast::Call* func_call)
@@ -734,6 +741,7 @@ class Emitter {
 
 const char* header = R"BLOCK(
 (module
+    (import "std" "readln" (func $readln (param i32) (param i32) (result i32)))
     (import "std" "_ln" (func $_ln))
     (import "std" "_print" (func $_print (param i32) (param i32)))
     (import "std" "_println" (func $_println (param i32) (param i32)))
@@ -854,10 +862,13 @@ void generate_code(
 
     out << header;
     // TODO initial stack pointer value
-    out << "(global $" << label_fp << " (mut i32) (i32.const " << stack_pos << "))"
-        << std::endl;
-    out << "(global $" << label_sp << " (mut i32) (i32.const " << stack_pos << "))"
-        << std::endl;
+    out << "(global " << label_fp << " (mut i32) (i32.const " << stack_pos
+        << "))" << std::endl;
+    out << "(global " << label_sp << " (mut i32) (i32.const " << stack_pos
+        << "))" << std::endl;
+    out << std::endl;
+    out << "(global $temp_i32 (mut i32) (i32.const 0))" << std::endl;
+    out << "(global $temp_f32 (mut f32) (f32.const 0))" << std::endl;
     out << std::endl;
 
     strtb::visit([&](const StrRow& str_row) {

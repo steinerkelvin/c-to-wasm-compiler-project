@@ -26,6 +26,8 @@ class Node : public pos::HasPosition {
     LABEL("NODE");
 
   public:
+    virtual ~Node() {}
+
     virtual const std::vector<Node*> get_children_nodes() const
     {
         return std::vector<Node*>();
@@ -113,6 +115,10 @@ class MultiChildrenBase : public virtual Node {
         assert(child);
         this->children.push_back(child);
         this->merge_pos_from(child);
+    };
+    bool empty()
+    {
+        return this->children.empty();
     };
 
     const std::vector<T*>& get_children() { return this->children; }
@@ -590,6 +596,7 @@ struct Block : MultiChildrenBase<Statement>, Statement {
         if (stmt)
             this->MultiChildrenBase<Statement>::add(stmt);
     };
+
     void set_scope(const ScopeId scope_id) { this->scope_id = scope_id; }
 
     virtual void write_data_repr(std::ostream& stream) const

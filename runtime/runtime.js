@@ -1,20 +1,27 @@
 const { readFileSync } = require("fs")
-
-const ARGS = process.argv.slice(2)
-const input_file_name = ARGS[0]
-
-if (!input_file_name) {
-  console.error("Missing first paramenter: input file name")
-  process.exit(1)
-}
-
-const utf8_decoder = new TextDecoder('utf-8')
+const readlineSync = require("./readline-sync")
 
 const make_imports = (global) => {
+  const utf8_decoder = new TextDecoder('utf-8')
+  const utf8_encoder = new TextEncoder('utf-8')
+
   const std = {
+    readln: (po, len) => {
+      const { memory } = global
+      const line = readlineSync.question('')
+      const in_arr = utf8_encoder.encode(line)
+      const in_len = in_arr.length
+      const out_arr = new Uint8Array(memory.buffer, po, len)
+      const overflowed = in_len > len
+      const max_len = overflowed ? len : in_len
+      for (let i = 0; i < max_len; i++) {
+        out_arr[i] = in_arr[i]
+      }
+      return in_len
+    },
     _ln: () => { process.stdout.write("\n") },
     _print: (po, len) => {
-      const { exports, memory } = global
+      const { memory } = global
       const arr = new Uint8Array(memory.buffer, po, len)
       const txt = utf8_decoder.decode(arr)
       process.stdout.write(txt)
@@ -69,9 +76,8 @@ const make_imports = (global) => {
   return { "std": std }
 }
 
-const run = async (file_name) => {
-  const program_buffer = readFileSync(file_name)
-  const module = await WebAssembly.compile(program_buffer)
+const run_wasm = async (source_buffer) => {
+  const module = await WebAssembly.compile(source_buffer)
 
   const global = {
     exports: null,
@@ -100,9 +106,23 @@ const run = async (file_name) => {
   exports.main()
 }
 
-run(input_file_name).catch((err) => {
-  if (err) {
-    console.error(err)
+const run = () => {
+  const ARGS = process.argv.slice(2)
+  const source_file_name = ARGS[0]
+
+  if (!source_file_name) {
+    console.error("Missing first paramenter: input file name")
     process.exit(1)
   }
-})
+
+  const source_buffer = readFileSync(source_file_name)
+
+  run_wasm(source_buffer).catch((err) => {
+    if (err) {
+      console.error(err)
+      process.exit(1)
+    }
+  })
+}
+
+run()
