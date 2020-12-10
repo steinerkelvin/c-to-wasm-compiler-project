@@ -6,17 +6,18 @@ const make_imports = (global) => {
   const utf8_encoder = new TextEncoder('utf-8')
 
   const std = {
-    readln: (po, len) => {
+    readln: (po, buf_len) => {
       const { memory } = global
       const line = readlineSync.question('')
       const in_arr = utf8_encoder.encode(line)
       const in_len = in_arr.length
-      const out_arr = new Uint8Array(memory.buffer, po, len)
-      const overflowed = in_len > len
-      const max_len = overflowed ? len : in_len
-      for (let i = 0; i < max_len; i++) {
+      const out_arr = new Uint8Array(memory.buffer, po, buf_len)
+      const overflowed = in_len >= buf_len
+      const str_len = overflowed ? buf_len - 1 : in_len
+      for (let i = 0; i < str_len; i++) {
         out_arr[i] = in_arr[i]
       }
+      out_arr[str_len] = 0;
       return in_len
     },
     _ln: () => { process.stdout.write("\n") },
