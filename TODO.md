@@ -1,6 +1,4 @@
-- vector access [ ]
-- if-else
-- rand
+- rand on JS runtime
 - handle specific instructions for some arithmetic on floats
 - int / float type coersion
 

@@ -1,15 +1,21 @@
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-// #include <time.h>
+int readln(char*, int);
+void _ln();
+void print(const char*);
+void println(const char*);
+void print_int(int);
+void print_real(float);
+void println_int(int);
+void println_real(float);
+void print_int_pad(int, int);
+void print_real_pad(float, int);
 
-#if 0
-void srand(int);
-int rand();
-void printf(const char *);
-int scanf(const char *);
-#endif
+int ___rand_counter;
+int rand()
+{
+    ___rand_counter = ___rand_counter + 1;
+    return ___rand_counter;
+}
+void srand(int s) { ___rand_counter = s; }
 
 // const char EMPTY_CELL[] = "        ";
 // const char TABLE_WIDTH = 5 + 4 * 8;
@@ -33,10 +39,10 @@ int table[4][4]; // = {0};
 //                        229, 228, 227, 226, 220, 233};
 // //                     128  258  512 1024 2048
 
-// void set_bg_256color(int color) { printf("\033[48;5;%dm", color); }
+// void set_bg_256color(int color) { print("\033[48;5;%dm", color); }
 // void reset_bg_color() { set_bg_256color(DEFAULT_BG_256COLOR); }
 // void reset_original_bg_color() { system("echo \"\\033[49m\""); }
-// void set_fg_256color(int color) { printf("\033[38;5;%dm", color); }
+// void set_fg_256color(int color) { print("\033[38;5;%dm", color); }
 // void reset_fg_color() { set_fg_256color(DEFAULT_FG_256COLOR); }
 // void reset_original_fg_color() { system("echo \"\\033[39m\""); }
 
@@ -67,7 +73,10 @@ int table[4][4]; // = {0};
 
 void clear_screen()
 {
-    // system("clear");
+    int i;
+    for (i = 0; i < 20; i = i + 1) {
+        _ln();
+    }
 }
 
 // printa uma string n vezes
@@ -75,14 +84,14 @@ void repeatPrint(char c[], int n)
 {
     int i;
     for (i = 0; i < n; i = i + 1) {
-        // printf("%s", c);  // TODO
+        print(c);
     }
 }
 
 // printa um espaçamento vertical de uma linha
 void table_vpadding(int r)
 {
-    printf("|");
+    print("|");
     int c;
     for (c = 0; c < 4; c = c + 1) {
         // int v = table[r][c];
@@ -91,16 +100,16 @@ void table_vpadding(int r)
         repeatPrint(" ", 8);
         // if (v)
         //     reset_bg_color();
-        printf("|");
+        print("|");
     }
-    printf("\n");
+    print("\n");
 }
 
 // printa linha horizontal com largura da tabela
 void table_hline()
 {
     repeatPrint("-", TABLE_WIDTH);
-    printf("\n");
+    print("\n");
 }
 
 // printa a tabela
@@ -113,22 +122,24 @@ void render_table()
         // espacamento
         table_vpadding(r);
 
-        printf("|");
+        print("|");
         for (c = 0; c < 4; c = c + 1) {
             int v = table[r][c];
             if (v) {
                 // set_bg_256color(get_tile_bg(v));
                 // set_fg_256color(get_tile_fg(v));
-                // printf("  %4d  ", v); // TODO
+                print("  ");
+                print_int_pad(v, 4);
+                print("  ");
                 // reset_bg_color();
                 // reset_fg_color();
-                printf("|");
+                print("|");
             } else {
                 repeatPrint(" ", 8);
-                printf("|");
+                print("|");
             }
         }
-        printf("\n");
+        print("\n");
 
         table_vpadding(r);
 
@@ -139,15 +150,21 @@ void render_table()
 // printa informação sobre o jogo
 void render_info()
 {
-    // printf("SCORE: %-4d  RECORD: %-4d\n", score, record);  // TODO
+    print("SCORE: ");
+    print_int_pad(score, -8);
+    print("  RECORD: ");
+    print_int_pad(record, -8);
+    _ln();
 }
 
-void render_info_2() { printf("\nPress Q to quit.\n"); }
+void render_info_2() { println("CONTROLS: W A S D; Q to quit"); }
 
 void render_game()
 {
     render_info();
+    _ln();
     render_table();
+    _ln();
     render_info_2();
 }
 
@@ -255,20 +272,23 @@ int move_table_hor(int dir)
                 if (table[i][c] == cur_tile) {
                     // adiciona à nova coluna uma peça com o dobro do valor das
                     // peças encontradas
-                    new_row[n = n + 1] = cur_tile * 2;
+                    new_row[n] = cur_tile * 2;
+                    n = n + 1;
                     add_score(cur_tile * 2);
                     cur_tile = 0;
                     // se for diferente
                 } else if (table[i][c] != cur_tile) {
                     // adiciona à nova coluna a peça ativa e seta a peça ativa
                     // para peça encontrada
-                    new_row[n = n + 1] = cur_tile;
+                    new_row[n] = cur_tile;
+                    n = n + 1;
                     cur_tile = table[i][c];
                 }
             }
         }
         if (cur_tile) {
-            new_row[n = n + 1] = cur_tile;
+            new_row[n] = cur_tile;
+            n = n + 1;
         }
         // escreve a nova coluna na tabela de acordo com a dirte��o do movimento
         for (j = 0; j < 4; j = j + 1) {
@@ -317,20 +337,23 @@ int move_table_vert(int dir)
                 if (table[r][i] == cur_tile) {
                     // adiciona à nova coluna uma peça com o dobro do valor das
                     // peças encontradas
-                    new_col[n = n + 1] = cur_tile * 2;
+                    new_col[n] = cur_tile * 2;
+                    n = n + 1;
                     add_score(cur_tile * 2);
                     cur_tile = 0;
                     // se for diferente
                 } else if (table[r][i] != cur_tile) {
                     // adiciona à nova coluna a peça ativa e seta a peça ativa
                     // para peça encontrada
-                    new_col[n = n + 1] = cur_tile;
+                    new_col[n] = cur_tile;
+                    n = n + 1;
                     cur_tile = table[r][i];
                 }
             }
         }
         if (cur_tile) {
-            new_col[n = n + 1] = cur_tile;
+            new_col[n] = cur_tile;
+            n = n + 1;
         }
 
         // escreve a nova coluna na tabela de acordo com a direçãos do movimento
@@ -351,6 +374,7 @@ int move_table_vert(int dir)
 
 void reset_game()
 {
+    score = 0;
     clean_table();
     init_table();
     clear_screen();
@@ -365,7 +389,7 @@ int main()
     record = 0;
 
     // srand(time(NULL));
-    srand(0);
+    srand(3);
 
     clean_table();
     init_table();
@@ -376,37 +400,39 @@ int main()
     clear_screen();
     render_game();
 
+    char buffer[32];
     while (1) {
-        char ch;
-        int ret; // const int ret = scanf(" %c", &ch); // TODO
+        print("> ");
+        int linesize = readln(buffer, 1024);
+        if (linesize >= 1024) {
+            println("input line too long");
+            return 1;
+        }
 
+        int ret = 1; // const int ret = scanf(" %c", &ch); // TODO
         if (ret != 1) {
             continue;
         }
 
-        if ((char)ch == 'R' || (char)ch == 'r') {
+        char ch;
+        ch = buffer[0];
+
+        if (ch == 'R' || ch == 'r') {
+            println("Resetting...");
             reset_game();
-        } else if ((char)ch == 'Q' || (char)ch == 'q') {
+        } else if (ch == 'Q' || ch == 'q') {
+            println("Quitting...");
             break;
         } else {
             int moved = 0;
-            switch (ch) {
-                case 'w':
-                case 'W':
-                    moved = move_table_vert(+1);
-                    break;
-                case 's':
-                case 'S':
-                    moved = move_table_vert(-1);
-                    break;
-                case 'd':
-                case 'D':
-                    moved = move_table_hor(+1);
-                    break;
-                case 'a':
-                case 'A':
-                    moved = move_table_hor(-1);
-                    break;
+            if (ch == 'w' || ch == 'W') {
+                moved = move_table_vert(+1);
+            } else if (ch == 's' || ch == 'S') {
+                moved = move_table_vert(-1);
+            } else if (ch == 'd' || ch == 'D') {
+                moved = move_table_hor(+1);
+            } else if (ch == 'a' || ch == 'A') {
+                moved = move_table_hor(-1);
             }
             if (moved) {
                 insert_random_tile();
@@ -417,15 +443,15 @@ int main()
                 clear_screen();
                 render_info();
                 render_table();
-                printf("GAME OVER\n");
-                printf("press R to start a new game\n");
+                print("GAME OVER\n");
+                print("press R to start a new game\n");
 
                 char ch;
                 int ret; // const int ret = scanf(" %c", &ch); // TODO
                 if (ret != 1) {
                     break;
                 }
-                if ((char)ch == 'R' || (char)ch == 'r') {
+                if (ch == 'R' || ch == 'r') {
                     reset_game();
                     continue;
                 } else {
