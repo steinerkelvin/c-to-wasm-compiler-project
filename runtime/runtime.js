@@ -1,9 +1,10 @@
 const { readFileSync } = require("fs")
+const util = require('util')
 const readlineSync = require("./readline-sync")
 
 const make_imports = (global) => {
-  const utf8_decoder = new TextDecoder('utf-8')
-  const utf8_encoder = new TextEncoder('utf-8')
+  const utf8_decoder = new util.TextDecoder('utf-8')
+  const utf8_encoder = new util.TextEncoder('utf-8')
 
   const std = {
     readln: (po, buf_len) => {
