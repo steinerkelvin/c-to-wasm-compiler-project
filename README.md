@@ -26,19 +26,21 @@ Hopefully, a C to WebAssemply compiler.
 ### Test
 
     make test-parsing
+    make test-codegen
 
 ### File structure
 
     src/ - "library" sources
     main/ - .cpp files that compile to executables
-    runtime/ - JavScript runtime
-    tests/ - test files
+    runtime/ - JavaScript runtime
+    tests-parsing/ - test files for parsing
         input/ - inputs
         ast-dot/ - rendered ASTs
-        tokens/ - dumped tokens fomr input files
+        tokens/ - dumped tokens from input files
         tokens-expected/ - expected token dumps
         output/ - stdout and stderr outputs
         output-expected/ - expected outputs
+    tests-parsing/ - test files for code generation
 
 ### Tested with versions
 

@@ -3,7 +3,8 @@ set -e
 
 dump_tokens_exe="./bin/custom/dump-tokens"
 parser_exe="./bin/just-parse"
-tests_base="./tests"
+
+tests_base="./tests-parsing/"
 
 mkdir -p "${tests_base}/input"
 mkdir -p "${tests_base}/output"

@@ -28,6 +28,9 @@ test-parsing: exe
 render-asts: exe
 	@./run_render_asts.sh
 
+test-codegen: exe
+	@./run_codegen_tests.sh
+
 format:
 	clang-format -i src/**.cpp src/**.hpp
 
