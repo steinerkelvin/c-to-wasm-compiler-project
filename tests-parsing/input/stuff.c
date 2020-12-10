@@ -20,11 +20,11 @@ int test7(int* [8]);
 // int test8(int (*cb[])());  // TODO
 int test8(int (*cb[2])()) { return cb[0](); }
 
-int voidp_to_int(void* p)
-{
-    int* ip = (int*)p;
-    return *ip;
-}
+// int voidp_to_int(void* p)
+// {
+//     int* ip = (int*)p;
+//     return *ip;
+// }
 
 // NOT IMPLEMENTED
 // void varargs(int, ...);

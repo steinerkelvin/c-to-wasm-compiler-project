@@ -2,11 +2,6 @@
 
 Hopefully, a C to WebAssemply compiler.
 
-## Guidelines
-
-- Test files with well-formed input should compile with GCC and Clang. Those
-  will be used here as reference implementations.
-
 ## Build requirements
 
 - Make
@@ -31,8 +26,8 @@ Hopefully, a C to WebAssemply compiler.
     sudo apt install -y make flex bison clang
     suto apt install -y nodejs
 
-Get `wabt` from https://github.com/WebAssembly/wabt/releases or install
-whatever. `wabt` is also avaiable on Nixpkgs.
+Get `wabt` from https://github.com/WebAssembly/wabt/releases or whatever. `wabt`
+is also avaiable on Nixpkgs.
 
 ### Build
 
@@ -42,6 +37,10 @@ whatever. `wabt` is also avaiable on Nixpkgs.
 
     make test-parsing
     make test-codegen
+
+Run a console version of the 2048 game written in C compiled to Wasm:
+
+    ./run_codegen_tests.sh 2048
 
 ### File structure
 
@@ -55,7 +54,7 @@ whatever. `wabt` is also avaiable on Nixpkgs.
         tokens-expected/ - expected token dumps
         output/ - stdout and stderr outputs
         output-expected/ - expected outputs
-    tests-parsing/ - test files for code generation
+    tests-codegen/ - test files for code generation
 
 ### Tested with versions
 
@@ -74,5 +73,5 @@ following command:
 ## Trivia
 
 We have managed to _crash the Clang compiler_ in the course of programming this
-project. Code on the `clang-crash` branch. Maybe I'll trying to open a bug
+project. Code is on the `clang-crash` branch. Maybe I'll trying to open a bug
 report later. :P

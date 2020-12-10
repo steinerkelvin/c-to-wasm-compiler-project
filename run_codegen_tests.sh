@@ -5,7 +5,7 @@ set -e
 compiler_exe="./bin/compiler"
 tests_base="./tests-codegen/"
 
-valgrind_exe=valgrind
+use_valgrind= #1
 
 mkdir -p "${tests_base}/build"
 
@@ -16,11 +16,15 @@ function run_test() {
     local wat_file="${tests_base}/build/${name}.wat"
     local wasm_file="${tests_base}/build/${name}.wasm"
 
-    "${valgrind_exe}" "${compiler_exe}" <"${source_file}" >"${wat_file}"
+    if [ -n "${use_valgrind}" ]; then
+        valgrind "${compiler_exe}" <"${source_file}" >"${wat_file}"
+    else
+        "${compiler_exe}" <"${source_file}" >"${wat_file}"
+    fi
+
     wat2wasm "${wat_file}" -o "${wasm_file}"
-
     ./runtime/runtime "${wasm_file}"
-
+    echo
 }
 
 if [ -n "${1}" ]; then

@@ -74,7 +74,7 @@ int table[4][4]; // = {0};
 void clear_screen()
 {
     int i;
-    for (i = 0; i < 20; i = i + 1) {
+    for (i = 0; i < 40; i = i + 1) {
         _ln();
     }
 }
