@@ -1,4 +1,5 @@
 const { readFileSync } = require("fs")
+var util= require('util');
 
 const ARGS = process.argv.slice(2)
 const input_file_name = ARGS[0]
@@ -8,7 +9,7 @@ if (!input_file_name) {
   process.exit(1)
 }
 
-const utf8_decoder = new TextDecoder('utf-8')
+const utf8_decoder = new util.TextDecoder('utf-8')
 
 const make_imports = (global) => {
   const std = {
