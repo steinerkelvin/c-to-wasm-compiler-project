@@ -261,7 +261,6 @@ void compute_offsets(size_t base_activ_record_size)
 
 void compute_frame_sizes() {
     for (size_t i = scopes.size() - 1; i >= 1; i--) {
-        std::cerr << i << std::endl;
         auto& scope = scopes[i];
         auto size = assert_derref(scope.size);
         if (!scope.is_func_scope) {
