@@ -62,6 +62,7 @@ size_t Function::get_size() const { return null_size; }
 // Code generation
 //
 
+
 namespace back {
 
 const char* prim_type_text(const types::PrimType* type)
@@ -858,6 +859,14 @@ void generate_code(
     out << "(global $" << label_sp << " (mut i32) (i32.const " << stack_pos << "))"
         << std::endl;
     out << std::endl;
+
+    strtb::visit([&](const StrRow& str_row) {
+        size_t offset = assert_derref(str_row.offset);
+        out << "(data ";
+        out << "(i32.const " << offset << ")";
+        out << " \"" << str_row.content << "\"";
+        out << ")" << std::endl;
+    });
 
     Emitter emt(out, strtb_pos, data_pos);
     emt.emit_program(root);

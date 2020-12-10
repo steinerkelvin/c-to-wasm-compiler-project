@@ -3,7 +3,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <cassert>
 
 #include "strtable.hpp"
 
@@ -16,10 +15,10 @@ StrRef add(const std::string& str_raw)
 {
     const auto len = str_raw.length();
     assert(str_raw[0] == '\"');
-    assert(str_raw[len-1] == '\"');
+    assert(str_raw[len - 1] == '\"');
 
     // strip quotation marks
-    auto str = str_raw.substr(1, len-2);
+    auto str = str_raw.substr(1, len - 2);
 
     auto it = str_table.find(str);
     if (it != str_table.end()) {
@@ -57,6 +56,13 @@ size_t compute_offsets()
         size += str_row.content.size() + 1;
     }
     return size;
+}
+
+void visit(std::function<void(const StrRow&)> visitor)
+{
+    for (const auto& str_row : str_list) {
+        visitor(str_row);
+    }
 }
 
 } // namespace strtb

@@ -5,9 +5,10 @@
  * @file strtable.hpp
  */
 
+#include <functional>
+#include <optional>
 #include <ostream>
 #include <string>
-#include <optional>
 
 struct StrRow {
     const std::string content;
@@ -31,6 +32,9 @@ StrRef add(const std::string& str);
 std::ostream& repr(std::ostream& stream);
 
 size_t compute_offsets();
+
+/// Iterate through all string table rows
+void visit(std::function<void(const StrRow&)> visitor);
 
 }; // namespace strtb
 

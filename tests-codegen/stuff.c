@@ -34,12 +34,14 @@ int main()
             while (1) {
                 break;
             }
-            println_int(777);
+            print_int_pad(777, 8);
             break;
         }
-        println_int(num);
+        print_int_pad(num, 8);
     }
+    _ln();
 
+    println("MULTIPLES OF 3");
     int i;
     for (i = 0; i < 12; i = i + 1) {
         if (i % 3 != 0) {
@@ -49,11 +51,13 @@ int main()
     }
     _ln();
 
-    println("FATORIAL");
+    println("FACTORIAL");
     int acc = 1;
     for (i = 1; i <= 6; i = i + 1) {
         acc = acc * i;
-        print_int_pad(acc, 0-6);
+        print_int_pad(acc, 0 - 6);
     }
     _ln();
+
+    return 0;
 }
