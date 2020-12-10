@@ -487,7 +487,7 @@ class Emitter {
         emit_eqz(wasm_type_inte);
         emit_br_if(else_label);
         emit_stmt(body_stmt);
-        emit_br_if(break_label);
+        emit_br(break_label);
         out << idt << ")" << std::endl;
         emit_stmt(else_stmt);
         out << idt << ")" << std::endl;
@@ -571,6 +571,8 @@ class Emitter {
             emit_var(var);
         } else if (auto lexpr = dynamic_cast<ast::LExpr*>(expr)) {
             emit_lexpr(lexpr);
+        } else if (auto char_val = dynamic_cast<ast::CharValue*>(expr)) {
+            emit_char_val(char_val);
         } else if (auto int_val = dynamic_cast<ast::IntegerValue*>(expr)) {
             emit_int_val(int_val);
         } else if (auto real_val = dynamic_cast<ast::RealValue*>(expr)) {
@@ -645,6 +647,11 @@ class Emitter {
         bool is_byte = type->is_compatible_with(types::prim_char);
         emit_load(type_txt, is_byte);
         // TODO refactor into "emit_load_something"
+    }
+
+    void emit_char_val(ast::CharValue* val_node) {
+        auto val = val_node->get_value();
+        emit_const_int(wasm_type_inte, val);
     }
 
     void emit_int_val(const ast::IntegerValue* val_node)
