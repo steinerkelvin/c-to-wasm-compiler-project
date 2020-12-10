@@ -182,13 +182,9 @@ class Emitter {
         : out(out), strtb_pos(strtb_pos), data_pos(data_pos)
     {}
 
-    void indent() {
-        idt.resize(idt.size() + 2, ' ');
-    }
+    void indent() { idt.resize(idt.size() + 2, ' '); }
 
-    void dedent() {
-        idt.resize(idt.size() - 2);
-    }
+    void dedent() { idt.resize(idt.size() - 2); }
 
     //
     // Emiting Wasm instructions
@@ -196,58 +192,59 @@ class Emitter {
 
     void emit_comment(const std::string& txt)
     {
-        out << ";; " << txt << std::endl;
+        out << idt << ";; " << txt << std::endl;
     }
 
     void emit_const_ptr(uint64_t value)
     {
-        out << "(" << wasm_type_ptr << ".const " << value << ")" << std::endl;
+        out << idt << "(" << wasm_type_ptr << ".const " << value << ")"
+            << std::endl;
     }
     void emit_const_int(const std::string& tptxt, uint64_t value)
     {
-        out << "(" << tptxt << ".const " << value << ")" << std::endl;
+        out << idt << "(" << tptxt << ".const " << value << ")" << std::endl;
     }
     void emit_const_real(const std::string& tptxt, double value)
     {
-        out << "(" << tptxt << ".const " << value << ")" << std::endl;
+        out << idt << "(" << tptxt << ".const " << value << ")" << std::endl;
     }
 
     void emit_get_local(size_t idx)
     {
-        out << "(get_local " << idx << ")" << std::endl;
+        out << idt << "(get_local " << idx << ")" << std::endl;
     }
     void emit_get_local(const std::string& label)
     {
-        out << "(get_local " << label << ")" << std::endl;
+        out << idt << "(get_local " << label << ")" << std::endl;
     }
     void emit_set_local(const std::string& label)
     {
-        out << "(set_local " << label << ")" << std::endl;
+        out << idt << "(set_local " << label << ")" << std::endl;
     }
     void emit_tee_local(const std::string& label)
     {
-        out << "(tee_local " << label << ")" << std::endl;
+        out << idt << "(tee_local " << label << ")" << std::endl;
     }
 
     void emit_get_global(const std::string& label)
     {
-        out << "(get_global " << label << ")" << std::endl;
+        out << idt << "(get_global " << label << ")" << std::endl;
     }
     void emit_set_global(const std::string& label)
     {
-        out << "(set_global " << label << ")" << std::endl;
+        out << idt << "(set_global " << label << ")" << std::endl;
     }
 
     void emit_drop(size_t num = 1)
     {
         for (size_t i = 0; i < num; ++i) {
-            out << "(drop)" << std::endl;
+            out << idt << "(drop)" << std::endl;
         }
     }
 
     void emit_load(const std::string& tptxt, bool is_byte = false)
     {
-        out << "(" << tptxt << ".load";
+        out << idt << "(" << tptxt << ".load";
         if (is_byte) {
             out << "8_s";
         }
@@ -255,7 +252,7 @@ class Emitter {
     }
     void emit_store(const std::string& tptxt, bool is_byte = false)
     {
-        out << "(" << tptxt << ".store";
+        out << idt << "(" << tptxt << ".store";
         if (is_byte) {
             out << "8_s";
         }
@@ -264,7 +261,7 @@ class Emitter {
 
     void emit_call(const std::string& label)
     {
-        out << "(call $" << label << ")" << std::endl;
+        out << idt << "(call $" << label << ")" << std::endl;
     }
 
     void emit_get_fp() { emit_get_global(label_fp); }
@@ -292,52 +289,52 @@ class Emitter {
 
     void emit_add(const std::string& tptxt)
     {
-        out << "(" << tptxt << "."
+        out << idt << "(" << tptxt << "."
             << "add"
             << ")" << std::endl;
     }
     void emit_sub(const std::string& tptxt)
     {
-        out << "(" << tptxt << "."
+        out << idt << "(" << tptxt << "."
             << "sub"
             << ")" << std::endl;
     }
     void emit_mul(const std::string& tptxt)
     {
-        out << "(" << tptxt << "."
+        out << idt << "(" << tptxt << "."
             << "mul"
             << ")" << std::endl;
     }
 
     void emit_eq(const std::string& tptxt)
     {
-        out << "(" << tptxt << "."
+        out << idt << "(" << tptxt << "."
             << "eq"
             << ")" << std::endl;
     }
     void emit_ne(const std::string& tptxt)
     {
-        out << "(" << tptxt << "."
+        out << idt << "(" << tptxt << "."
             << "ne"
             << ")" << std::endl;
     }
     void emit_eqz(const std::string& tptxt)
     {
-        out << "(" << tptxt << "."
+        out << idt << "(" << tptxt << "."
             << "eqz"
             << ")" << std::endl;
     }
 
     void emit_br(const std::string& label)
     {
-        out << "(br " << label << ")" << std::endl;
+        out << idt << "(br " << label << ")" << std::endl;
     }
     void emit_br_if(const std::string& label)
     {
-        out << "(br_if " << label << ")" << std::endl;
+        out << idt << "(br_if " << label << ")" << std::endl;
     }
 
-    void emit_return() { out << "(return)" << std::endl; }
+    void emit_return() { out << idt << "(return)" << std::endl; }
 
     //
     // AST handling
@@ -365,18 +362,18 @@ class Emitter {
             assert_ret(dynamic_cast<types::Function*>(func_row.type));
 
         auto name = func_row.name;
-        out << "(func "
+        out << idt << "(func "
             << "$" << name << std::endl;
 
         // Parameter types
         for (auto [o_pr_name, pr_type] : func_type->parameters) {
-            out << "(param " << type_text(pr_type) << ")" << std::endl;
+            out << idt << "(param " << type_text(pr_type) << ")" << std::endl;
         }
 
         // Return type
         auto ret_type = func_type->get_base();
         if (ret_type->get_size() > 0) {
-            out << "(result " << type_text(ret_type) << ")" << std::endl;
+            out << idt << "(result " << type_text(ret_type) << ")" << std::endl;
         }
 
         auto block = func_def->get_child();
@@ -415,7 +412,7 @@ class Emitter {
         emit_sub(wasm_type_ptr);
         emit_set_sp();
 
-        out << ")" << std::endl << std::endl;
+        out << idt << ")" << std::endl << std::endl;
     }
 
     void emit_return_value(ast::ReturnValue* ret)
@@ -428,14 +425,16 @@ class Emitter {
     void emit_stmt(ast::Statement* stmt)
     {
         assert(stmt);
-        out << ";; " << *stmt << std::endl;
+        out << idt << ";; " << *stmt << std::endl;
         if (dynamic_cast<ast::EmptyStmt*>(stmt)) {
             // empty statement
         } else if (auto block = dynamic_cast<ast::Block*>(stmt)) {
             emit_comment("{");
+            indent();
             for (auto child_stmt : block->get_children()) {
                 emit_stmt(child_stmt);
             }
+            dedent();
             emit_comment("}");
         } else if (dynamic_cast<ast::Return*>(stmt)) {
             emit_return();
@@ -464,12 +463,12 @@ class Emitter {
         auto if_label = labels.block.next_label();
         auto cond = if_stmt->get_left();
         auto body = if_stmt->get_right();
-        out << "(block " << if_label << std::endl;
+        out << idt << "(block " << if_label << std::endl;
         emit_expr(cond);
         emit_eqz(wasm_type_inte);
         emit_br_if(if_label);
         emit_stmt(body);
-        out << ")" << std::endl;
+        out << idt << ")" << std::endl;
     }
 
     void emit_while_loop(ast::WhileStmt* while_stmt)
@@ -479,15 +478,15 @@ class Emitter {
         auto continue_label = loops.get_label_continue();
         auto cond = while_stmt->get_left();
         auto body = while_stmt->get_right();
-        out << "(block " << break_label << std::endl;
-        out << "(loop " << continue_label << std::endl;
+        out << idt << "(block " << break_label << std::endl;
+        out << idt << "(loop " << continue_label << std::endl;
         emit_expr(cond);
         emit_eqz(wasm_type_inte);
         emit_br_if(break_label);
         emit_stmt(body);
         emit_br(continue_label);
-        out << ")" << std::endl;
-        out << ")" << std::endl;
+        out << idt << ")" << std::endl;
+        out << idt << ")" << std::endl;
         loops.pop();
     }
 
@@ -502,20 +501,20 @@ class Emitter {
         auto incr = for_stmt->get_incr();
         auto body = for_stmt->get_body();
         emit_stmt(init);
-        out << "(block " << break_label << std::endl;
-        out << "(loop " << aux_label << std::endl;
-        out << "(block " << continue_label << std::endl;
+        out << idt << "(block " << break_label << std::endl;
+        out << idt << "(loop " << aux_label << std::endl;
+        out << idt << "(block " << continue_label << std::endl;
         if (cond_opt) {
             emit_expr(*cond_opt);
             emit_eqz(wasm_type_inte);
             emit_br_if(break_label);
         }
         emit_stmt(body);
-        out << ")" << std::endl; // inner block
+        out << idt << ")" << std::endl; // inner block
         emit_stmt(incr);
         emit_br(aux_label);
-        out << ")" << std::endl; // loop
-        out << ")" << std::endl; // outer block
+        out << idt << ")" << std::endl; // loop
+        out << idt << ")" << std::endl; // outer block
         loops.pop();
     }
 
@@ -728,7 +727,7 @@ class Emitter {
         auto type = expr->get_type();
         auto type_txt = type_text(type);
         auto instr = binop_instr(expr);
-        out << "(" << type_txt << "." << instr << ")" << std::endl;
+        out << idt << "(" << type_txt << "." << instr << ")" << std::endl;
     }
 
     void emit_derref(ast::Derreference* derref)
@@ -918,7 +917,9 @@ void generate_code(
     });
 
     Emitter emt(out, strtb_pos, data_pos);
+    emt.indent();
     emt.emit_program(root);
+    emt.dedent();
     out << footer;
 }
 
