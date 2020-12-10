@@ -53,3 +53,9 @@ You can see the versions that are being used in your environment with the
 following command:
 
     make show-versions
+
+## Trivia
+
+We have managed to _crash the Clang compiler_ in the course of programming this
+project. Code on the `clang-crash` branch. Maybe I'll trying to open a bug
+report later. :P
