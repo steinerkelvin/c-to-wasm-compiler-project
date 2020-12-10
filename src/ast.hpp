@@ -493,22 +493,34 @@ struct IfStmt : TwoChildrenBase<Expr, Statement>, Statement {
 
 struct IfElseStmt : Statement {
     LABEL("IfElseStmt");
-    IfElseStmt(Expr* expr, Statement* stmt, Statement* else_stmt)
+    IfElseStmt(Expr* cond, Statement* stmt, Statement* else_stmt)
     {
-        assert(expr);
+        assert(cond);
         assert(stmt);
         assert(else_stmt);
-        this->expr = expr;
+        this->cond = cond;
         this->stmt = stmt;
         this->else_stmt = else_stmt;
+        this->merge_pos_from(this->cond);
+        this->merge_pos_from(this->else_stmt);
     }
     virtual const std::vector<Node*> get_children_nodes() const
     {
-        return std::vector<Node*>{this->expr, this->stmt, this->else_stmt};
+        return std::vector<Node*>{this->cond, this->stmt, this->else_stmt};
+    }
+
+    Expr* get_cond() {
+        return this->cond;
+    }
+    Statement* get_body() {
+        return this->stmt;
+    }
+    Statement* get_else() {
+        return this->else_stmt;
     }
 
   protected:
-    Expr* expr;
+    Expr* cond;
     Statement* else_stmt;
     Statement* stmt;
 };

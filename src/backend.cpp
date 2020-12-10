@@ -442,6 +442,8 @@ class Emitter {
             emit_return_value(ret_stmt);
         } else if (auto if_stmt = dynamic_cast<ast::IfStmt*>(stmt)) {
             emit_if(if_stmt);
+        } else if (auto if_else_stmt = dynamic_cast<ast::IfElseStmt*>(stmt)) {
+            emit_if_else(if_else_stmt);
         } else if (auto while_stmt = dynamic_cast<ast::WhileStmt*>(stmt)) {
             emit_while_loop(while_stmt);
         } else if (auto for_stmt = dynamic_cast<ast::ForStmt*>(stmt)) {
@@ -460,14 +462,34 @@ class Emitter {
 
     void emit_if(ast::IfStmt* if_stmt)
     {
-        auto if_label = labels.block.next_label();
+        auto break_label = labels.block.next_label();
         auto cond = if_stmt->get_left();
         auto body = if_stmt->get_right();
-        out << idt << "(block " << if_label << std::endl;
+        out << idt << "(block " << break_label << std::endl;
         emit_expr(cond);
         emit_eqz(wasm_type_inte);
-        emit_br_if(if_label);
+        emit_br_if(break_label);
         emit_stmt(body);
+        out << idt << ")" << std::endl;
+    }
+
+    void emit_if_else(ast::IfElseStmt* if_else_stmt)
+    {
+        auto break_label = labels.block.next_label();
+        auto else_label = labels.block.next_label();
+        auto cond = if_else_stmt->get_cond();
+        auto body_stmt = if_else_stmt->get_body();
+        auto else_stmt = if_else_stmt->get_else();
+
+        out << idt << "(block " << break_label << std::endl;
+        out << idt << "(block " << else_label << std::endl;
+        emit_expr(cond);
+        emit_eqz(wasm_type_inte);
+        emit_br_if(else_label);
+        emit_stmt(body_stmt);
+        emit_br_if(break_label);
+        out << idt << ")" << std::endl;
+        emit_stmt(else_stmt);
         out << idt << ")" << std::endl;
     }
 
@@ -565,8 +587,16 @@ class Emitter {
             auto child = v2p->get_child();
             auto child_lex = assert_ret(dynamic_cast<ast::LExpr*>(child));
             emit_lexpr_loc(child_lex);
+        } else if (auto and_expr = dynamic_cast<ast::And*>(expr)) {
+            emit_and(and_expr);
+        } else if (auto or_expr = dynamic_cast<ast::Or*>(expr)) {
+            emit_or(or_expr);
         } else if (auto binop = dynamic_cast<ast::BinOp*>(expr)) {
             emit_simple_binop(binop);
+        } else if (auto inv_expr = dynamic_cast<ast::InvertSignal*>(expr)) {
+            emit_invert_signal(inv_expr);
+        } else if (auto not_expr = dynamic_cast<ast::Not*>(expr)) {
+            emit_not(not_expr);
         } else {
             std::cerr << "NOT IMPLEMENTED: " << (*expr) << std::endl;
             assert(0);
@@ -728,6 +758,75 @@ class Emitter {
         auto type_txt = type_text(type);
         auto instr = binop_instr(expr);
         out << idt << "(" << type_txt << "." << instr << ")" << std::endl;
+    }
+
+    void emit_invert_signal(ast::InvertSignal* inv_expr)
+    {
+        auto child = inv_expr->get_child();
+        emit_expr(child);
+    }
+    void emit_not(ast::Not* not_expr)
+    {
+        auto child = not_expr->get_child();
+        auto type = child->get_type();
+        auto type_txt = type_text(type);
+        emit_expr(child);
+        emit_eqz(type_txt);
+    }
+
+    void emit_and(ast::And* and_expr)
+    {
+        auto left = and_expr->get_left();
+        auto right = and_expr->get_right();
+        auto type = left->get_type();
+        auto type_txt = type_text(type);
+
+        auto label = labels.local.next_label();
+        out << idt << "(block " << label << " (result " << type_txt << ")"
+            << std::endl;
+
+        // left side
+        emit_const_int(type_txt, 0); // branch return value
+        indent();
+        emit_expr(left);
+        dedent();
+        emit_eqz(type_txt);
+        emit_br_if(label);
+        emit_drop();
+
+        // right side
+        indent();
+        emit_expr(right);
+        dedent();
+
+        out << idt << ")" << std::endl;
+    }
+
+    void emit_or(ast::Or* or_expr)
+    {
+        auto left = or_expr->get_left();
+        auto right = or_expr->get_right();
+        auto type = left->get_type();
+        auto type_txt = type_text(type);
+        auto label = labels.local.next_label();
+
+        out << idt << "(block " << label << " (result " << type_txt << ")"
+            << std::endl;
+
+        // left side
+        emit_const_int(type_txt, 1); // branch return value
+        indent();
+        emit_expr(left);
+        dedent();
+        emit_br_if(label);
+        emit_drop();
+
+        // right side
+        indent();
+        emit_expr(right);
+        dedent();
+
+        out << idt << ")" << std::endl;
     }
 
     void emit_derref(ast::Derreference* derref)
