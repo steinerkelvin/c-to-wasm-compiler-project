@@ -581,12 +581,12 @@ conditional-expression
 
 or-expression
     : and-expression
-    | or-expression OR and-expression      { $$ = ops::unify_logic($1, $3, ast::And::builder, "||", @$); }
+    | or-expression OR and-expression      { $$ = ops::unify_logic($1, $3, ast::Or::builder, "||", @$); }
     ;
 
 and-expression
     : bit-or-expression
-    | and-expression AND bit-or-expression { $$ = ops::unify_logic($1, $3, ast::Or::builder,  "&&", @$); }
+    | and-expression AND bit-or-expression { $$ = ops::unify_logic($1, $3, ast::And::builder,  "&&", @$); }
     ;
 
 bit-or-expression
