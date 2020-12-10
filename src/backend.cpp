@@ -204,7 +204,8 @@ class Emitter {
         out << "(" << tptxt << ".const " << value << ")" << std::endl;
     }
 
-    void emit_get_local(size_t idx) {
+    void emit_get_local(size_t idx)
+    {
         out << "(get_local " << idx << ")" << std::endl;
     }
     void emit_get_local(const std::string& label)
@@ -342,12 +343,15 @@ class Emitter {
             assert_ret(dynamic_cast<types::Function*>(func_row.type));
 
         auto name = func_row.name;
-        out << "(func " << "$" << name << std::endl;
+        out << "(func "
+            << "$" << name << std::endl;
 
+        // Parameter types
         for (auto [o_pr_name, pr_type] : func_type->parameters) {
             out << "(param " << type_text(pr_type) << ")" << std::endl;
         }
 
+        // Return type
         auto ret_type = func_type->get_base();
         if (ret_type->get_size() > 0) {
             out << "(result " << type_text(ret_type) << ")" << std::endl;
@@ -356,6 +360,13 @@ class Emitter {
         auto block = func_def->get_child();
         auto o_scope_id = block->scope_id;
         auto& scope = symtb::get_scope(assert_derref(o_scope_id));
+        auto frame_size = assert_derref(scope.frame_size);
+
+        // Updates stack pointer, adding frame size
+        emit_get_sp();
+        emit_const_int(wasm_type_ptr, frame_size);
+        emit_add(wasm_type_ptr);
+        emit_set_sp();
 
         {
             // emit parameter variables initialization code
@@ -370,11 +381,18 @@ class Emitter {
                 emit_var_loc_by_ref(ref);
                 emit_get_local(i++);
                 emit_store(type_txt, is_byte);
-                // TODO var loc
             }
         }
 
+        // Emits function body
         emit_stmt(block);
+
+        // Ungrows stack
+        emit_get_sp();
+        emit_const_int(wasm_type_ptr, frame_size);
+        emit_sub(wasm_type_ptr);
+        emit_set_sp();
+
         out << ")" << std::endl << std::endl;
     }
 
@@ -536,7 +554,8 @@ class Emitter {
         emit_var_loc_by_ref(var->ref);
     }
 
-    void emit_var_loc_by_ref(const symtb::VarRef& var_ref){
+    void emit_var_loc_by_ref(const symtb::VarRef& var_ref)
+    {
         auto& var_row = var_ref.get();
         auto offset = assert_derref(var_row.offset);
 
@@ -612,11 +631,26 @@ class Emitter {
         if (auto var_node = dynamic_cast<ast::Variable*>(func_val)) {
             auto& var_row = var_node->ref.get();
             auto& var_name = var_row.name;
-            // std::cerr << "calling " << var_name << std::endl;  // DEBUG
+
+            // Stores current frame pointer inside stack frame of next function
+            emit_get_sp();
+            emit_get_fp();
+            emit_store(wasm_type_ptr);
+
+            // Updates frame pointer
+            emit_get_sp();
+            emit_set_fp();
+
             emit_call(var_name);
+
+            // Restores frame pointer
+            emit_get_fp();
+            emit_load(wasm_type_ptr);
+            emit_set_fp();
         } else {
             std::cerr << "called value is not a name/symbol " << (*func_val)
                       << std::endl;
+            abort();
         }
     }
 
@@ -819,9 +853,9 @@ void generate_code(
 
     out << header;
     // TODO initial stack pointer value
-    out << "(global $" << label_fp << " i32 (i32.const " << stack_pos << "))"
+    out << "(global $" << label_fp << " (mut i32) (i32.const " << stack_pos << "))"
         << std::endl;
-    out << "(global $" << label_sp << " i32 (i32.const " << stack_pos << "))"
+    out << "(global $" << label_sp << " (mut i32) (i32.const " << stack_pos << "))"
         << std::endl;
     out << std::endl;
 

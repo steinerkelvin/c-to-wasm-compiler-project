@@ -245,7 +245,6 @@ void compute_offsets(size_t base_activ_record_size)
         scope.size = 0;
         auto& scope_size = *scope.size;
 
-        // TODO compute space and offset for arguments before?
         if (scope.is_func_scope) {
             scope_size += base_activ_record_size;
         }
@@ -256,6 +255,22 @@ void compute_offsets(size_t base_activ_record_size)
             scope_size += var_size;
             // std::cerr << var_row.name << " : " << *(var_row.type) << " : "
             //           << var_size << " : " << *(var_row.offset) << std::endl;
+        }
+    }
+}
+
+void compute_frame_sizes() {
+    for (size_t i = scopes.size() - 1; i >= 1; i--) {
+        std::cerr << i << std::endl;
+        auto& scope = scopes[i];
+        auto size = assert_derref(scope.size);
+        if (!scope.is_func_scope) {
+            auto parent_id = assert_derref(scope.parent_id);
+            auto& parent = scopes[parent_id];
+            parent.max_inner_size = std::max(parent.max_inner_size, size);
+        } else {
+            auto size = assert_derref(scope.size);
+            scope.frame_size = scope.max_inner_size + size;
         }
     }
 }

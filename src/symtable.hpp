@@ -66,6 +66,8 @@ struct Scope {
 
     std::optional<size_t> base_offset;
     std::optional<size_t> size;
+    size_t max_inner_size = 0;
+    std::optional<size_t> frame_size;
 
     using IdMap = std::map<std::string, SymId>;
     IdMap tags_map;
@@ -143,6 +145,12 @@ bool is_typename(const char* name);
  * Computes scope sizes and offsets of all variables on all scopes
  */
 void compute_offsets(size_t base_activ_record_size);
+
+/**
+ * Computes frame sizes for all function.
+ * Must be called after `compute_offsets`.
+ */
+void compute_frame_sizes();
 
 /**
  * Gets size of the global scope (first scope)

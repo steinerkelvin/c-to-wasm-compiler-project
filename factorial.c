@@ -13,12 +13,25 @@ int fac(int n)
     if (n <= 1) {
         return 1;
     }
-    return n;
+    return n * fac(n - 1);
+}
+
+int fac_iter(int n)
+{
+    int acc = 1;
+    int i;
+    for (i = 2; i <= n; i = i+1) {
+        acc = acc * i;
+    }
+    return acc;
 }
 
 int main()
 {
     int x = fac(6);
+    int y = fac_iter(6);
     println_int(x);
+    println_int(y);
+    println_int(x == y);
     return 0;
 }

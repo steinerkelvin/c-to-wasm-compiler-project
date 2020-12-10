@@ -22,6 +22,7 @@ int main(void)
 
     const size_t strtb_size = strtb::compute_offsets();
     symtb::compute_offsets(back::base_activ_record_size);
+    symtb::compute_frame_sizes();
     const size_t data_size = symtb::get_global_scope_size();
 
     // std::cout << (*last_expr) << std::endl;
