@@ -4,6 +4,8 @@ const term_opts = {
     columns: 32,
 };
 
+const delay = 200;
+
 const make_imports = (global) => {
     const utf8_decoder = new TextDecoder('utf-8')
     const utf8_encoder = new TextEncoder('utf-8')
@@ -121,15 +123,25 @@ const run_wasm = async (source_buffer, { terminal }) => {
         console.error("wasm program does not export memory")
         return
     }
-    if (!exports.main) {
-        console.error("wasm program does not export main function")
-        return
-    }
 
     global.exports = exports
     global.memory = exports.memory
 
-    exports.main()
+    if (exports.start && exports.loop) {
+        exports.start()
+        function run_loop() {
+            let result = exports.loop()
+            if (result) {
+                setTimeout(run_loop, delay);
+            }
+        }
+        setTimeout(run_loop, 0)
+    } else if (exports.loop) {
+        exports.main()
+    } else {
+        console.error("wasm program does not export `main` or `loop` function")
+        return
+    }
 }
 
 const run = async () => {

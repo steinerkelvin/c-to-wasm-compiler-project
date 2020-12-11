@@ -103,12 +103,11 @@ void print_board()
     }
 }
 
-void nope() {}
+int loop_counter;
 
-int main()
+int start()
 {
-    int i, j;
-
+    loop_counter = 0;
     // for (i = 0; i < 32; i = i + 1) {
     //     for (j = 0; j < 32; j = j + 1) {
     //         board[i][j] = rand() % 5;
@@ -147,14 +146,29 @@ int main()
     board[x + 0][y - 2] = 1;
     board[x + 1][y - 3] = 1;
 
-    for (i = 0; i < 500; i = i + 1) {
-        print_board();
-        play();
+    return 0;
+}
 
-        /* clear the screen using VT100 escape codes */
-        // print("\033[H\033[J");
-        _ln();
-        int k;
+int loop()
+{
+    print_board();
+    play();
+    /* clear the screen using VT100 escape codes */
+    // print("\033[H\033[J");
+    _ln();
+
+    if (loop_counter >= 500) {
+        return 0;
+    }
+    loop_counter = loop_counter + 1;
+    return 1;
+}
+
+int main()
+{
+    start();
+    while (1) {
+        loop();
         sleep(200);
     }
 

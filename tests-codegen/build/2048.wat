@@ -1,5 +1,6 @@
 
 (module
+    (import "std" "sleep" (func $sleep (param i32)))
     (import "std" "readln" (func $readln (param i32) (param i32) (result i32)))
     (import "std" "_ln" (func $_ln))
     (import "std" "_print" (func $_print (param i32) (param i32)))
@@ -95,7 +96,7 @@
         call $str_copy
     )
 
-(memory $mem 1)
+(memory $mem 16)
 (global $fp (mut i32) (i32.const 304))
 (global $sp (mut i32) (i32.const 304))
 

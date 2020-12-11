@@ -17,7 +17,10 @@
     (export "str_copy" (func $str_copy))
     (export "str_end" (func $str_end))
     (export "str_cat" (func $str_cat))
+  
     (export "main" (func $main))
+    (export "start" (func $start))
+    (export "loop" (func $loop))
 
     (func $str_len (param $po i32) (result i32)
         (local $idx i32)
