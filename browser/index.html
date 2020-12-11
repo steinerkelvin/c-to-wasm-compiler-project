@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- <link rel="stylesheet" href="node_modules/xterm/css/xterm.css" /> -->
+    <!-- <script src="node_modules/xterm/lib/xterm.js"></script> -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.js"
+      integrity="sha512-2PRgAav8Os8vLcOAh1gSaDoNLe1fAyq8/G3QSdyjFFD+OqNjLeHE/8q4+S4MEZgPsuo+itHopj+hJvqS8XUQ8A=="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/xterm/3.14.5/xterm.min.css"
+      integrity="sha512-iLYuqv+v/P4u9erpk+KM83Ioe/l7SEmr7wB6g+Kg1qmEit8EShDKnKtLHlv2QXUp7GGJhmqDI+1PhJYLTsfb8w=="
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="./window.css" crossorigin="anonymous" />
+    <script src="./main.js"></script>
+  </head>
+  <body>
+
+    <div id="window-wrapper">
+      <div id="window">
+        <div class="titlebar">
+          <div class="dot close"></div>
+          <div class="dot minimise"></div>
+          <div class="dot maximise"></div>
+          <div class="title" id="window-title">DOPE Wasm Runtime</div>
+        </div>
+        <div id="terminal"></div>
+      </div>
+    </div>
+  </body>
+</html>
