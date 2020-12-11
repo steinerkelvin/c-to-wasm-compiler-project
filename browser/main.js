@@ -1,6 +1,7 @@
 const term_opts = {
-    fontSize: 20,
+    fontSize: 18,
     rows: 32,
+    columns: 32,
 };
 
 const make_imports = (global) => {
@@ -12,6 +13,12 @@ const make_imports = (global) => {
     }
 
     const std = {
+        sleep: (ms) => {
+            const start = new Date().getTime()
+            const expire = start + ms
+            while (new Date().getTime() < expire) { }
+            return
+        },
         readln: (po, buf_len) => {
             const { memory, terminal } = global
             const line = readline(terminal)

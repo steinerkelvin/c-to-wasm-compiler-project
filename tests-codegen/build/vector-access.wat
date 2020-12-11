@@ -1,5 +1,6 @@
 
 (module
+    (import "std" "sleep" (func $sleep (param i32)))
     (import "std" "readln" (func $readln (param i32) (param i32) (result i32)))
     (import "std" "_ln" (func $_ln))
     (import "std" "_print" (func $_print (param i32) (param i32)))
@@ -17,8 +18,6 @@
     (export "str_end" (func $str_end))
     (export "str_cat" (func $str_cat))
     (export "main" (func $main))
-
-    (memory $mem 1)
 
     (func $str_len (param $po i32) (result i32)
         (local $idx i32)
@@ -97,6 +96,7 @@
         call $str_copy
     )
 
+(memory $mem 16)
 (global $fp (mut i32) (i32.const 0))
 (global $sp (mut i32) (i32.const 0))
 
@@ -275,8 +275,10 @@
       (set_global $fp)
       (call $println_int)
       (get_global $fp)
+      (get_global $fp)
       (i32.load)
       (set_global $fp)
+      (set_global $sp)
     ;; }
     )
     ;; (ExprStmt (= "[integer]" (Var "i" "1,2" "[integer]") (- "[integer]" (Var "i" "1,2" "[integer]") (Integer "[integer]" 1))))

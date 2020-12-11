@@ -13,7 +13,8 @@ const size_t null_size = 0;
 const size_t word_size = 4;
 const size_t table_align = 8;
 const size_t base_activ_record_size = 1 * word_size;
-// const size_t stack_size = 1 << 20; // 1 MiB
+const size_t stack_size = 1 << 20; // 1 MiB
+// const size_t stack_size = (1 << 10) * 64; // 64 KiB
 
 const char* wasm_type_ptr = "i32";
 const char* wasm_type_inte = "i32";
@@ -649,7 +650,8 @@ class Emitter {
         // TODO refactor into "emit_load_something"
     }
 
-    void emit_char_val(ast::CharValue* val_node) {
+    void emit_char_val(ast::CharValue* val_node)
+    {
         auto val = val_node->get_value();
         emit_const_int(wasm_type_inte, val);
     }
@@ -715,10 +717,12 @@ class Emitter {
 
             emit_call(var_name);
 
+            emit_get_fp();
             // Restores frame pointer
             emit_get_fp();
             emit_load(wasm_type_ptr);
             emit_set_fp();
+            emit_set_sp();
         } else {
             std::cerr << "called value is not a name/symbol " << (*func_val)
                       << std::endl;
@@ -888,6 +892,7 @@ class Emitter {
 
 const char* header = R"BLOCK(
 (module
+    (import "std" "sleep" (func $sleep (param i32)))
     (import "std" "readln" (func $readln (param i32) (param i32) (result i32)))
     (import "std" "_ln" (func $_ln))
     (import "std" "_print" (func $_print (param i32) (param i32)))
@@ -905,8 +910,6 @@ const char* header = R"BLOCK(
     (export "str_end" (func $str_end))
     (export "str_cat" (func $str_cat))
     (export "main" (func $main))
-
-    (memory $mem 1)
 
     (func $str_len (param $po i32) (result i32)
         (local $idx i32)
@@ -1008,6 +1011,10 @@ void generate_code(
     //           << "size: " << data_size << std::endl;
 
     out << header;
+
+    const size_t pages = stack_size / 0x10000;
+    out << "(memory $mem " << pages << ")" << std::endl;
+
     // TODO initial stack pointer value
     out << "(global " << label_fp << " (mut i32) (i32.const " << stack_pos
         << "))" << std::endl;

@@ -7,6 +7,12 @@ const make_imports = (global) => {
   const utf8_encoder = new util.TextEncoder('utf-8')
 
   const std = {
+    sleep: (ms) => {
+      const start = new Date().getTime()
+      const expire = start + ms
+      while (new Date().getTime() < expire) { }
+      return
+    },
     readln: (po, buf_len) => {
       const { memory } = global
       const line = readlineSync.question('')

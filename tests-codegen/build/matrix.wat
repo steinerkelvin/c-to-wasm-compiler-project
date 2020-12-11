@@ -1,5 +1,6 @@
 
 (module
+    (import "std" "sleep" (func $sleep (param i32)))
     (import "std" "readln" (func $readln (param i32) (param i32) (result i32)))
     (import "std" "_ln" (func $_ln))
     (import "std" "_print" (func $_print (param i32) (param i32)))
@@ -17,8 +18,6 @@
     (export "str_end" (func $str_end))
     (export "str_cat" (func $str_cat))
     (export "main" (func $main))
-
-    (memory $mem 1)
 
     (func $str_len (param $po i32) (result i32)
         (local $idx i32)
@@ -97,6 +96,7 @@
         call $str_copy
     )
 
+(memory $mem 16)
 (global $fp (mut i32) (i32.const 8))
 (global $sp (mut i32) (i32.const 8))
 
@@ -317,8 +317,10 @@
         (set_global $fp)
         (call $print_int_pad)
         (get_global $fp)
+        (get_global $fp)
         (i32.load)
         (set_global $fp)
+        (set_global $sp)
         ;; (ExprStmt ("f(x)" "[void]" (Var "print" "0,1" "[(*char)void]") ( (String "[*char]" "0"))))
         (i32.const 0)
         (get_global $sp)
@@ -328,8 +330,10 @@
         (set_global $fp)
         (call $print)
         (get_global $fp)
+        (get_global $fp)
         (i32.load)
         (set_global $fp)
+        (set_global $sp)
         ;; (ForStmt (ExprStmt (= "[integer]" (Var "j" "6,0" "[integer]") (Integer "[integer]" 0))) (< "[integer]" (Var "j" "6,0" "[integer]") (Integer "[integer]" 4)) (ExprStmt (= "[integer]" (Var "j" "6,0" "[integer]") (+ "[integer]" (Var "j" "6,0" "[integer]") (Integer "[integer]" 1)))) (Block 7 (ExprStmt ("f(x)" "[void]" (Var "print_int_pad" "0,7" "[(integer, integer)void]") ( (v[x] "[integer]" (Var "j" "6,0" "[integer]") (v[x] "[[4]integer]" (Var "i" "5,0" "[integer]") (Var "mat" "1,0" "[[4][4]integer]"))) (Integer "[integer]" 8))))))
         ;; (ExprStmt (= "[integer]" (Var "j" "6,0" "[integer]") (Integer "[integer]" 0)))
         (get_global $fp)
@@ -381,8 +385,10 @@
           (set_global $fp)
           (call $print_int_pad)
           (get_global $fp)
+          (get_global $fp)
           (i32.load)
           (set_global $fp)
+          (set_global $sp)
         ;; }
         )
         ;; (ExprStmt (= "[integer]" (Var "j" "6,0" "[integer]") (+ "[integer]" (Var "j" "6,0" "[integer]") (Integer "[integer]" 1))))
@@ -411,8 +417,10 @@
         (set_global $fp)
         (call $_ln)
         (get_global $fp)
+        (get_global $fp)
         (i32.load)
         (set_global $fp)
+        (set_global $sp)
       ;; }
       )
       ;; (ExprStmt (= "[integer]" (Var "i" "5,0" "[integer]") (+ "[integer]" (Var "i" "5,0" "[integer]") (Integer "[integer]" 1))))

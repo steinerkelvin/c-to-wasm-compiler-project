@@ -1,5 +1,6 @@
 
 (module
+    (import "std" "sleep" (func $sleep (param i32)))
     (import "std" "readln" (func $readln (param i32) (param i32) (result i32)))
     (import "std" "_ln" (func $_ln))
     (import "std" "_print" (func $_print (param i32) (param i32)))
@@ -17,8 +18,6 @@
     (export "str_end" (func $str_end))
     (export "str_cat" (func $str_cat))
     (export "main" (func $main))
-
-    (memory $mem 1)
 
     (func $str_len (param $po i32) (result i32)
         (local $idx i32)
@@ -97,6 +96,7 @@
         call $str_copy
     )
 
+(memory $mem 16)
 (global $fp (mut i32) (i32.const 24))
 (global $sp (mut i32) (i32.const 24))
 
@@ -150,8 +150,10 @@
       (set_global $fp)
       (call $print_int_pad)
       (get_global $fp)
+      (get_global $fp)
       (i32.load)
       (set_global $fp)
+      (set_global $sp)
       ;; (IfElseStmt (== "[integer]" (Var "i" "1,0" "[integer]") (Integer "[integer]" 0)) (Block 3 (ExprStmt ("f(x)" "[void]" (Var "println" "0,2" "[(*char)void]") ( (String "[*char]" "0"))))) (IfElseStmt (== "[integer]" (Var "i" "1,0" "[integer]") (Integer "[integer]" 1)) (Block 4 (ExprStmt ("f(x)" "[void]" (Var "println" "0,2" "[(*char)void]") ( (String "[*char]" "1"))))) (Block 5 (ExprStmt ("f(x)" "[void]" (Var "println" "0,2" "[(*char)void]") ( (String "[*char]" "2")))))))
       (block $b0
       (block $b1
@@ -174,8 +176,10 @@
         (set_global $fp)
         (call $println)
         (get_global $fp)
+        (get_global $fp)
         (i32.load)
         (set_global $fp)
+        (set_global $sp)
       ;; }
       (br $b0)
       )
@@ -201,8 +205,10 @@
         (set_global $fp)
         (call $println)
         (get_global $fp)
+        (get_global $fp)
         (i32.load)
         (set_global $fp)
+        (set_global $sp)
       ;; }
       (br $b2)
       )
@@ -217,8 +223,10 @@
         (set_global $fp)
         (call $println)
         (get_global $fp)
+        (get_global $fp)
         (i32.load)
         (set_global $fp)
+        (set_global $sp)
       ;; }
       )
       )
@@ -265,8 +273,10 @@
     (set_global $fp)
     (call $test)
     (get_global $fp)
+    (get_global $fp)
     (i32.load)
     (set_global $fp)
+    (set_global $sp)
     ;; (return (Integer "[integer]" 0))
     (i32.const 0)
     (return)
