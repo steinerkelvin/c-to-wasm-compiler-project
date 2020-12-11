@@ -73,10 +73,10 @@ int table[4][4]; // = {0};
 
 void clear_screen()
 {
-    int i;
-    for (i = 0; i < 40; i = i + 1) {
-        _ln();
-    }
+    // int i;
+    // for (i = 0; i < 40; i = i + 1) {
+    //     _ln();
+    // }
 }
 
 // printa uma string n vezes
@@ -102,14 +102,16 @@ void table_vpadding(int r)
         //     reset_bg_color();
         print("|");
     }
-    print("\n");
+    // print("\n");
+    _ln();
 }
 
 // printa linha horizontal com largura da tabela
 void table_hline()
 {
     repeatPrint("-", TABLE_WIDTH);
-    print("\n");
+    // print("\n");
+    _ln();
 }
 
 // printa a tabela
@@ -139,7 +141,8 @@ void render_table()
                 print("|");
             }
         }
-        print("\n");
+        // print("\n");
+        _ln();
 
         table_vpadding(r);
 
@@ -397,7 +400,7 @@ int main()
     // reset_bg_color();
     // reset_fg_color();
 
-    clear_screen();
+    // clear_screen();
     render_game();
 
     char buffer[32];
@@ -437,14 +440,16 @@ int main()
             if (moved) {
                 insert_random_tile();
             }
-            clear_screen();
+
+            // clear_screen();
             render_game();
+
             if (count_empty_tiles() == 0) {
                 clear_screen();
                 render_info();
                 render_table();
-                print("GAME OVER\n");
-                print("press R to start a new game\n");
+                println("GAME OVER");
+                println("press R to start a new game");
 
                 char ch;
                 int ret; // const int ret = scanf(" %c", &ch); // TODO

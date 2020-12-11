@@ -1,3 +1,4 @@
+- input on browser runtime
 - organize codegen tests
 - rand on JS runtime
 - handle specific instructions for some arithmetic on floats
