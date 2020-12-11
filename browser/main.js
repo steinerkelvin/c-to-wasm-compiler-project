@@ -14,10 +14,10 @@ const make_imports = (global) => {
 
     const std = {
         sleep: (ms) => {
-            const start = new Date().getTime()
-            const expire = start + ms
-            while (new Date().getTime() < expire) { }
-            return
+            // const start = new Date().getTime()
+            // const expire = start + ms
+            // while (new Date().getTime() < expire) { }
+            // return
         },
         readln: (po, buf_len) => {
             const { memory, terminal } = global
@@ -133,7 +133,7 @@ const run_wasm = async (source_buffer, { terminal }) => {
 }
 
 const run = async () => {
-    const source_file = "app/2048.wasm"
+    const source_file = "app/life.wasm"
 
     const terminal = new Terminal(term_opts)
     terminal.open(document.getElementById("terminal"))

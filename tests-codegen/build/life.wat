@@ -96,7 +96,7 @@
         call $str_copy
     )
 
-(memory $mem 1)
+(memory $mem 16)
 (global $fp (mut i32) (i32.const 8216))
 (global $sp (mut i32) (i32.const 8216))
 
