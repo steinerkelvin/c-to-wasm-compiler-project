@@ -42,9 +42,11 @@ is also avaiable on Nixpkgs.
     make test-parsing
     make test-codegen
 
-Run a console version of the 2048 game written in C compiled to Wasm:
+Run a [console version][2048_c] of the 2048 game written in C compiled to Wasm:
 
     ./run_codegen_tests.sh 2048
+
+[2048_c]: https://github.com/kelvinss/2048_c
 
 ### File structure
 
