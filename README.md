@@ -1,4 +1,4 @@
-# compiladores-trabalho
+# c-to-wasm-compiler-project
 
 Hopefully, a C to WebAssemply compiler.
 
