@@ -78,6 +78,6 @@ following command:
 
 ## Trivia
 
-We have managed to _crash the Clang compiler_ in the course of programming this
-project. Code is on the `clang-crash` branch. Maybe I'll trying to open a bug
+We have managed to _crash the Clang compiler_ while programming this
+project. The code is at the `clang-crash` branch. Maybe I'll try to open a bug
 report later. :P
