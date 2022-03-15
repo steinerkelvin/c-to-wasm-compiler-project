@@ -2,9 +2,11 @@
 
 Hopefully, a C to WebAssemply compiler.
 
-[demo on browser](http://c2wasm-life.surge.sh/)
+[Demo of compiled program running on browser](http://c2wasm-life.surge.sh/)
 
-[![demo](./docs/demo.gif)](https://asciinema.org/a/dGx6qmir81vWzT8m8trrHjkFr)
+[Video (portuguese)](https://youtu.be/DkHkKAFLcmI)
+
+[![demo on terminal](./docs/demo.gif)](https://asciinema.org/a/dGx6qmir81vWzT8m8trrHjkFr)
 
 ## Build requirements
 
